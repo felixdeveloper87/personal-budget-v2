@@ -35,7 +35,7 @@ household/   transaction/   account/   auth/ ...
 3. **Mover com `git mv`** (não copiar e apagar), para o git mostrar como renomeação e o histórico continuar.
 4. **Só mover.** Nada de refatorar lógica no mesmo commit, para o diff ser fácil de revisar.
 5. Os testes acompanham a classe: `src/test/java/.../<funcionalidade>/`.
-6. **Pacote plano por funcionalidade**, sem subpastas `controller/service/` dentro dele. Ex.: `household/HouseholdService.java`. Isso é o que permite usar package-private.
+6. **Subpastas por camada dentro de cada funcionalidade** (decisão tomada em 2026-11-10, depois do piloto): `household/controller/`, `household/service/`, `household/model/`, `household/repository/`, `household/dto/`. Cada arquivo vai para a subpasta de mesmo nome da pasta de onde veio. Crie só as subpastas que tiverem arquivos. Os testes seguem a mesma regra (ex.: `src/test/.../household/service/`).
 
 Se parar no meio de uma funcionalidade: `git checkout . && git clean -fd` volta ao último commit, que está funcionando.
 
@@ -46,7 +46,7 @@ Se parar no meio de uma funcionalidade: `git checkout . && git clean -fd` volta 
 Ordem sugerida: da funcionalidade mais isolada para a mais compartilhada.
 
 - [x] 0. Criar a branch `refactor/feature-packages`
-- [x] 1. `household`, o piloto: 51 arquivos + 15 testes movidos (2026-11-10). Só foi preciso adicionar `import ...model.User` em 8 entidades e `import ...service.PushNotificationService` em 1 serviço e 1 teste. **Falta testar no Docker antes de seguir.**
+- [x] 1. `household`, o piloto: 51 arquivos + 15 testes movidos (2026-11-10) e testado no Docker. Depois reorganizado em subpastas `controller/ dto/ model/ repository/ service/` (regra 6).
 - [ ] 2. `business`
 - [ ] 3. `goals`
 - [ ] 4. `push`
@@ -157,32 +157,40 @@ Não há nenhuma referência a estas classes no código (verificado em 2026-11-1
 
 ---
 
-## Passo a passo de uma funcionalidade (exemplo: household)
+## Passo a passo de uma funcionalidade (com subpastas, regra 6)
+
+Rodar no **Git Bash**, dentro de `backend/`. Preencha `F` e a lista `FILES` com os caminhos atuais (main **e** testes) a partir do [mapeamento](#mapeamento-para-onde-vai-cada-classe):
 
 ```bash
-cd backend
-B=src/main/java/com/example/budget
-T=src/test/java/com/example/budget
-mkdir -p $B/household $T/household
+F=business   # nome da funcionalidade
+FILES="src/main/java/com/example/budget/controller/BusinessController.java
+src/main/java/com/example/budget/service/BusinessService.java
+src/test/java/com/example/budget/service/BusinessServiceTest.java"   # etc.
 
-# 1. mover (main + testes)
-for f in $(ls $B/{controller,service,model,repository,dto}/Household*.java); do git mv "$f" $B/household/; done
-for f in $(ls $T/{service,model}/Household*Test.java); do git mv "$f" $T/household/; done
-
-# 2. corrigir a declaração de package dos arquivos movidos
-sed -i -E 's/^package com\.example\.budget\.[a-z]+;/package com.example.budget.household;/' $B/household/*.java $T/household/*.java
-
-# 3. corrigir imports em TODO o projeto
-for c in $(ls $B/household | sed 's/\.java//'); do
-  grep -rl "com\.example\.budget\.[a-z]*\.$c\b" src | xargs -r sed -i -E "s/com\.example\.budget\.[a-z]+\.$c\b/com.example.budget.household.$c/g"
+for old in $FILES; do
+  layer=$(basename "$(dirname "$old")")             # controller, service, model...
+  root=${old%%/com/example/budget/*}/com/example/budget   # src/main/java/... ou src/test/java/...
+  dest="$root/$F/$layer"; mkdir -p "$dest"
+  git mv "$old" "$dest/"
+  # 1. package do arquivo movido
+  sed -i -E "s/^package com\.example\.budget\.$layer;/package com.example.budget.$F.$layer;/" "$dest/$(basename "$old")"
+  # 2. imports em TODO o projeto (classes de teste não são importadas, mas não faz mal)
+  c=$(basename "$old" .java)
+  grep -rlE "com\.example\.budget\.$layer\.$c\b" src | xargs -r sed -i -E "s/com\.example\.budget\.$layer\.$c\b/com.example.budget.$F.$layer.$c/g"
 done
 
-# 4. compilar e corrigir o que sobrar
+# 3. compilar e corrigir o que sobrar
 ./mvnw -q test-compile
 ```
 
-**Erros esperados no passo 4:**
-- **Import faltando.** Classes que antes estavam no mesmo pacote (ex.: `service`) não precisavam de import entre si. Depois de mover, quem ficou para trás precisa importar, e quem foi movido precisa importar o que ficou.
+Para listar os símbolos que faltam, por arquivo:
+```bash
+./mvnw -q test-compile 2>&1 | grep -A2 "cannot find symbol" | grep -E "ERROR.*\.java|symbol:" | paste - -
+```
+
+**Erros esperados no passo 3:**
+- **Import faltando.** Classes que estavam na mesma pasta (ex.: `service/`) não precisavam de import entre si. Depois de mover, quem ficou para trás precisa importar quem saiu, e vice-versa. No household foram só `User` (8 entidades) e `PushNotificationService` (1 serviço, 1 teste).
+- **Imports entre funcionalidades já migradas:** se `transaction/service/X` usa `account/service/Y`, precisa de import explícito, porque são pacotes diferentes.
 - **Imports com curinga** (`import com.example.budget.model.*;`, `import com.example.budget.repository.*;`): não são corrigidos pelo script. Adicione imports explícitos.
 - **Membros package-private:** algo que era visível por estar no mesmo pacote deixa de ser. Torne `public` só se for usado fora da funcionalidade.
 
