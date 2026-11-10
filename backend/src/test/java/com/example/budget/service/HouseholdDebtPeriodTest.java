@@ -20,8 +20,8 @@ class HouseholdDebtPeriodTest {
     void calculateDebtsThroughMonth_excludesExpensesFromLaterMonths() {
         YearMonth currentMonth = YearMonth.of(2026, 8);
 
-        List<HouseholdService.DebtPosition> debts =
-                HouseholdService.calculateDebtsThroughMonth(
+        List<HouseholdDebtCalculator.DebtPosition> debts =
+                HouseholdDebtCalculator.calculateDebtsThroughMonth(
                         List.of(
                                 share(currentMonth.minusMonths(1), "10.00"),
                                 share(currentMonth, "20.00"),
@@ -30,21 +30,21 @@ class HouseholdDebtPeriodTest {
                         currentMonth);
 
         assertThat(debts).containsExactly(
-                new HouseholdService.DebtPosition(2L, 1L, new BigDecimal("30.00")));
+                new HouseholdDebtCalculator.DebtPosition(2L, 1L, new BigDecimal("30.00")));
     }
 
     @Test
     void calculateDebtsThroughMonth_activatesTheExpenseWhenItsMonthArrives() {
         YearMonth expenseMonth = YearMonth.of(2026, 9);
 
-        List<HouseholdService.DebtPosition> debts =
-                HouseholdService.calculateDebtsThroughMonth(
+        List<HouseholdDebtCalculator.DebtPosition> debts =
+                HouseholdDebtCalculator.calculateDebtsThroughMonth(
                         List.of(share(expenseMonth, "30.00")),
                         List.of(),
                         expenseMonth);
 
         assertThat(debts).containsExactly(
-                new HouseholdService.DebtPosition(2L, 1L, new BigDecimal("30.00")));
+                new HouseholdDebtCalculator.DebtPosition(2L, 1L, new BigDecimal("30.00")));
     }
 
     private HouseholdExpenseShare share(YearMonth month, String amount) {

@@ -98,8 +98,8 @@ public class HouseholdPaymentReminderService {
         Map<Long, BigDecimal> owedByDebtor = new LinkedHashMap<>();
         Map<Long, Long> creditorCountByDebtor = new LinkedHashMap<>();
         Map<Long, String> onlyCreditorByDebtor = new LinkedHashMap<>();
-        for (HouseholdService.DebtPosition debt :
-                HouseholdService.calculateDebtsThroughMonth(shares, settlements, YearMonth.from(today))) {
+        for (HouseholdDebtCalculator.DebtPosition debt :
+                HouseholdDebtCalculator.calculateDebtsThroughMonth(shares, settlements, YearMonth.from(today))) {
             HouseholdMember debtor = memberById.get(debt.fromId());
             HouseholdMember creditor = memberById.get(debt.toId());
             if (debt.amount().signum() <= 0 || debtor == null || creditor == null) {

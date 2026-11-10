@@ -51,14 +51,10 @@ class HouseholdMemberNameServiceTest {
         service = new HouseholdService(
                 householdRepository,
                 memberRepository,
-                invitationRepository,
-                expenseRepository,
-                shareRepository,
-                settlementRepository,
-                attachmentRepository,
+                new HouseholdAccess(memberRepository),
+                new HouseholdLedgerLoader(expenseRepository, shareRepository, settlementRepository),
                 cleaningService,
-                notificationService,
-                userRepository);
+                notificationService);
     }
 
     @Test

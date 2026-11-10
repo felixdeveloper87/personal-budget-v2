@@ -8,7 +8,11 @@ import com.example.budget.dto.HouseholdRequests;
 import com.example.budget.model.User;
 import com.example.budget.service.HouseholdAttachmentService;
 import com.example.budget.service.HouseholdCleaningService;
+import com.example.budget.service.HouseholdDashboardService;
+import com.example.budget.service.HouseholdExpenseService;
+import com.example.budget.service.HouseholdInvitationService;
 import com.example.budget.service.HouseholdService;
+import com.example.budget.service.HouseholdSettlementService;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
@@ -24,21 +28,33 @@ import java.util.List;
 @CrossOrigin
 public class HouseholdController {
     private final HouseholdService service;
+    private final HouseholdDashboardService dashboardService;
+    private final HouseholdInvitationService invitationService;
+    private final HouseholdExpenseService expenseService;
+    private final HouseholdSettlementService settlementService;
     private final HouseholdAttachmentService attachmentService;
     private final HouseholdCleaningService cleaningService;
 
     public HouseholdController(
             HouseholdService service,
+            HouseholdDashboardService dashboardService,
+            HouseholdInvitationService invitationService,
+            HouseholdExpenseService expenseService,
+            HouseholdSettlementService settlementService,
             HouseholdAttachmentService attachmentService,
             HouseholdCleaningService cleaningService) {
         this.service = service;
+        this.dashboardService = dashboardService;
+        this.invitationService = invitationService;
+        this.expenseService = expenseService;
+        this.settlementService = settlementService;
         this.attachmentService = attachmentService;
         this.cleaningService = cleaningService;
     }
 
     @GetMapping("/households/current")
     public HouseholdPageDTO current(Authentication authentication) {
-        return service.page(user(authentication));
+        return dashboardService.page(user(authentication));
     }
 
     @PostMapping("/households")
@@ -48,7 +64,7 @@ public class HouseholdController {
             Authentication authentication) {
         User user = user(authentication);
         service.create(request, user);
-        return service.page(user);
+        return dashboardService.page(user);
     }
 
     @PatchMapping("/households/{householdId}")
@@ -58,7 +74,7 @@ public class HouseholdController {
             Authentication authentication) {
         User user = user(authentication);
         service.update(householdId, request, user);
-        return service.page(user);
+        return dashboardService.page(user);
     }
 
     @PostMapping("/households/{householdId}/invitations")
@@ -67,8 +83,8 @@ public class HouseholdController {
             @RequestBody HouseholdRequests.InviteMember request,
             Authentication authentication) {
         User user = user(authentication);
-        service.invite(householdId, request, user);
-        return service.page(user);
+        invitationService.invite(householdId, request, user);
+        return dashboardService.page(user);
     }
 
     @DeleteMapping("/households/{householdId}/invitations/{invitationId}")
@@ -77,8 +93,8 @@ public class HouseholdController {
             @PathVariable Long invitationId,
             Authentication authentication) {
         User user = user(authentication);
-        service.revokeInvitation(householdId, invitationId, user);
-        return service.page(user);
+        invitationService.revokeInvitation(householdId, invitationId, user);
+        return dashboardService.page(user);
     }
 
     @PostMapping("/household-invitations/{invitationId}/accept")
@@ -86,8 +102,8 @@ public class HouseholdController {
             @PathVariable Long invitationId,
             Authentication authentication) {
         User user = user(authentication);
-        service.acceptInvitation(invitationId, user);
-        return service.page(user);
+        invitationService.acceptInvitation(invitationId, user);
+        return dashboardService.page(user);
     }
 
     @PostMapping("/household-invitations/{invitationId}/decline")
@@ -95,8 +111,8 @@ public class HouseholdController {
             @PathVariable Long invitationId,
             Authentication authentication) {
         User user = user(authentication);
-        service.declineInvitation(invitationId, user);
-        return service.page(user);
+        invitationService.declineInvitation(invitationId, user);
+        return dashboardService.page(user);
     }
 
     @DeleteMapping("/households/{householdId}/members/{memberId}")
@@ -106,7 +122,7 @@ public class HouseholdController {
             Authentication authentication) {
         User user = user(authentication);
         service.deactivateMember(householdId, memberId, user);
-        return service.page(user);
+        return dashboardService.page(user);
     }
 
     @PatchMapping("/households/{householdId}/members/{memberId}")
@@ -117,7 +133,7 @@ public class HouseholdController {
             Authentication authentication) {
         User user = user(authentication);
         service.updateMemberName(householdId, memberId, request, user);
-        return service.page(user);
+        return dashboardService.page(user);
     }
 
     @PostMapping("/households/{householdId}/notifications/read")
@@ -126,7 +142,7 @@ public class HouseholdController {
             Authentication authentication) {
         User user = user(authentication);
         service.markNotificationsRead(householdId, user);
-        return service.page(user);
+        return dashboardService.page(user);
     }
 
     @PutMapping("/households/{householdId}/cleaning-rotation")
@@ -136,7 +152,7 @@ public class HouseholdController {
             Authentication authentication) {
         User user = user(authentication);
         cleaningService.configure(householdId, request, user);
-        return service.page(user);
+        return dashboardService.page(user);
     }
 
     @PostMapping(
@@ -147,7 +163,7 @@ public class HouseholdController {
             Authentication authentication) {
         User user = user(authentication);
         cleaningService.completeCurrentWeek(householdId, assignmentId, user);
-        return service.page(user);
+        return dashboardService.page(user);
     }
 
     @PatchMapping(
@@ -168,7 +184,7 @@ public class HouseholdController {
                 dutyKey,
                 request.completed(),
                 user);
-        return service.page(user);
+        return dashboardService.page(user);
     }
 
     @GetMapping("/households/{householdId}/expenses")
@@ -176,7 +192,7 @@ public class HouseholdController {
             @PathVariable Long householdId,
             @RequestParam(defaultValue = "0") int page,
             Authentication authentication) {
-        return service.expenseHistory(householdId, page, user(authentication));
+        return expenseService.expenseHistory(householdId, page, user(authentication));
     }
 
     @PostMapping("/households/{householdId}/expenses")
@@ -186,8 +202,8 @@ public class HouseholdController {
             @RequestBody HouseholdRequests.Expense request,
             Authentication authentication) {
         User user = user(authentication);
-        Long expenseId = service.createExpense(householdId, request, user);
-        return new HouseholdRecordCreatedDTO(expenseId, service.page(user));
+        Long expenseId = expenseService.createExpense(householdId, request, user);
+        return new HouseholdRecordCreatedDTO(expenseId, dashboardService.page(user));
     }
 
     @PostMapping(
@@ -200,7 +216,7 @@ public class HouseholdController {
             Authentication authentication) {
         User user = user(authentication);
         attachmentService.uploadToExpense(householdId, expenseId, files, user);
-        return service.page(user);
+        return dashboardService.page(user);
     }
 
     @PutMapping("/households/{householdId}/expenses/{expenseId}")
@@ -210,8 +226,8 @@ public class HouseholdController {
             @RequestBody HouseholdRequests.Expense request,
             Authentication authentication) {
         User user = user(authentication);
-        service.updateExpense(householdId, expenseId, request, user);
-        return service.page(user);
+        expenseService.updateExpense(householdId, expenseId, request, user);
+        return dashboardService.page(user);
     }
 
     @DeleteMapping("/households/{householdId}/expenses/{expenseId}")
@@ -220,8 +236,8 @@ public class HouseholdController {
             @PathVariable Long expenseId,
             Authentication authentication) {
         User user = user(authentication);
-        service.voidExpense(householdId, expenseId, user);
-        return service.page(user);
+        expenseService.voidExpense(householdId, expenseId, user);
+        return dashboardService.page(user);
     }
 
     @GetMapping("/households/{householdId}/settlements")
@@ -229,7 +245,7 @@ public class HouseholdController {
             @PathVariable Long householdId,
             @RequestParam(defaultValue = "0") int page,
             Authentication authentication) {
-        return service.paymentHistory(householdId, page, user(authentication));
+        return settlementService.paymentHistory(householdId, page, user(authentication));
     }
 
     @PostMapping("/households/{householdId}/settlements")
@@ -239,8 +255,8 @@ public class HouseholdController {
             @RequestBody HouseholdRequests.Settlement request,
             Authentication authentication) {
         User user = user(authentication);
-        Long settlementId = service.createSettlement(householdId, request, user);
-        return new HouseholdRecordCreatedDTO(settlementId, service.page(user));
+        Long settlementId = settlementService.createSettlement(householdId, request, user);
+        return new HouseholdRecordCreatedDTO(settlementId, dashboardService.page(user));
     }
 
     @PostMapping(
@@ -253,7 +269,7 @@ public class HouseholdController {
             Authentication authentication) {
         User user = user(authentication);
         attachmentService.uploadToSettlement(householdId, settlementId, files, user);
-        return service.page(user);
+        return dashboardService.page(user);
     }
 
     @GetMapping("/households/{householdId}/attachments/{attachmentId}/content")
@@ -282,7 +298,7 @@ public class HouseholdController {
             Authentication authentication) {
         User user = user(authentication);
         attachmentService.remove(householdId, attachmentId, user);
-        return service.page(user);
+        return dashboardService.page(user);
     }
 
     private User user(Authentication authentication) {

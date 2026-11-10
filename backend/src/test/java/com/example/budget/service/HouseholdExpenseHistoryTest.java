@@ -11,7 +11,7 @@ import com.example.budget.model.User;
 import com.example.budget.repository.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
+import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageRequest;
@@ -42,7 +42,18 @@ class HouseholdExpenseHistoryTest {
     @Mock private User user;
     @Mock private Household household;
     @Mock private HouseholdMember member;
-    @InjectMocks private HouseholdService service;
+    private HouseholdExpenseService service;
+
+    @BeforeEach
+    void setUp() {
+        service = new HouseholdExpenseService(
+                new HouseholdAccess(memberRepository),
+                memberRepository,
+                expenseRepository,
+                shareRepository,
+                attachmentRepository,
+                notificationService);
+    }
 
     @Test
     void rejectsMissingActiveMembershipBeforeReadingExpenses() {

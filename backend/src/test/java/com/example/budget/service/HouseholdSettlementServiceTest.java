@@ -47,21 +47,16 @@ class HouseholdSettlementServiceTest {
     @Mock private HouseholdNotificationService notificationService;
     @Mock private UserRepository userRepository;
 
-    private HouseholdService service;
+    private HouseholdSettlementService service;
 
     @BeforeEach
     void setUp() {
-        service = new HouseholdService(
-                householdRepository,
+        service = new HouseholdSettlementService(
+                new HouseholdAccess(memberRepository),
                 memberRepository,
-                invitationRepository,
-                expenseRepository,
-                shareRepository,
                 settlementRepository,
-                attachmentRepository,
-                cleaningService,
-                notificationService,
-                userRepository);
+                new HouseholdLedgerLoader(expenseRepository, shareRepository, settlementRepository),
+                notificationService);
     }
 
     @Test

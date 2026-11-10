@@ -16,7 +16,7 @@ class HouseholdMonthSummaryTest {
     void buildMonthSummaries_groupsAndSortsTheFullLedgerByMonth() {
         YearMonth currentMonth = YearMonth.of(2026, 8);
 
-        List<HouseholdPageDTO.MonthSummary> summaries = HouseholdService.buildMonthSummaries(
+        List<HouseholdPageDTO.MonthSummary> summaries = HouseholdDashboardService.buildMonthSummaries(
                 List.of(
                         expense("2026-08-04", "12.25"),
                         expense("2026-07-19", "8.00"),
@@ -34,7 +34,7 @@ class HouseholdMonthSummaryTest {
 
     @Test
     void buildMonthSummaries_alwaysIncludesAnEmptyCurrentMonth() {
-        List<HouseholdPageDTO.MonthSummary> summaries = HouseholdService.buildMonthSummaries(
+        List<HouseholdPageDTO.MonthSummary> summaries = HouseholdDashboardService.buildMonthSummaries(
                 List.of(expense("2026-06-10", "9.99")),
                 YearMonth.of(2026, 8));
 

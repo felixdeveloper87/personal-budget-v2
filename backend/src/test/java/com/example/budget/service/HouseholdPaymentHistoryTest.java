@@ -9,7 +9,7 @@ import com.example.budget.model.HouseholdSettlementStatus;
 import com.example.budget.repository.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
+import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageRequest;
@@ -39,7 +39,17 @@ class HouseholdPaymentHistoryTest {
     @Mock private User user;
     @Mock private Household household;
     @Mock private HouseholdMember member;
-    @InjectMocks private HouseholdService service;
+    private HouseholdSettlementService service;
+
+    @BeforeEach
+    void setUp() {
+        service = new HouseholdSettlementService(
+                new HouseholdAccess(memberRepository),
+                memberRepository,
+                settlementRepository,
+                new HouseholdLedgerLoader(expenseRepository, shareRepository, settlementRepository),
+                notificationService);
+    }
 
     @Test
     void rejectsMissingActiveMembership() {
