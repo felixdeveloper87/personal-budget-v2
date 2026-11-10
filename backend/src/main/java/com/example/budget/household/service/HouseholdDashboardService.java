@@ -15,7 +15,7 @@ import com.example.budget.household.model.HouseholdRole;
 import com.example.budget.household.model.HouseholdInvitationStatus;
 import com.example.budget.household.model.Household;
 
-import com.example.budget.model.User;
+import com.example.budget.user.model.User;
 import com.example.budget.household.service.HouseholdDebtCalculator.DebtPosition;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

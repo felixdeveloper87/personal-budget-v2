@@ -1,4 +1,4 @@
-package com.example.budget.model;
+package com.example.budget.user.model;
 
 import com.example.budget.transaction.model.Transaction;
 

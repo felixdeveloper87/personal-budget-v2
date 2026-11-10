@@ -3,7 +3,7 @@ package com.example.budget.goals.controller;
 import com.example.budget.goals.dto.SavingsGoalContributionRequest;
 import com.example.budget.goals.dto.SavingsGoalDTO;
 import com.example.budget.goals.dto.SavingsGoalRequest;
-import com.example.budget.model.User;
+import com.example.budget.user.model.User;
 import com.example.budget.goals.service.SavingsGoalService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;

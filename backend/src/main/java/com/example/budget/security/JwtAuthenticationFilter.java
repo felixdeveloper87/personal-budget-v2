@@ -1,7 +1,7 @@
 package com.example.budget.security;
 
-import com.example.budget.model.User;
-import com.example.budget.repository.UserRepository;
+import com.example.budget.user.model.User;
+import com.example.budget.user.repository.UserRepository;
 import com.example.budget.util.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

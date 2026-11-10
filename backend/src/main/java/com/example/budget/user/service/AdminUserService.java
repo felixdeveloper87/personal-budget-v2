@@ -1,11 +1,11 @@
-package com.example.budget.service;
+package com.example.budget.user.service;
 
-import com.example.budget.dto.AdminUserResponse;
-import com.example.budget.dto.UpdateUserPlanRequest;
+import com.example.budget.user.dto.AdminUserResponse;
+import com.example.budget.user.dto.UpdateUserPlanRequest;
 import com.example.budget.exception.AccessDeniedException;
 import com.example.budget.exception.EntityNotFoundException;
-import com.example.budget.model.User;
-import com.example.budget.repository.UserRepository;
+import com.example.budget.user.model.User;
+import com.example.budget.user.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

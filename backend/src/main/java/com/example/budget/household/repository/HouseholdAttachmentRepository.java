@@ -6,7 +6,6 @@ import com.example.budget.household.model.HouseholdAttachment;
 import com.example.budget.household.model.HouseholdSettlement;
 import com.example.budget.household.model.Household;
 
-import com.example.budget.model.*;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDateTime;

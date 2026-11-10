@@ -5,7 +5,7 @@ import com.example.budget.planning.dto.CategoryBudgetDTO;
 import com.example.budget.planning.dto.CategoryBudgetRequest;
 import com.example.budget.planning.dto.IncomePlanRequest;
 import com.example.budget.planning.dto.VariableExpensePlanRequest;
-import com.example.budget.model.User;
+import com.example.budget.user.model.User;
 import com.example.budget.planning.service.CashFlowForecastService;
 import com.example.budget.planning.service.CategoryBudgetService;
 import jakarta.validation.Valid;

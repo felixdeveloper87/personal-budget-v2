@@ -1,8 +1,8 @@
-package com.example.budget.mapper;
+package com.example.budget.user.mapper;
 
 import com.example.budget.dto.AuthResponse;
 import com.example.budget.dto.RegisterRequest;
-import com.example.budget.model.User;
+import com.example.budget.user.model.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 

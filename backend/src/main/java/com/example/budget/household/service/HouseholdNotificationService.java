@@ -12,7 +12,6 @@ import com.example.budget.household.model.HouseholdNotification;
 
 import com.example.budget.push.service.PushNotificationService;
 
-import com.example.budget.model.*;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;

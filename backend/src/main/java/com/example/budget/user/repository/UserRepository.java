@@ -1,6 +1,6 @@
-package com.example.budget.repository;
+package com.example.budget.user.repository;
 
-import com.example.budget.model.User;
+import com.example.budget.user.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

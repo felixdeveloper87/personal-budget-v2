@@ -1,6 +1,6 @@
-package com.example.budget.dto;
+package com.example.budget.user.dto;
 
-import com.example.budget.model.UserPlan;
+import com.example.budget.user.model.UserPlan;
 
 import java.time.LocalDateTime;
 

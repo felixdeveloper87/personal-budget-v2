@@ -1,7 +1,7 @@
 package com.example.budget.transaction.controller;
 
 import com.example.budget.transaction.dto.MonthlySummary;
-import com.example.budget.model.User;
+import com.example.budget.user.model.User;
 import com.example.budget.transaction.service.TransactionService;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;

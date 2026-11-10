@@ -4,7 +4,7 @@ import com.example.budget.recurring.dto.CreateRecurringTransactionRequest;
 import com.example.budget.recurring.dto.RecurringTransactionDTO;
 import com.example.budget.recurring.model.RecurringFrequency;
 import com.example.budget.recurring.model.RecurringTransaction;
-import com.example.budget.model.User;
+import com.example.budget.user.model.User;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;

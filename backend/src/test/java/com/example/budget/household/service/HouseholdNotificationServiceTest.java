@@ -1,5 +1,7 @@
 package com.example.budget.household.service;
 
+import com.example.budget.user.model.User;
+
 import com.example.budget.household.model.HouseholdMember;
 import com.example.budget.household.model.HouseholdExpense;
 import com.example.budget.household.repository.HouseholdNotificationRepository;
@@ -11,7 +13,6 @@ import com.example.budget.household.model.HouseholdNotification;
 
 import com.example.budget.push.service.PushNotificationService;
 
-import com.example.budget.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -16,8 +16,8 @@ import com.example.budget.household.model.HouseholdNotificationType;
 import com.example.budget.household.model.Household;
 import com.example.budget.household.repository.HouseholdExpenseShareRepository;
 
-import com.example.budget.model.User;
-import com.example.budget.repository.UserRepository;
+import com.example.budget.user.model.User;
+import com.example.budget.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

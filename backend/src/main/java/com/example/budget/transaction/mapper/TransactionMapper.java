@@ -7,7 +7,7 @@ import com.example.budget.transaction.dto.UpdateTransactionRequest;
 import com.example.budget.merchant.MerchantBrand;
 import com.example.budget.merchant.MerchantBrandCatalog;
 import com.example.budget.transaction.model.Transaction;
-import com.example.budget.model.User;
+import com.example.budget.user.model.User;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

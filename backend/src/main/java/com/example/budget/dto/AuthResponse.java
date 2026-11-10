@@ -1,6 +1,6 @@
 package com.example.budget.dto;
 
-import com.example.budget.model.UserPlan;
+import com.example.budget.user.model.UserPlan;
 
 /**
  * Authentication / registration response payload.

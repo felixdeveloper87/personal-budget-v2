@@ -1,4 +1,4 @@
-package com.example.budget.service;
+package com.example.budget.user.service;
 
 import com.example.budget.account.model.AccountTransfer;
 import com.example.budget.planning.model.CategoryBudget;
@@ -9,7 +9,7 @@ import com.example.budget.recurring.model.RecurringTransaction;
 import com.example.budget.goals.model.SavingsGoal;
 import com.example.budget.goals.model.SavingsGoalContribution;
 import com.example.budget.transaction.model.Transaction;
-import com.example.budget.model.User;
+import com.example.budget.user.model.User;
 import com.example.budget.account.repository.AccountTransferRepository;
 import com.example.budget.planning.repository.CategoryBudgetRepository;
 import com.example.budget.account.repository.FinancialAccountRepository;

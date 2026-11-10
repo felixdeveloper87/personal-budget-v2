@@ -6,7 +6,7 @@ import com.example.budget.installment.model.InstallmentPlan;
 import com.example.budget.transaction.model.Transaction;
 import com.example.budget.transaction.model.TransactionType;
 import com.example.budget.transaction.model.TransactionStatus;
-import com.example.budget.model.User;
+import com.example.budget.user.model.User;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;

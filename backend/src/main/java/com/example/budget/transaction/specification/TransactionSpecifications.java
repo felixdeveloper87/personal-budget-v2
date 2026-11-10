@@ -2,7 +2,7 @@ package com.example.budget.transaction.specification;
 
 import com.example.budget.transaction.model.Transaction;
 import com.example.budget.transaction.model.TransactionType;
-import com.example.budget.model.User;
+import com.example.budget.user.model.User;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.StringUtils;
 

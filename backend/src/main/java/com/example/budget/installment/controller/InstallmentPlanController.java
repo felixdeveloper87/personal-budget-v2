@@ -4,7 +4,7 @@ import com.example.budget.account.dto.AssignAccountRequest;
 import com.example.budget.installment.dto.CreateInstallmentPlanRequest;
 import com.example.budget.installment.dto.InstallmentPlanDTO;
 import com.example.budget.installment.dto.UpdateInstallmentPlanRequest;
-import com.example.budget.model.User;
+import com.example.budget.user.model.User;
 import com.example.budget.installment.service.InstallmentPlanService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;

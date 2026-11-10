@@ -13,7 +13,7 @@ import com.example.budget.household.dto.HouseholdPaymentHistoryDTO;
 import com.example.budget.household.service.HouseholdSettlementService;
 import com.example.budget.household.service.HouseholdAttachmentService;
 
-import com.example.budget.model.User;
+import com.example.budget.user.model.User;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;

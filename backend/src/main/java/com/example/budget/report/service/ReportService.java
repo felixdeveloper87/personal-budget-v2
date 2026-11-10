@@ -3,7 +3,7 @@ package com.example.budget.report.service;
 import com.example.budget.report.dto.ReportResponse;
 import com.example.budget.report.model.PeriodRange;
 import com.example.budget.report.model.ReportPeriod;
-import com.example.budget.model.User;
+import com.example.budget.user.model.User;
 import com.example.budget.transaction.repository.TransactionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

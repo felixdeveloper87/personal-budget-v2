@@ -22,7 +22,7 @@ import com.example.budget.paymentmethod.model.PaymentMethod;
 import com.example.budget.account.model.FinancialAccount;
 import com.example.budget.transaction.model.Transaction;
 import com.example.budget.transaction.model.TransactionType;
-import com.example.budget.model.User;
+import com.example.budget.user.model.User;
 import com.example.budget.transaction.repository.TransactionRepository;
 
 import org.springframework.cache.Cache;

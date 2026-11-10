@@ -1,5 +1,7 @@
 package com.example.budget.household.service;
 
+import com.example.budget.user.repository.UserRepository;
+
 import com.example.budget.household.model.HouseholdMember;
 import com.example.budget.household.repository.HouseholdAttachmentRepository;
 import com.example.budget.household.model.HouseholdSettlementStatus;
@@ -13,8 +15,7 @@ import com.example.budget.household.model.Household;
 import com.example.budget.household.repository.HouseholdExpenseShareRepository;
 
 import com.example.budget.exception.AccessDeniedException;
-import com.example.budget.model.User;
-import com.example.budget.repository.*;
+import com.example.budget.user.model.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.BeforeEach;

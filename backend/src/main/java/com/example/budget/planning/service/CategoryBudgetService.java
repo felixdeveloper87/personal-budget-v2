@@ -7,7 +7,7 @@ import com.example.budget.exception.EntityNotFoundException;
 import com.example.budget.planning.model.CategoryBudget;
 import com.example.budget.transaction.model.Transaction;
 import com.example.budget.transaction.model.TransactionType;
-import com.example.budget.model.User;
+import com.example.budget.user.model.User;
 import com.example.budget.planning.repository.CategoryBudgetRepository;
 import com.example.budget.transaction.repository.TransactionRepository;
 import org.springframework.stereotype.Service;

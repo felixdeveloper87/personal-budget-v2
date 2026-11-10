@@ -6,7 +6,7 @@ import com.example.budget.recurring.dto.RecurringTransactionDTO;
 import com.example.budget.recurring.dto.RecurringUpdateScope;
 import com.example.budget.recurring.dto.UpdateRecurringTransactionAmountRequest;
 import com.example.budget.recurring.dto.UpdateRecurringTransactionRequest;
-import com.example.budget.model.User;
+import com.example.budget.user.model.User;
 import com.example.budget.recurring.service.RecurringTransactionService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;

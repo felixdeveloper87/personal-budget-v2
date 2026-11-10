@@ -6,7 +6,7 @@ import com.example.budget.household.repository.HouseholdMemberRepository;
 import com.example.budget.household.model.HouseholdRole;
 
 import com.example.budget.exception.AccessDeniedException;
-import com.example.budget.model.User;
+import com.example.budget.user.model.User;
 import org.springframework.stereotype.Component;
 
 /** Permission checks shared by the household services. */

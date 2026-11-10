@@ -3,7 +3,7 @@ package com.example.budget.transaction.repository;
 import com.example.budget.transaction.model.Transaction;
 import com.example.budget.transaction.model.TransactionType;
 import com.example.budget.transaction.model.TransactionStatus;
-import com.example.budget.model.User;
+import com.example.budget.user.model.User;
 import com.example.budget.account.model.FinancialAccount;
 import com.example.budget.paymentmethod.model.PaymentMethodType;
 import org.springframework.data.domain.Pageable;

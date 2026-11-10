@@ -2,7 +2,7 @@ package com.example.budget.goals.service;
 
 import com.example.budget.goals.dto.SavingsGoalRequest;
 import com.example.budget.goals.model.SavingsGoal;
-import com.example.budget.model.User;
+import com.example.budget.user.model.User;
 import com.example.budget.goals.repository.SavingsGoalContributionRepository;
 import com.example.budget.goals.repository.SavingsGoalRepository;
 import org.junit.jupiter.api.Test;

@@ -8,7 +8,7 @@ import com.example.budget.transaction.dto.UpdateTransactionRequest;
 import com.example.budget.transaction.mapper.TransactionMapper;
 import com.example.budget.transaction.model.Transaction;
 import com.example.budget.transaction.model.TransactionType;
-import com.example.budget.model.User;
+import com.example.budget.user.model.User;
 import com.example.budget.transaction.service.TransactionService;
 import jakarta.validation.Valid;
 import org.springframework.format.annotation.DateTimeFormat;

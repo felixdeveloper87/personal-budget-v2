@@ -5,7 +5,7 @@ import com.example.budget.paymentmethod.model.PaymentMethodType;
 import com.example.budget.transaction.model.Transaction;
 import com.example.budget.transaction.model.TransactionStatus;
 import com.example.budget.transaction.model.TransactionType;
-import com.example.budget.model.User;
+import com.example.budget.user.model.User;
 import com.example.budget.transaction.repository.TransactionRepository;
 import com.example.budget.push.service.PushNotificationService.PushMessage;
 import org.junit.jupiter.api.Test;

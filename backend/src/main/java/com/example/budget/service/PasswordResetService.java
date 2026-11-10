@@ -1,7 +1,7 @@
 package com.example.budget.service;
 
-import com.example.budget.model.User;
-import com.example.budget.repository.UserRepository;
+import com.example.budget.user.model.User;
+import com.example.budget.user.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

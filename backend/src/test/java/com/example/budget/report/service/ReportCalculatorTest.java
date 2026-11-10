@@ -8,7 +8,7 @@ import com.example.budget.report.model.ReportPeriod;
 import com.example.budget.transaction.model.Transaction;
 import com.example.budget.transaction.model.TransactionStatus;
 import com.example.budget.transaction.model.TransactionType;
-import com.example.budget.model.User;
+import com.example.budget.user.model.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

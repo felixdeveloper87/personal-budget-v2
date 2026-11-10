@@ -1,5 +1,7 @@
 package com.example.budget.account.service;
 
+import com.example.budget.user.model.User;
+
 import com.example.budget.transaction.model.TransactionType;
 
 import com.example.budget.transaction.model.TransactionStatus;
@@ -33,7 +35,6 @@ import com.example.budget.paymentmethod.model.PaymentMethodType;
 import com.example.budget.dto.*;
 import com.example.budget.exception.AccessDeniedException;
 import com.example.budget.exception.EntityNotFoundException;
-import com.example.budget.model.*;
 import com.example.budget.account.repository.AccountTransferRepository;
 import com.example.budget.account.repository.FinancialAccountRepository;
 import com.example.budget.transaction.repository.TransactionRepository;

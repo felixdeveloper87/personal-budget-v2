@@ -1,8 +1,8 @@
-package com.example.budget.controller;
+package com.example.budget.user.controller;
 
-import com.example.budget.model.User;
-import com.example.budget.service.UserDataExportService;
-import com.example.budget.service.UserDataService;
+import com.example.budget.user.model.User;
+import com.example.budget.user.service.UserDataExportService;
+import com.example.budget.user.service.UserDataService;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;

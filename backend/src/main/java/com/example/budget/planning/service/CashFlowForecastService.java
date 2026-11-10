@@ -9,10 +9,10 @@ import com.example.budget.exception.EntityNotFoundException;
 import com.example.budget.recurring.model.RecurringTransaction;
 import com.example.budget.transaction.model.Transaction;
 import com.example.budget.transaction.model.TransactionType;
-import com.example.budget.model.User;
+import com.example.budget.user.model.User;
 import com.example.budget.recurring.repository.RecurringTransactionRepository;
 import com.example.budget.transaction.repository.TransactionRepository;
-import com.example.budget.repository.UserRepository;
+import com.example.budget.user.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

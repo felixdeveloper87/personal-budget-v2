@@ -3,7 +3,7 @@ package com.example.budget.validator;
 import com.example.budget.exception.AccessDeniedException;
 import com.example.budget.exception.EntityNotFoundException;
 import com.example.budget.transaction.model.Transaction;
-import com.example.budget.model.User;
+import com.example.budget.user.model.User;
 import org.springframework.stereotype.Component;
 
 /**

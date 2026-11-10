@@ -1,8 +1,8 @@
 package com.example.budget.push.controller;
 
 import com.example.budget.push.dto.PushSubscriptionRequest;
-import com.example.budget.model.User;
-import com.example.budget.repository.UserRepository;
+import com.example.budget.user.model.User;
+import com.example.budget.user.repository.UserRepository;
 import com.example.budget.push.service.PushNotificationService;
 import com.example.budget.push.service.PushNotificationService.PushMessage;
 import jakarta.validation.Valid;

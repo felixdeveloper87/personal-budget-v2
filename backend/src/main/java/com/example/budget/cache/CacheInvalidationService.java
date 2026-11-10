@@ -1,7 +1,7 @@
 package com.example.budget.cache;
 
 import com.example.budget.config.RedisCacheConfig;
-import com.example.budget.model.User;
+import com.example.budget.user.model.User;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;

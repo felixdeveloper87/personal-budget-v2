@@ -1,6 +1,6 @@
 package com.example.budget.transaction.model;
 
-import com.example.budget.model.User;
+import com.example.budget.user.model.User;
 
 import com.example.budget.account.model.FinancialAccount;
 

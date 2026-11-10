@@ -14,7 +14,7 @@ import com.example.budget.household.model.HouseholdNotificationType;
 import com.example.budget.household.repository.HouseholdExpenseShareRepository;
 
 import com.example.budget.exception.EntityNotFoundException;
-import com.example.budget.model.User;
+import com.example.budget.user.model.User;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

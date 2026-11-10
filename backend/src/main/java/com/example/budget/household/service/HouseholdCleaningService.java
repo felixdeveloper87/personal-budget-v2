@@ -1,5 +1,7 @@
 package com.example.budget.household.service;
 
+import com.example.budget.user.model.User;
+
 import com.example.budget.household.model.HouseholdMember;
 import com.example.budget.household.dto.HouseholdPageDTO;
 import com.example.budget.household.repository.HouseholdCleaningAssignmentRepository;
@@ -18,7 +20,6 @@ import com.example.budget.household.model.HouseholdCleaningDutyCompletion;
 
 import com.example.budget.exception.AccessDeniedException;
 import com.example.budget.exception.EntityNotFoundException;
-import com.example.budget.model.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

@@ -57,7 +57,7 @@ Ordem sugerida: da funcionalidade mais isolada para a mais compartilhada.
 - [x] 9. `recurring` (12 arquivos + 1 teste)
 - [x] 10. `account` (17 arquivos + 2 testes)
 - [x] 11. `transaction` (20 arquivos + 4 testes; `merchant/` ficou onde está)
-- [ ] 12. `user` + `admin`
+- [x] 12. `user` + `admin` (11 arquivos, tudo em `user/`; removidos imports curinga de `model.*` e `repository.*`, que ficaram vazios)
 - [ ] 13. `auth`
 - [ ] 14. `shared` (exception, cache, util) e apagar as pastas antigas vazias
 - [ ] 15. Rodar o app no Docker e testar as telas principais

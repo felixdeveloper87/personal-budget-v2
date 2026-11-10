@@ -18,7 +18,7 @@ import com.example.budget.paymentmethod.model.PaymentMethod;
 import com.example.budget.paymentmethod.model.PaymentMethodType;
 import com.example.budget.transaction.model.Transaction;
 import com.example.budget.transaction.model.TransactionStatus;
-import com.example.budget.model.User;
+import com.example.budget.user.model.User;
 import com.example.budget.installment.repository.InstallmentPlanRepository;
 import com.example.budget.transaction.repository.TransactionRepository;
 import org.junit.jupiter.api.BeforeEach;

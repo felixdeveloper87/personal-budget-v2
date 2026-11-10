@@ -7,7 +7,7 @@ import com.example.budget.exception.AccessDeniedException;
 import com.example.budget.exception.EntityNotFoundException;
 import com.example.budget.goals.model.SavingsGoal;
 import com.example.budget.goals.model.SavingsGoalContribution;
-import com.example.budget.model.User;
+import com.example.budget.user.model.User;
 import com.example.budget.goals.repository.SavingsGoalContributionRepository;
 import com.example.budget.goals.repository.SavingsGoalRepository;
 import org.springframework.stereotype.Service;

@@ -4,7 +4,7 @@ import com.example.budget.household.model.HouseholdInvitation;
 import com.example.budget.household.model.HouseholdInvitationStatus;
 import com.example.budget.household.model.Household;
 
-import com.example.budget.model.User;
+import com.example.budget.user.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

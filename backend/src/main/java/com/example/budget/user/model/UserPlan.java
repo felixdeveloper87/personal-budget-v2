@@ -1,4 +1,4 @@
-package com.example.budget.model;
+package com.example.budget.user.model;
 
 /**
  * Subscription tier for feature gates (e.g. premium vs standard).

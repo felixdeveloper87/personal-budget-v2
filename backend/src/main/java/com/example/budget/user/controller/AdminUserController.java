@@ -1,9 +1,9 @@
-package com.example.budget.controller;
+package com.example.budget.user.controller;
 
-import com.example.budget.dto.AdminUserResponse;
-import com.example.budget.dto.UpdateUserPlanRequest;
-import com.example.budget.model.User;
-import com.example.budget.service.AdminUserService;
+import com.example.budget.user.dto.AdminUserResponse;
+import com.example.budget.user.dto.UpdateUserPlanRequest;
+import com.example.budget.user.model.User;
+import com.example.budget.user.service.AdminUserService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

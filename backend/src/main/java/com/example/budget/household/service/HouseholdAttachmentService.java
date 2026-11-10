@@ -1,5 +1,7 @@
 package com.example.budget.household.service;
 
+import com.example.budget.user.model.User;
+
 import com.example.budget.household.model.HouseholdMember;
 import com.example.budget.household.repository.HouseholdAttachmentRepository;
 import com.example.budget.household.model.HouseholdExpense;
@@ -14,8 +16,6 @@ import com.example.budget.household.model.Household;
 
 import com.example.budget.exception.AccessDeniedException;
 import com.example.budget.exception.EntityNotFoundException;
-import com.example.budget.model.*;
-import com.example.budget.repository.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
