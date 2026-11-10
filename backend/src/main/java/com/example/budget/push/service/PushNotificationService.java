@@ -1,7 +1,7 @@
-package com.example.budget.service;
+package com.example.budget.push.service;
 
-import com.example.budget.model.PushSubscription;
-import com.example.budget.repository.PushSubscriptionRepository;
+import com.example.budget.push.model.PushSubscription;
+import com.example.budget.push.repository.PushSubscriptionRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PreDestroy;

@@ -1,4 +1,4 @@
-package com.example.budget.service;
+package com.example.budget.push.service;
 
 import org.junit.jupiter.api.Test;
 

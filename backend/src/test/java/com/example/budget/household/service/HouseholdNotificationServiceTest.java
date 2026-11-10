@@ -9,7 +9,7 @@ import com.example.budget.household.model.HouseholdNotificationType;
 import com.example.budget.household.model.Household;
 import com.example.budget.household.model.HouseholdNotification;
 
-import com.example.budget.service.PushNotificationService;
+import com.example.budget.push.service.PushNotificationService;
 
 import com.example.budget.model.*;
 import org.junit.jupiter.api.BeforeEach;

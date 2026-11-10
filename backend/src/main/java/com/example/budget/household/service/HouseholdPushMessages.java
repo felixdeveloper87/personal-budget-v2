@@ -2,7 +2,7 @@ package com.example.budget.household.service;
 
 import com.example.budget.household.model.HouseholdNotificationType;
 
-import com.example.budget.service.PushNotificationService.PushMessage;
+import com.example.budget.push.service.PushNotificationService.PushMessage;
 
 import java.math.BigDecimal;
 import java.text.NumberFormat;

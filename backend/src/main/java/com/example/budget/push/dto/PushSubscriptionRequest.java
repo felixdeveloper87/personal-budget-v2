@@ -1,4 +1,4 @@
-package com.example.budget.dto;
+package com.example.budget.push.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.Valid;

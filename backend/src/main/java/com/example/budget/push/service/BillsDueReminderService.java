@@ -1,4 +1,4 @@
-package com.example.budget.service;
+package com.example.budget.push.service;
 
 import com.example.budget.model.PaymentMethod;
 import com.example.budget.model.PaymentMethodType;
@@ -7,7 +7,7 @@ import com.example.budget.model.TransactionStatus;
 import com.example.budget.model.TransactionType;
 import com.example.budget.model.User;
 import com.example.budget.repository.TransactionRepository;
-import com.example.budget.service.PushNotificationService.PushMessage;
+import com.example.budget.push.service.PushNotificationService.PushMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;

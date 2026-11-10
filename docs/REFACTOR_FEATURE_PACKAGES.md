@@ -49,7 +49,7 @@ Ordem sugerida: da funcionalidade mais isolada para a mais compartilhada.
 - [x] 1. `household`, o piloto: 51 arquivos + 15 testes movidos (2026-11-10) e testado no Docker. Depois reorganizado em subpastas `controller/ dto/ model/ repository/ service/` (regra 6).
 - [x] 2. `business` (5 arquivos + 1 teste, nenhum ajuste de import)
 - [x] 3. `goals` (9 arquivos + 1 teste)
-- [ ] 4. `push`
+- [x] 4. `push` (7 arquivos + 3 testes)
 - [ ] 5. `report`
 - [ ] 6. `planning`
 - [ ] 7. `paymentmethod`

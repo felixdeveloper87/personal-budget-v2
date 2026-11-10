@@ -1,4 +1,4 @@
-package com.example.budget.dto;
+package com.example.budget.push.dto;
 
 import com.example.budget.config.JacksonConfig;
 import org.junit.jupiter.api.Test;

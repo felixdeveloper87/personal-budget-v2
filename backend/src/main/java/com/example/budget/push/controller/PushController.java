@@ -1,10 +1,10 @@
-package com.example.budget.controller;
+package com.example.budget.push.controller;
 
-import com.example.budget.dto.PushSubscriptionRequest;
+import com.example.budget.push.dto.PushSubscriptionRequest;
 import com.example.budget.model.User;
 import com.example.budget.repository.UserRepository;
-import com.example.budget.service.PushNotificationService;
-import com.example.budget.service.PushNotificationService.PushMessage;
+import com.example.budget.push.service.PushNotificationService;
+import com.example.budget.push.service.PushNotificationService.PushMessage;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.HttpStatus;
