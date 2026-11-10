@@ -14,7 +14,6 @@ import com.example.budget.account.dto.AccountDetailsDTO;
 
 import com.example.budget.account.dto.AccountActivityPageDTO;
 
-import com.example.budget.dto.*;
 import com.example.budget.user.model.User;
 import com.example.budget.account.service.FinancialAccountService;
 import jakarta.validation.Valid;
