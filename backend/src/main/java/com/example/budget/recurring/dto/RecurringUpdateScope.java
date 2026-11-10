@@ -1,4 +1,4 @@
-package com.example.budget.dto;
+package com.example.budget.recurring.dto;
 
 public enum RecurringUpdateScope {
     CURRENT_MONTH,

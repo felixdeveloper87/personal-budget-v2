@@ -1,6 +1,8 @@
-package com.example.budget.cache;
+package com.example.budget.recurring.cache;
 
-import com.example.budget.dto.RecurringTransactionDTO;
+import com.example.budget.cache.BaseCachedList;
+
+import com.example.budget.recurring.dto.RecurringTransactionDTO;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package com.example.budget.dto;
+package com.example.budget.recurring.dto;
 
 import com.example.budget.model.TransactionType;
 import jakarta.validation.constraints.Max;

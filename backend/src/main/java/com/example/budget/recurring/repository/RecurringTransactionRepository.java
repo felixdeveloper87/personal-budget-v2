@@ -1,6 +1,6 @@
-package com.example.budget.repository;
+package com.example.budget.recurring.repository;
 
-import com.example.budget.model.RecurringTransaction;
+import com.example.budget.recurring.model.RecurringTransaction;
 import com.example.budget.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;

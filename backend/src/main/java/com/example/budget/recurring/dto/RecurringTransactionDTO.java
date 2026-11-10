@@ -1,6 +1,6 @@
-package com.example.budget.dto;
+package com.example.budget.recurring.dto;
 
-import com.example.budget.model.RecurringFrequency;
+import com.example.budget.recurring.model.RecurringFrequency;
 import com.example.budget.model.TransactionType;
 
 import java.math.BigDecimal;

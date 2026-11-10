@@ -1,4 +1,4 @@
-package com.example.budget.model;
+package com.example.budget.recurring.model;
 
 public enum RecurringFrequency {
     MONTHLY

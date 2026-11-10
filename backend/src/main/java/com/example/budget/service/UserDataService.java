@@ -7,7 +7,7 @@ import com.example.budget.planning.repository.CategoryBudgetRepository;
 import com.example.budget.repository.FinancialAccountRepository;
 import com.example.budget.installment.repository.InstallmentPlanRepository;
 import com.example.budget.paymentmethod.repository.PaymentMethodRepository;
-import com.example.budget.repository.RecurringTransactionRepository;
+import com.example.budget.recurring.repository.RecurringTransactionRepository;
 import com.example.budget.goals.repository.SavingsGoalContributionRepository;
 import com.example.budget.goals.repository.SavingsGoalRepository;
 import com.example.budget.repository.TransactionRepository;

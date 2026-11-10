@@ -1,9 +1,9 @@
-package com.example.budget.mapper;
+package com.example.budget.recurring.mapper;
 
-import com.example.budget.dto.CreateRecurringTransactionRequest;
-import com.example.budget.dto.RecurringTransactionDTO;
-import com.example.budget.model.RecurringFrequency;
-import com.example.budget.model.RecurringTransaction;
+import com.example.budget.recurring.dto.CreateRecurringTransactionRequest;
+import com.example.budget.recurring.dto.RecurringTransactionDTO;
+import com.example.budget.recurring.model.RecurringFrequency;
+import com.example.budget.recurring.model.RecurringTransaction;
 import com.example.budget.model.User;
 import org.springframework.stereotype.Component;
 

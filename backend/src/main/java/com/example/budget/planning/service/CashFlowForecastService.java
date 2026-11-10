@@ -6,11 +6,11 @@ import com.example.budget.service.CreditCardBillingService;
 
 import com.example.budget.planning.dto.CashFlowForecastDTO;
 import com.example.budget.exception.EntityNotFoundException;
-import com.example.budget.model.RecurringTransaction;
+import com.example.budget.recurring.model.RecurringTransaction;
 import com.example.budget.model.Transaction;
 import com.example.budget.model.TransactionType;
 import com.example.budget.model.User;
-import com.example.budget.repository.RecurringTransactionRepository;
+import com.example.budget.recurring.repository.RecurringTransactionRepository;
 import com.example.budget.repository.TransactionRepository;
 import com.example.budget.repository.UserRepository;
 import org.springframework.stereotype.Service;

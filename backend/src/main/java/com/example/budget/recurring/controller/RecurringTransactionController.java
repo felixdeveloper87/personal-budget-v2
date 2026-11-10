@@ -1,13 +1,13 @@
-package com.example.budget.controller;
+package com.example.budget.recurring.controller;
 
 import com.example.budget.dto.AssignAccountRequest;
-import com.example.budget.dto.CreateRecurringTransactionRequest;
-import com.example.budget.dto.RecurringTransactionDTO;
-import com.example.budget.dto.RecurringUpdateScope;
-import com.example.budget.dto.UpdateRecurringTransactionAmountRequest;
-import com.example.budget.dto.UpdateRecurringTransactionRequest;
+import com.example.budget.recurring.dto.CreateRecurringTransactionRequest;
+import com.example.budget.recurring.dto.RecurringTransactionDTO;
+import com.example.budget.recurring.dto.RecurringUpdateScope;
+import com.example.budget.recurring.dto.UpdateRecurringTransactionAmountRequest;
+import com.example.budget.recurring.dto.UpdateRecurringTransactionRequest;
 import com.example.budget.model.User;
-import com.example.budget.service.RecurringTransactionService;
+import com.example.budget.recurring.service.RecurringTransactionService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
