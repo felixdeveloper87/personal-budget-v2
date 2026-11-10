@@ -1,4 +1,4 @@
-package com.example.budget.dto;
+package com.example.budget.account.dto;
 
 import java.math.BigDecimal;
 import java.util.List;

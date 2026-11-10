@@ -1,6 +1,6 @@
 package com.example.budget.installment.controller;
 
-import com.example.budget.dto.AssignAccountRequest;
+import com.example.budget.account.dto.AssignAccountRequest;
 import com.example.budget.installment.dto.CreateInstallmentPlanRequest;
 import com.example.budget.installment.dto.InstallmentPlanDTO;
 import com.example.budget.installment.dto.UpdateInstallmentPlanRequest;

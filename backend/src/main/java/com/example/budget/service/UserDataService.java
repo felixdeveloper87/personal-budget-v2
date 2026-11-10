@@ -2,9 +2,9 @@ package com.example.budget.service;
 
 import com.example.budget.cache.CacheInvalidationService;
 import com.example.budget.model.User;
-import com.example.budget.repository.AccountTransferRepository;
+import com.example.budget.account.repository.AccountTransferRepository;
 import com.example.budget.planning.repository.CategoryBudgetRepository;
-import com.example.budget.repository.FinancialAccountRepository;
+import com.example.budget.account.repository.FinancialAccountRepository;
 import com.example.budget.installment.repository.InstallmentPlanRepository;
 import com.example.budget.paymentmethod.repository.PaymentMethodRepository;
 import com.example.budget.recurring.repository.RecurringTransactionRepository;

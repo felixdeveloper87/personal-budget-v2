@@ -1,6 +1,6 @@
 package com.example.budget.installment.service;
 
-import com.example.budget.service.FinancialAccountService;
+import com.example.budget.account.service.FinancialAccountService;
 
 import com.example.budget.paymentmethod.service.PaymentMethodService;
 

@@ -1,4 +1,26 @@
-package com.example.budget.service;
+package com.example.budget.account.service;
+
+import com.example.budget.account.dto.FinancialAccountRequest;
+
+import com.example.budget.account.dto.FinancialAccountDTO;
+
+import com.example.budget.account.model.FinancialAccount;
+
+import com.example.budget.account.model.AccountType;
+
+import com.example.budget.account.dto.AccountTransferRequest;
+
+import com.example.budget.account.dto.AccountTransferDTO;
+
+import com.example.budget.account.model.AccountTransfer;
+
+import com.example.budget.account.dto.AccountSummaryDTO;
+
+import com.example.budget.account.dto.AccountDetailsDTO;
+
+import com.example.budget.account.dto.AccountActivityPageDTO;
+
+import com.example.budget.account.dto.AccountActivityItemDTO;
 
 import com.example.budget.paymentmethod.model.PaymentMethodType;
 
@@ -6,8 +28,8 @@ import com.example.budget.dto.*;
 import com.example.budget.exception.AccessDeniedException;
 import com.example.budget.exception.EntityNotFoundException;
 import com.example.budget.model.*;
-import com.example.budget.repository.AccountTransferRepository;
-import com.example.budget.repository.FinancialAccountRepository;
+import com.example.budget.account.repository.AccountTransferRepository;
+import com.example.budget.account.repository.FinancialAccountRepository;
 import com.example.budget.repository.TransactionRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;

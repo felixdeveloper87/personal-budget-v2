@@ -4,7 +4,7 @@ import com.example.budget.model.Transaction;
 import com.example.budget.model.TransactionType;
 import com.example.budget.model.TransactionStatus;
 import com.example.budget.model.User;
-import com.example.budget.model.FinancialAccount;
+import com.example.budget.account.model.FinancialAccount;
 import com.example.budget.paymentmethod.model.PaymentMethodType;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -50,7 +50,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
      * Same past-activity query as the Top20 variant above, but with a caller-supplied
      * {@link Pageable} cap so the account activity feed can page arbitrarily far back
      * instead of being frozen at 20 rows. Used to merge-sort against transfers — see
-     * {@link com.example.budget.service.FinancialAccountService#recentActivityPage}.
+     * {@link com.example.budget.account.service.FinancialAccountService#recentActivityPage}.
      */
     @Query("SELECT t FROM Transaction t " +
                     "LEFT JOIN FETCH t.paymentMethod paymentMethod " +

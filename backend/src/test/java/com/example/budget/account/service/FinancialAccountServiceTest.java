@@ -1,11 +1,17 @@
-package com.example.budget.service;
+package com.example.budget.account.service;
+
+import com.example.budget.account.model.FinancialAccount;
+
+import com.example.budget.account.model.AccountType;
+
+import com.example.budget.account.model.AccountTransfer;
 
 import com.example.budget.paymentmethod.model.PaymentMethodType;
 
-import com.example.budget.dto.FinancialAccountRequest;
+import com.example.budget.account.dto.FinancialAccountRequest;
 import com.example.budget.model.*;
-import com.example.budget.repository.AccountTransferRepository;
-import com.example.budget.repository.FinancialAccountRepository;
+import com.example.budget.account.repository.AccountTransferRepository;
+import com.example.budget.account.repository.FinancialAccountRepository;
 import com.example.budget.repository.TransactionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

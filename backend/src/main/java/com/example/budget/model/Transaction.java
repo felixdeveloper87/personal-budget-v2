@@ -1,5 +1,7 @@
 package com.example.budget.model;
 
+import com.example.budget.account.model.FinancialAccount;
+
 import com.example.budget.recurring.model.RecurringTransaction;
 
 import com.example.budget.installment.model.InstallmentPlan;

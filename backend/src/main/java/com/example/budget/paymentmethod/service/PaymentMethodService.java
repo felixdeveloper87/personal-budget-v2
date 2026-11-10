@@ -1,6 +1,6 @@
 package com.example.budget.paymentmethod.service;
 
-import com.example.budget.service.FinancialAccountService;
+import com.example.budget.account.service.FinancialAccountService;
 
 import com.example.budget.paymentmethod.dto.PaymentMethodDTO;
 import com.example.budget.paymentmethod.dto.PaymentMethodRequest;

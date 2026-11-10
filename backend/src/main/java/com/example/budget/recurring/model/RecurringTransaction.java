@@ -6,7 +6,7 @@ import com.example.budget.model.TransactionType;
 
 import com.example.budget.model.Transaction;
 
-import com.example.budget.model.FinancialAccount;
+import com.example.budget.account.model.FinancialAccount;
 
 import com.example.budget.paymentmethod.model.PaymentMethod;
 

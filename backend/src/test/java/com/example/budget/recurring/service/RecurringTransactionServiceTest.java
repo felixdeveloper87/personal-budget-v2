@@ -1,8 +1,8 @@
 package com.example.budget.recurring.service;
 
-import com.example.budget.service.FinancialAccountService;
+import com.example.budget.account.service.FinancialAccountService;
 
-import com.example.budget.service.CreditCardBillingService;
+import com.example.budget.account.service.CreditCardBillingService;
 
 import com.example.budget.paymentmethod.service.PaymentMethodService;
 

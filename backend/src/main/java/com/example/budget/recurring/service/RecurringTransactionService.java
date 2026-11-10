@@ -1,8 +1,8 @@
 package com.example.budget.recurring.service;
 
-import com.example.budget.service.FinancialAccountService;
+import com.example.budget.account.service.FinancialAccountService;
 
-import com.example.budget.service.CreditCardBillingService;
+import com.example.budget.account.service.CreditCardBillingService;
 
 import com.example.budget.paymentmethod.service.PaymentMethodService;
 
@@ -10,7 +10,7 @@ import com.example.budget.cache.CacheInvalidationService;
 import com.example.budget.recurring.cache.CachedRecurringList;
 import com.example.budget.cache.RedisCacheSafety;
 import com.example.budget.config.RedisCacheConfig;
-import com.example.budget.dto.AssignAccountRequest;
+import com.example.budget.account.dto.AssignAccountRequest;
 import com.example.budget.recurring.dto.CreateRecurringTransactionRequest;
 import com.example.budget.recurring.dto.RecurringTransactionDTO;
 import com.example.budget.recurring.dto.RecurringUpdateScope;
@@ -19,7 +19,7 @@ import com.example.budget.recurring.dto.UpdateRecurringTransactionRequest;
 import com.example.budget.exception.AccessDeniedException;
 import com.example.budget.exception.EntityNotFoundException;
 import com.example.budget.recurring.mapper.RecurringTransactionMapper;
-import com.example.budget.model.FinancialAccount;
+import com.example.budget.account.model.FinancialAccount;
 import com.example.budget.recurring.model.RecurringTransaction;
 import com.example.budget.model.Transaction;
 import com.example.budget.model.TransactionStatus;

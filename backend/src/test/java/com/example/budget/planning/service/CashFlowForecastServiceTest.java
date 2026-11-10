@@ -1,11 +1,11 @@
 package com.example.budget.planning.service;
 
-import com.example.budget.service.CreditCardBillingService;
-import com.example.budget.service.FinancialAccountService;
+import com.example.budget.account.service.CreditCardBillingService;
+import com.example.budget.account.service.FinancialAccountService;
 
-import com.example.budget.dto.AccountSummaryDTO;
-import com.example.budget.model.AccountType;
-import com.example.budget.model.FinancialAccount;
+import com.example.budget.account.dto.AccountSummaryDTO;
+import com.example.budget.account.model.AccountType;
+import com.example.budget.account.model.FinancialAccount;
 import com.example.budget.recurring.model.RecurringTransaction;
 import com.example.budget.model.Transaction;
 import com.example.budget.model.TransactionStatus;

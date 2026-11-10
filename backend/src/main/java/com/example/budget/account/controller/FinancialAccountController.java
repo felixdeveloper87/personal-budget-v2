@@ -1,8 +1,22 @@
-package com.example.budget.controller;
+package com.example.budget.account.controller;
+
+import com.example.budget.account.dto.FinancialAccountRequest;
+
+import com.example.budget.account.dto.FinancialAccountDTO;
+
+import com.example.budget.account.dto.AccountTransferRequest;
+
+import com.example.budget.account.dto.AccountTransferDTO;
+
+import com.example.budget.account.dto.AccountSummaryDTO;
+
+import com.example.budget.account.dto.AccountDetailsDTO;
+
+import com.example.budget.account.dto.AccountActivityPageDTO;
 
 import com.example.budget.dto.*;
 import com.example.budget.model.User;
-import com.example.budget.service.FinancialAccountService;
+import com.example.budget.account.service.FinancialAccountService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;

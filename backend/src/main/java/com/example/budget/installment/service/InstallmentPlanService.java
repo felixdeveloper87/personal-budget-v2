@@ -1,6 +1,6 @@
 package com.example.budget.installment.service;
 
-import com.example.budget.service.FinancialAccountService;
+import com.example.budget.account.service.FinancialAccountService;
 
 import com.example.budget.paymentmethod.service.PaymentMethodService;
 
@@ -8,14 +8,14 @@ import com.example.budget.cache.CacheInvalidationService;
 import com.example.budget.installment.cache.CachedInstallmentPlanList;
 import com.example.budget.cache.RedisCacheSafety;
 import com.example.budget.config.RedisCacheConfig;
-import com.example.budget.dto.AssignAccountRequest;
+import com.example.budget.account.dto.AssignAccountRequest;
 import com.example.budget.installment.dto.CreateInstallmentPlanRequest;
 import com.example.budget.installment.dto.InstallmentPlanDTO;
 import com.example.budget.installment.dto.UpdateInstallmentPlanRequest;
 import com.example.budget.exception.AccessDeniedException;
 import com.example.budget.exception.EntityNotFoundException;
 import com.example.budget.installment.mapper.InstallmentPlanMapper;
-import com.example.budget.model.FinancialAccount;
+import com.example.budget.account.model.FinancialAccount;
 import com.example.budget.installment.model.InstallmentPlan;
 import com.example.budget.model.Transaction;
 import com.example.budget.model.TransactionStatus;

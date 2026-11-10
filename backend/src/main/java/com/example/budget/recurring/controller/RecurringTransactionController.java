@@ -1,6 +1,6 @@
 package com.example.budget.recurring.controller;
 
-import com.example.budget.dto.AssignAccountRequest;
+import com.example.budget.account.dto.AssignAccountRequest;
 import com.example.budget.recurring.dto.CreateRecurringTransactionRequest;
 import com.example.budget.recurring.dto.RecurringTransactionDTO;
 import com.example.budget.recurring.dto.RecurringUpdateScope;
