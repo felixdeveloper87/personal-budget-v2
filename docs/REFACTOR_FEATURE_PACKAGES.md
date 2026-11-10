@@ -60,8 +60,8 @@ Ordem sugerida: da funcionalidade mais isolada para a mais compartilhada.
 - [x] 12. `user` + `admin` (11 arquivos, tudo em `user/`; removidos imports curinga de `model.*` e `repository.*`, que ficaram vazios)
 - [x] 13. `auth` (12 arquivos + testes)
 - [x] 14. `shared` (`shared/exception`, `shared/cache`: 6 arquivos + 1 teste) e pastas antigas vazias apagadas
-- [ ] 15. Rodar o app no Docker e testar as telas principais
-- [ ] 16. Merge da branch no `main`
+- [x] 15. Rodar o app no Docker e testar as telas principais (backend subiu com `ddl-auto=validate`, `/health` 200)
+- [x] 16. Merge da branch no `main` (2026-11-10)
 
 **Depois do item 1, pare e avalie** se o formato agradou antes de seguir com o resto.
 
