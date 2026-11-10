@@ -1,4 +1,4 @@
-package com.example.budget.dto;
+package com.example.budget.report.dto;
 
 import com.example.budget.model.TransactionType;
 import com.example.budget.model.TransactionStatus;

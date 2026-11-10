@@ -1,6 +1,6 @@
-package com.example.budget.service;
+package com.example.budget.report.service;
 
-import com.example.budget.dto.ReportResponse;
+import com.example.budget.report.dto.ReportResponse;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;

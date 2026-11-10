@@ -1,6 +1,6 @@
-package com.example.budget.service;
+package com.example.budget.report.service;
 
-import com.example.budget.model.ReportPeriod;
+import com.example.budget.report.model.ReportPeriod;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;

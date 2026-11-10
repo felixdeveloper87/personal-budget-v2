@@ -1,6 +1,6 @@
-package com.example.budget.service;
+package com.example.budget.report.service;
 
-import com.example.budget.dto.ReportResponse;
+import com.example.budget.report.dto.ReportResponse;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;

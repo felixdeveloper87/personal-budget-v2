@@ -1,4 +1,4 @@
-package com.example.budget.service;
+package com.example.budget.report.service;
 
 import org.junit.jupiter.api.Test;
 

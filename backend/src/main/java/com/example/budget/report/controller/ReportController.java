@@ -1,8 +1,8 @@
-package com.example.budget.controller;
+package com.example.budget.report.controller;
 
-import com.example.budget.dto.ReportResponse;
+import com.example.budget.report.dto.ReportResponse;
 import com.example.budget.model.User;
-import com.example.budget.service.ReportService;
+import com.example.budget.report.service.ReportService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.CrossOrigin;

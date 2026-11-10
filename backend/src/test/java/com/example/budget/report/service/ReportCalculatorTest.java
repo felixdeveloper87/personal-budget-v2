@@ -1,10 +1,10 @@
-package com.example.budget.service;
+package com.example.budget.report.service;
 
-import com.example.budget.dto.ReportResponse;
+import com.example.budget.report.dto.ReportResponse;
 import com.example.budget.model.PaymentMethod;
 import com.example.budget.model.FinancialAccount;
-import com.example.budget.model.PeriodRange;
-import com.example.budget.model.ReportPeriod;
+import com.example.budget.report.model.PeriodRange;
+import com.example.budget.report.model.ReportPeriod;
 import com.example.budget.model.Transaction;
 import com.example.budget.model.TransactionStatus;
 import com.example.budget.model.TransactionType;

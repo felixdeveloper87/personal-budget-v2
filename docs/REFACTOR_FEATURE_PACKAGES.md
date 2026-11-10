@@ -50,7 +50,7 @@ Ordem sugerida: da funcionalidade mais isolada para a mais compartilhada.
 - [x] 2. `business` (5 arquivos + 1 teste, nenhum ajuste de import)
 - [x] 3. `goals` (9 arquivos + 1 teste)
 - [x] 4. `push` (7 arquivos + 3 testes)
-- [ ] 5. `report`
+- [x] 5. `report` (9 arquivos + 5 testes)
 - [ ] 6. `planning`
 - [ ] 7. `paymentmethod`
 - [ ] 8. `installment`

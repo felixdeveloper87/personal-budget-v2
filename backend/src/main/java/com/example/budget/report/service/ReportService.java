@@ -1,8 +1,8 @@
-package com.example.budget.service;
+package com.example.budget.report.service;
 
-import com.example.budget.dto.ReportResponse;
-import com.example.budget.model.PeriodRange;
-import com.example.budget.model.ReportPeriod;
+import com.example.budget.report.dto.ReportResponse;
+import com.example.budget.report.model.PeriodRange;
+import com.example.budget.report.model.ReportPeriod;
 import com.example.budget.model.User;
 import com.example.budget.repository.TransactionRepository;
 import org.springframework.stereotype.Service;

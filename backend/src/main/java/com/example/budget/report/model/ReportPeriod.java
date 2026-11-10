@@ -1,4 +1,4 @@
-package com.example.budget.model;
+package com.example.budget.report.model;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
