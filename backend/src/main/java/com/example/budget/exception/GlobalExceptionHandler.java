@@ -9,6 +9,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.util.HashMap;
@@ -109,6 +110,18 @@ public class GlobalExceptionHandler {
             HttpMessageNotReadableException ex) {
         Map<String, String> error = new HashMap<>();
         error.put("error", "Malformed request body");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    /**
+     * Handles query/path parameters that cannot be converted to the declared type,
+     * e.g. {@code ?startDate=abc} for a LocalDate or {@code ?type=foo} for an enum.
+     */
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<Map<String, String>> handleTypeMismatch(
+            MethodArgumentTypeMismatchException ex) {
+        Map<String, String> error = new HashMap<>();
+        error.put("error", "Invalid value for parameter '" + ex.getName() + "'");
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 

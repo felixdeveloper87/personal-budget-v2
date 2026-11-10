@@ -1,39 +1,33 @@
 package com.example.budget.util;
 
 import com.example.budget.model.TransactionType;
+import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
+
+import java.util.Locale;
 
 /**
- * Utility class for converting strings to TransactionType enum.
- * 
- * Centralizes parsing and validation logic for transaction type conversion.
- * Handles case-insensitive matching and returns null for invalid inputs.
+ * Converts request parameters such as {@code ?type=income} into {@link TransactionType}.
+ *
+ * <p>Registered automatically by Spring Boot because it is a {@link Converter} bean, so
+ * controllers can declare {@code @RequestParam TransactionType type} directly. Matching is
+ * case-insensitive ("income", "INCOME", "Income") and a blank value means no filter. Unknown
+ * values throw, which Spring turns into a {@code MethodArgumentTypeMismatchException} (HTTP 400).
  */
 @Component
-public class TransactionTypeConverter {
-    
-    /**
-     * Converts a string to TransactionType enum.
-     * 
-     * Performs case-insensitive matching. Returns null if the string is null,
-     * empty, or does not match any valid transaction type.
-     * 
-     * @param typeString String representing the type ("income" or "expense", case-insensitive)
-     * @return TransactionType corresponding to the string, or null if invalid
-     */
-    public TransactionType fromString(String typeString) {
-        if (!StringUtils.hasText(typeString)) {
-            return null;
+public class TransactionTypeConverter implements Converter<String, TransactionType> {
+
+    @Override
+    public TransactionType convert(String source) {
+        if (source.isBlank()) {
+            return null; // "?type=" means no type filter
         }
-        
-        String normalized = typeString.trim().toLowerCase();
-        
+        String normalized = source.trim().toLowerCase(Locale.ROOT);
         return switch (normalized) {
             case "income" -> TransactionType.INCOME;
             case "expense" -> TransactionType.EXPENSE;
-            default -> null;
+            default -> throw new IllegalArgumentException(
+                    "Invalid transaction type '" + source + "'. Use 'income' or 'expense'");
         };
     }
 }
-

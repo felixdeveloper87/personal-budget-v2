@@ -30,7 +30,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -417,45 +416,20 @@ public class TransactionService {
      * automatically scoped to the authenticated user.
      * 
      * @param text Optional text to search in transaction descriptions (case-insensitive)
-     * @param type Optional transaction type filter ("income" or "expense", case-insensitive)
+     * @param type Optional transaction type filter
      * @param category Optional category filter (case-insensitive partial match)
-     * @param startDate Optional start date filter (yyyy-MM-dd format)
-     * @param endDate Optional end date filter (yyyy-MM-dd format)
+     * @param start Optional first payment date to include
+     * @param end Optional last payment date to include
      * @param user User to search transactions for
      * @return List of transactions matching the search criteria
      */
     public List<Transaction> searchTransactions(
             String text,
-            String type,
+            TransactionType txType,
             String category,
-            String startDate,
-            String endDate,
+            LocalDate start,
+            LocalDate end,
             User user) {
-
-        final LocalDateTime start;
-        final LocalDateTime end;
-
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
-        if (StringUtils.hasText(startDate)) {
-            start = LocalDate.parse(startDate, formatter).atStartOfDay();
-        } else {
-            start = null;
-        }
-        if (StringUtils.hasText(endDate)) {
-            end = LocalDate.parse(endDate, formatter).atTime(23, 59, 59);
-        } else {
-            end = null;
-        }
-
-        final TransactionType txType;
-        if ("income".equalsIgnoreCase(type)) {
-            txType = TransactionType.INCOME;
-        } else if ("expense".equalsIgnoreCase(type)) {
-            txType = TransactionType.EXPENSE;
-        } else {
-            txType = null;
-        }
 
         Specification<Transaction> spec = (root, query, cb) -> cb.conjunction();
 
@@ -476,11 +450,11 @@ public class TransactionService {
         }
 
         if (start != null) {
-            spec = spec.and((root, query, cb) -> cb.greaterThanOrEqualTo(root.get("paymentDate"), start.toLocalDate()));
+            spec = spec.and((root, query, cb) -> cb.greaterThanOrEqualTo(root.get("paymentDate"), start));
         }
 
         if (end != null) {
-            spec = spec.and((root, query, cb) -> cb.lessThanOrEqualTo(root.get("paymentDate"), end.toLocalDate()));
+            spec = spec.and((root, query, cb) -> cb.lessThanOrEqualTo(root.get("paymentDate"), end));
         }
 
         return repository.findAll(spec);

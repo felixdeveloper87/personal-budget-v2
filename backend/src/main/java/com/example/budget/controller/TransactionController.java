@@ -8,9 +8,11 @@ import com.example.budget.dto.TransactionDTO;
 import com.example.budget.dto.UpdateTransactionRequest;
 import com.example.budget.mapper.TransactionMapper;
 import com.example.budget.model.Transaction;
+import com.example.budget.model.TransactionType;
 import com.example.budget.model.User;
 import com.example.budget.service.TransactionService;
 import jakarta.validation.Valid;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -186,10 +188,10 @@ public class TransactionController {
     @GetMapping("/transactions/search")
     public List<TransactionDTO> searchTransactions(
             @RequestParam(required = false) String text,
-            @RequestParam(required = false) String type,
+            @RequestParam(required = false) TransactionType type,
             @RequestParam(required = false) String category,
-            @RequestParam(required = false) String startDate,
-            @RequestParam(required = false) String endDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             Authentication authentication) {
 
         User user = (User) authentication.getPrincipal();
