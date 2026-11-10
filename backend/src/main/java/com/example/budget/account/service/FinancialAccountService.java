@@ -1,5 +1,11 @@
 package com.example.budget.account.service;
 
+import com.example.budget.transaction.model.TransactionType;
+
+import com.example.budget.transaction.model.TransactionStatus;
+
+import com.example.budget.transaction.model.Transaction;
+
 import com.example.budget.account.dto.FinancialAccountRequest;
 
 import com.example.budget.account.dto.FinancialAccountDTO;
@@ -30,7 +36,7 @@ import com.example.budget.exception.EntityNotFoundException;
 import com.example.budget.model.*;
 import com.example.budget.account.repository.AccountTransferRepository;
 import com.example.budget.account.repository.FinancialAccountRepository;
-import com.example.budget.repository.TransactionRepository;
+import com.example.budget.transaction.repository.TransactionRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

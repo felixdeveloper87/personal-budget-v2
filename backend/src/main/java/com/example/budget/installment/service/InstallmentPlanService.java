@@ -17,11 +17,11 @@ import com.example.budget.exception.EntityNotFoundException;
 import com.example.budget.installment.mapper.InstallmentPlanMapper;
 import com.example.budget.account.model.FinancialAccount;
 import com.example.budget.installment.model.InstallmentPlan;
-import com.example.budget.model.Transaction;
-import com.example.budget.model.TransactionStatus;
+import com.example.budget.transaction.model.Transaction;
+import com.example.budget.transaction.model.TransactionStatus;
 import com.example.budget.model.User;
 import com.example.budget.installment.repository.InstallmentPlanRepository;
-import com.example.budget.repository.TransactionRepository;
+import com.example.budget.transaction.repository.TransactionRepository;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;

@@ -1,4 +1,4 @@
-package com.example.budget.model;
+package com.example.budget.transaction.model;
 
 /**
  * Enumeration representing the type of a transaction.

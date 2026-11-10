@@ -1,7 +1,7 @@
-package com.example.budget.dto;
+package com.example.budget.transaction.dto;
 
-import com.example.budget.model.TransactionType;
-import com.example.budget.model.TransactionStatus;
+import com.example.budget.transaction.model.TransactionType;
+import com.example.budget.transaction.model.TransactionStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;

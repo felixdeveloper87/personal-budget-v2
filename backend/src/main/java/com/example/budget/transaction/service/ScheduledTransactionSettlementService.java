@@ -1,9 +1,9 @@
-package com.example.budget.service;
+package com.example.budget.transaction.service;
 
 import com.example.budget.cache.CacheInvalidationService;
-import com.example.budget.model.Transaction;
-import com.example.budget.model.TransactionStatus;
-import com.example.budget.repository.TransactionRepository;
+import com.example.budget.transaction.model.Transaction;
+import com.example.budget.transaction.model.TransactionStatus;
+import com.example.budget.transaction.repository.TransactionRepository;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Scheduled;

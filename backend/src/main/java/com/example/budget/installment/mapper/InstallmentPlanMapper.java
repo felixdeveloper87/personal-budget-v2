@@ -3,9 +3,9 @@ package com.example.budget.installment.mapper;
 import com.example.budget.installment.dto.CreateInstallmentPlanRequest;
 import com.example.budget.installment.dto.InstallmentPlanDTO;
 import com.example.budget.installment.model.InstallmentPlan;
-import com.example.budget.model.Transaction;
-import com.example.budget.model.TransactionType;
-import com.example.budget.model.TransactionStatus;
+import com.example.budget.transaction.model.Transaction;
+import com.example.budget.transaction.model.TransactionType;
+import com.example.budget.transaction.model.TransactionStatus;
 import com.example.budget.model.User;
 import org.springframework.stereotype.Component;
 

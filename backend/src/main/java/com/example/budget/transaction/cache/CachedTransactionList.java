@@ -1,6 +1,8 @@
-package com.example.budget.cache;
+package com.example.budget.transaction.cache;
 
-import com.example.budget.model.Transaction;
+import com.example.budget.cache.BaseCachedList;
+
+import com.example.budget.transaction.model.Transaction;
 
 import java.util.List;
 

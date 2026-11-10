@@ -1,7 +1,7 @@
 package com.example.budget.report.dto;
 
-import com.example.budget.model.TransactionType;
-import com.example.budget.model.TransactionStatus;
+import com.example.budget.transaction.model.TransactionType;
+import com.example.budget.transaction.model.TransactionStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

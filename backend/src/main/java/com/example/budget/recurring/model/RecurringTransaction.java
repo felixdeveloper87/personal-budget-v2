@@ -2,9 +2,9 @@ package com.example.budget.recurring.model;
 
 import com.example.budget.model.User;
 
-import com.example.budget.model.TransactionType;
+import com.example.budget.transaction.model.TransactionType;
 
-import com.example.budget.model.Transaction;
+import com.example.budget.transaction.model.Transaction;
 
 import com.example.budget.account.model.FinancialAccount;
 

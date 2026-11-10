@@ -1,8 +1,8 @@
-package com.example.budget.controller;
+package com.example.budget.transaction.controller;
 
-import com.example.budget.dto.MonthlySummary;
+import com.example.budget.transaction.dto.MonthlySummary;
 import com.example.budget.model.User;
-import com.example.budget.service.TransactionService;
+import com.example.budget.transaction.service.TransactionService;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.test.web.servlet.MockMvc;

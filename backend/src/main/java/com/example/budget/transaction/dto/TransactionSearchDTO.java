@@ -1,6 +1,6 @@
-package com.example.budget.dto;
+package com.example.budget.transaction.dto;
 
-import com.example.budget.model.TransactionType;
+import com.example.budget.transaction.model.TransactionType;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 

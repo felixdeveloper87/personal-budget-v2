@@ -1,6 +1,6 @@
 package com.example.budget.recurring.dto;
 
-import com.example.budget.model.TransactionType;
+import com.example.budget.transaction.model.TransactionType;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;

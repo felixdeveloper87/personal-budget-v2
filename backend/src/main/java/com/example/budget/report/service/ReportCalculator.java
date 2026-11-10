@@ -3,8 +3,8 @@ package com.example.budget.report.service;
 import com.example.budget.report.dto.ReportResponse;
 import com.example.budget.report.model.PeriodRange;
 import com.example.budget.report.model.ReportPeriod;
-import com.example.budget.model.Transaction;
-import com.example.budget.model.TransactionType;
+import com.example.budget.transaction.model.Transaction;
+import com.example.budget.transaction.model.TransactionType;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;

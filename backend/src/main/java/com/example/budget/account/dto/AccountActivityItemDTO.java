@@ -1,6 +1,6 @@
 package com.example.budget.account.dto;
 
-import com.example.budget.model.TransactionStatus;
+import com.example.budget.transaction.model.TransactionStatus;
 import com.example.budget.paymentmethod.model.PaymentMethodType;
 
 import java.math.BigDecimal;

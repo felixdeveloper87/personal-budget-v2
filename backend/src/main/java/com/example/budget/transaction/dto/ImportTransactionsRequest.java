@@ -1,4 +1,4 @@
-package com.example.budget.dto;
+package com.example.budget.transaction.dto;
 
 import jakarta.validation.constraints.NotEmpty;
 

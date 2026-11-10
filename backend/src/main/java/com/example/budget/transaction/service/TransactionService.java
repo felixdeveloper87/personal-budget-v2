@@ -1,4 +1,4 @@
-package com.example.budget.service;
+package com.example.budget.transaction.service;
 
 import com.example.budget.account.service.FinancialAccountService;
 
@@ -7,23 +7,23 @@ import com.example.budget.account.service.CreditCardBillingService;
 import com.example.budget.paymentmethod.service.PaymentMethodService;
 
 import com.example.budget.cache.CacheInvalidationService;
-import com.example.budget.cache.CachedTransactionList;
+import com.example.budget.transaction.cache.CachedTransactionList;
 import com.example.budget.cache.RedisCacheSafety;
 import com.example.budget.config.RedisCacheConfig;
-import com.example.budget.dto.MonthlySummary;
-import com.example.budget.dto.CreateTransactionRequest;
-import com.example.budget.dto.ImportResultDTO;
-import com.example.budget.dto.ImportTransactionRow;
-import com.example.budget.dto.UpdateTransactionRequest;
+import com.example.budget.transaction.dto.MonthlySummary;
+import com.example.budget.transaction.dto.CreateTransactionRequest;
+import com.example.budget.transaction.dto.ImportResultDTO;
+import com.example.budget.transaction.dto.ImportTransactionRow;
+import com.example.budget.transaction.dto.UpdateTransactionRequest;
 import com.example.budget.exception.AccessDeniedException;
 import com.example.budget.exception.EntityNotFoundException;
-import com.example.budget.mapper.TransactionMapper;
+import com.example.budget.transaction.mapper.TransactionMapper;
 import com.example.budget.paymentmethod.model.PaymentMethod;
 import com.example.budget.account.model.FinancialAccount;
-import com.example.budget.model.Transaction;
-import com.example.budget.model.TransactionType;
+import com.example.budget.transaction.model.Transaction;
+import com.example.budget.transaction.model.TransactionType;
 import com.example.budget.model.User;
-import com.example.budget.repository.TransactionRepository;
+import com.example.budget.transaction.repository.TransactionRepository;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
@@ -210,7 +210,7 @@ public class TransactionService {
                 t.setAccount(account);
                 t.setStatus(row.getStatus() != null
                         ? row.getStatus()
-                        : com.example.budget.model.TransactionStatus.CLEARED);
+                        : com.example.budget.transaction.model.TransactionStatus.CLEARED);
                 if (row.getPaymentDate() != null) {
                     t.setPaymentDate(row.getPaymentDate());
                 } else {

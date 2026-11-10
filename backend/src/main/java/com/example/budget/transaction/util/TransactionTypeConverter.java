@@ -1,6 +1,6 @@
-package com.example.budget.util;
+package com.example.budget.transaction.util;
 
-import com.example.budget.model.TransactionType;
+import com.example.budget.transaction.model.TransactionType;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 

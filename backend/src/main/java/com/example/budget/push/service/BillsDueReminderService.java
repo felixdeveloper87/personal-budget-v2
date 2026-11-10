@@ -2,11 +2,11 @@ package com.example.budget.push.service;
 
 import com.example.budget.paymentmethod.model.PaymentMethod;
 import com.example.budget.paymentmethod.model.PaymentMethodType;
-import com.example.budget.model.Transaction;
-import com.example.budget.model.TransactionStatus;
-import com.example.budget.model.TransactionType;
+import com.example.budget.transaction.model.Transaction;
+import com.example.budget.transaction.model.TransactionStatus;
+import com.example.budget.transaction.model.TransactionType;
 import com.example.budget.model.User;
-import com.example.budget.repository.TransactionRepository;
+import com.example.budget.transaction.repository.TransactionRepository;
 import com.example.budget.push.service.PushNotificationService.PushMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

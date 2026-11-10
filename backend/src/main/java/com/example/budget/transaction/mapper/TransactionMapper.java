@@ -1,12 +1,12 @@
-package com.example.budget.mapper;
+package com.example.budget.transaction.mapper;
 
-import com.example.budget.dto.CreateTransactionRequest;
-import com.example.budget.dto.TransactionDTO;
-import com.example.budget.dto.TransactionSearchDTO;
-import com.example.budget.dto.UpdateTransactionRequest;
+import com.example.budget.transaction.dto.CreateTransactionRequest;
+import com.example.budget.transaction.dto.TransactionDTO;
+import com.example.budget.transaction.dto.TransactionSearchDTO;
+import com.example.budget.transaction.dto.UpdateTransactionRequest;
 import com.example.budget.merchant.MerchantBrand;
 import com.example.budget.merchant.MerchantBrandCatalog;
-import com.example.budget.model.Transaction;
+import com.example.budget.transaction.model.Transaction;
 import com.example.budget.model.User;
 import org.springframework.stereotype.Component;
 

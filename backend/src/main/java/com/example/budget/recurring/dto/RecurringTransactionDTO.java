@@ -1,7 +1,7 @@
 package com.example.budget.recurring.dto;
 
 import com.example.budget.recurring.model.RecurringFrequency;
-import com.example.budget.model.TransactionType;
+import com.example.budget.transaction.model.TransactionType;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

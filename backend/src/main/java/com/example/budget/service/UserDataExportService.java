@@ -8,7 +8,7 @@ import com.example.budget.paymentmethod.model.PaymentMethod;
 import com.example.budget.recurring.model.RecurringTransaction;
 import com.example.budget.goals.model.SavingsGoal;
 import com.example.budget.goals.model.SavingsGoalContribution;
-import com.example.budget.model.Transaction;
+import com.example.budget.transaction.model.Transaction;
 import com.example.budget.model.User;
 import com.example.budget.account.repository.AccountTransferRepository;
 import com.example.budget.planning.repository.CategoryBudgetRepository;
@@ -18,7 +18,7 @@ import com.example.budget.paymentmethod.repository.PaymentMethodRepository;
 import com.example.budget.recurring.repository.RecurringTransactionRepository;
 import com.example.budget.goals.repository.SavingsGoalContributionRepository;
 import com.example.budget.goals.repository.SavingsGoalRepository;
-import com.example.budget.repository.TransactionRepository;
+import com.example.budget.transaction.repository.TransactionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

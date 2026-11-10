@@ -1,8 +1,8 @@
-package com.example.budget.repository;
+package com.example.budget.transaction.repository;
 
-import com.example.budget.model.Transaction;
-import com.example.budget.model.TransactionType;
-import com.example.budget.model.TransactionStatus;
+import com.example.budget.transaction.model.Transaction;
+import com.example.budget.transaction.model.TransactionType;
+import com.example.budget.transaction.model.TransactionStatus;
 import com.example.budget.model.User;
 import com.example.budget.account.model.FinancialAccount;
 import com.example.budget.paymentmethod.model.PaymentMethodType;

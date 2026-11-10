@@ -21,11 +21,11 @@ import com.example.budget.exception.EntityNotFoundException;
 import com.example.budget.recurring.mapper.RecurringTransactionMapper;
 import com.example.budget.account.model.FinancialAccount;
 import com.example.budget.recurring.model.RecurringTransaction;
-import com.example.budget.model.Transaction;
-import com.example.budget.model.TransactionStatus;
+import com.example.budget.transaction.model.Transaction;
+import com.example.budget.transaction.model.TransactionStatus;
 import com.example.budget.model.User;
 import com.example.budget.recurring.repository.RecurringTransactionRepository;
-import com.example.budget.repository.TransactionRepository;
+import com.example.budget.transaction.repository.TransactionRepository;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
@@ -389,8 +389,8 @@ public class RecurringTransactionService {
         transaction.setAccount(recurringTransaction.getAccount());
         transaction.setPaymentMethod(recurringTransaction.getPaymentMethod());
         transaction.setStatus(paymentDate.isAfter(LocalDate.now())
-                ? com.example.budget.model.TransactionStatus.PLANNED
-                : com.example.budget.model.TransactionStatus.CLEARED);
+                ? com.example.budget.transaction.model.TransactionStatus.PLANNED
+                : com.example.budget.transaction.model.TransactionStatus.CLEARED);
 
         transactionRepository.save(transaction);
         cacheInvalidation.evictMonthlySummary(recurringTransaction.getUser(), transaction.getPaymentDate());

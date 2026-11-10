@@ -10,7 +10,7 @@ import com.example.budget.paymentmethod.repository.PaymentMethodRepository;
 import com.example.budget.recurring.repository.RecurringTransactionRepository;
 import com.example.budget.goals.repository.SavingsGoalContributionRepository;
 import com.example.budget.goals.repository.SavingsGoalRepository;
-import com.example.budget.repository.TransactionRepository;
+import com.example.budget.transaction.repository.TransactionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

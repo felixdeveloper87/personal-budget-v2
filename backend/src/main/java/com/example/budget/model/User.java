@@ -1,5 +1,7 @@
 package com.example.budget.model;
 
+import com.example.budget.transaction.model.Transaction;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.math.BigDecimal;

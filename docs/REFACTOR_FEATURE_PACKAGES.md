@@ -56,7 +56,7 @@ Ordem sugerida: da funcionalidade mais isolada para a mais compartilhada.
 - [x] 8. `installment` (9 arquivos + 1 teste; `cache/BaseCachedList` virou `public`)
 - [x] 9. `recurring` (12 arquivos + 1 teste)
 - [x] 10. `account` (17 arquivos + 2 testes)
-- [ ] 11. `transaction`
+- [x] 11. `transaction` (20 arquivos + 4 testes; `merchant/` ficou onde está)
 - [ ] 12. `user` + `admin`
 - [ ] 13. `auth`
 - [ ] 14. `shared` (exception, cache, util) e apagar as pastas antigas vazias
