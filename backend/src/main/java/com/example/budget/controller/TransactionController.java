@@ -3,7 +3,6 @@ package com.example.budget.controller;
 import com.example.budget.dto.CreateTransactionRequest;
 import com.example.budget.dto.ImportResultDTO;
 import com.example.budget.dto.ImportTransactionsRequest;
-import com.example.budget.dto.MonthlySummary;
 import com.example.budget.dto.TransactionDTO;
 import com.example.budget.dto.UpdateTransactionRequest;
 import com.example.budget.mapper.TransactionMapper;
@@ -32,7 +31,7 @@ import java.util.List;
  * All endpoints require authentication and are scoped to the authenticated user.
  */
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/transactions")
 @CrossOrigin
 public class TransactionController {
 
@@ -50,7 +49,7 @@ public class TransactionController {
      * @param authentication Spring Security authentication object containing the authenticated user
      * @return List of all transactions belonging to the authenticated user
      */
-    @GetMapping("/transactions")
+    @GetMapping
     public List<TransactionDTO> all(Authentication authentication) {
         User user = (User) authentication.getPrincipal();
         return mapper.toDTOList(service.findAllByUser(user));
@@ -63,7 +62,7 @@ public class TransactionController {
      * @param authentication Spring Security authentication object containing the authenticated user
      * @return Created transaction with generated ID
      */
-    @PostMapping("/transactions")
+    @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public TransactionDTO create(@Valid @RequestBody CreateTransactionRequest tx, Authentication authentication) {
         User user = (User) authentication.getPrincipal();
@@ -80,7 +79,7 @@ public class TransactionController {
      * @param authentication authenticated user
      * @return import summary (imported count, failed count, per-row errors)
      */
-    @PostMapping("/transactions/import")
+    @PostMapping("/import")
     public ImportResultDTO importTransactions(
             @Valid @RequestBody ImportTransactionsRequest request,
             Authentication authentication) {
@@ -94,7 +93,7 @@ public class TransactionController {
      * @param authentication authenticated user
      * @return CSV file download
      */
-    @GetMapping(value = "/transactions/export", produces = "text/csv")
+    @GetMapping(value = "/export", produces = "text/csv")
     public ResponseEntity<byte[]> exportCsv(Authentication authentication) {
         User user = (User) authentication.getPrincipal();
         byte[] csv = service.exportCsv(user).getBytes(StandardCharsets.UTF_8);
@@ -120,7 +119,7 @@ public class TransactionController {
      * @param authentication Spring Security authentication object containing the authenticated user
      * @return Updated transaction
      */
-    @PutMapping("/transactions/{id}")
+    @PutMapping("/{id}")
     public TransactionDTO update(
             @PathVariable("id") Long id,
             @Valid @RequestBody UpdateTransactionRequest tx,
@@ -139,30 +138,10 @@ public class TransactionController {
      * @param id Transaction ID to delete
      * @param authentication Spring Security authentication object containing the authenticated user
      */
-    @DeleteMapping("/transactions/{id}")
+    @DeleteMapping("/{id}")
     public void delete(@PathVariable("id") Long id, Authentication authentication) {
         User user = (User) authentication.getPrincipal();
         service.delete(id, user);
-    }
-
-    /**
-     * Retrieves a monthly summary of transactions for the authenticated user.
-     * 
-     * Returns aggregated data including total income, total expenses, balance,
-     * and breakdown by category for the specified month.
-     * 
-     * @param year Year for the summary (e.g., 2024)
-     * @param month Month for the summary (1-12)
-     * @param authentication Spring Security authentication object containing the authenticated user
-     * @return MonthlySummary containing aggregated transaction data
-     */
-    @GetMapping("/summary/month")
-    public MonthlySummary monthSummary(
-            @RequestParam("year") int year,
-            @RequestParam("month") int month,
-            Authentication authentication) {
-        User user = (User) authentication.getPrincipal();
-        return service.monthlySummary(year, month, user);
     }
 
     /**
@@ -185,7 +164,7 @@ public class TransactionController {
      * @param authentication Spring Security authentication object containing the authenticated user
      * @return List of TransactionSearchDTO matching the search criteria
      */
-    @GetMapping("/transactions/search")
+    @GetMapping("/search")
     public List<TransactionDTO> searchTransactions(
             @RequestParam(required = false) String text,
             @RequestParam(required = false) TransactionType type,
