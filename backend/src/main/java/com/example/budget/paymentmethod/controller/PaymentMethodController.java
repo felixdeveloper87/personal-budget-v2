@@ -1,9 +1,9 @@
-package com.example.budget.controller;
+package com.example.budget.paymentmethod.controller;
 
-import com.example.budget.dto.PaymentMethodDTO;
-import com.example.budget.dto.PaymentMethodRequest;
+import com.example.budget.paymentmethod.dto.PaymentMethodDTO;
+import com.example.budget.paymentmethod.dto.PaymentMethodRequest;
 import com.example.budget.model.User;
-import com.example.budget.service.PaymentMethodService;
+import com.example.budget.paymentmethod.service.PaymentMethodService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;

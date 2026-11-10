@@ -1,9 +1,9 @@
-package com.example.budget.mapper;
+package com.example.budget.paymentmethod.mapper;
 
-import com.example.budget.dto.PaymentMethodDTO;
-import com.example.budget.dto.PaymentMethodRequest;
-import com.example.budget.model.PaymentMethod;
-import com.example.budget.model.PaymentMethodType;
+import com.example.budget.paymentmethod.dto.PaymentMethodDTO;
+import com.example.budget.paymentmethod.dto.PaymentMethodRequest;
+import com.example.budget.paymentmethod.model.PaymentMethod;
+import com.example.budget.paymentmethod.model.PaymentMethodType;
 import com.example.budget.model.User;
 import org.springframework.stereotype.Component;
 

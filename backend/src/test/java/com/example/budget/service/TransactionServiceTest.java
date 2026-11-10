@@ -1,5 +1,7 @@
 package com.example.budget.service;
 
+import com.example.budget.paymentmethod.service.PaymentMethodService;
+
 import com.example.budget.cache.CacheInvalidationService;
 import com.example.budget.cache.CachedTransactionList;
 import com.example.budget.config.RedisCacheConfig;
@@ -8,8 +10,8 @@ import com.example.budget.mapper.TransactionMapper;
 import com.example.budget.exception.AccessDeniedException;
 import com.example.budget.exception.EntityNotFoundException;
 import com.example.budget.model.InstallmentPlan;
-import com.example.budget.model.PaymentMethod;
-import com.example.budget.model.PaymentMethodType;
+import com.example.budget.paymentmethod.model.PaymentMethod;
+import com.example.budget.paymentmethod.model.PaymentMethodType;
 import com.example.budget.model.Transaction;
 import com.example.budget.model.TransactionType;
 import com.example.budget.model.User;

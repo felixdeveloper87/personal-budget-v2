@@ -1,6 +1,6 @@
-package com.example.budget.dto;
+package com.example.budget.paymentmethod.dto;
 
-import com.example.budget.model.PaymentMethodType;
+import com.example.budget.paymentmethod.model.PaymentMethodType;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;

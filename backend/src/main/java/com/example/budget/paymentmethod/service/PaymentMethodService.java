@@ -1,13 +1,15 @@
-package com.example.budget.service;
+package com.example.budget.paymentmethod.service;
 
-import com.example.budget.dto.PaymentMethodDTO;
-import com.example.budget.dto.PaymentMethodRequest;
+import com.example.budget.service.FinancialAccountService;
+
+import com.example.budget.paymentmethod.dto.PaymentMethodDTO;
+import com.example.budget.paymentmethod.dto.PaymentMethodRequest;
 import com.example.budget.exception.EntityNotFoundException;
-import com.example.budget.mapper.PaymentMethodMapper;
-import com.example.budget.model.PaymentMethod;
-import com.example.budget.model.PaymentMethodType;
+import com.example.budget.paymentmethod.mapper.PaymentMethodMapper;
+import com.example.budget.paymentmethod.model.PaymentMethod;
+import com.example.budget.paymentmethod.model.PaymentMethodType;
 import com.example.budget.model.User;
-import com.example.budget.repository.PaymentMethodRepository;
+import com.example.budget.paymentmethod.repository.PaymentMethodRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

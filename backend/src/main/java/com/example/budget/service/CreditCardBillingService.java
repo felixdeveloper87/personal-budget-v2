@@ -1,7 +1,7 @@
 package com.example.budget.service;
 
-import com.example.budget.model.PaymentMethod;
-import com.example.budget.model.PaymentMethodType;
+import com.example.budget.paymentmethod.model.PaymentMethod;
+import com.example.budget.paymentmethod.model.PaymentMethodType;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;

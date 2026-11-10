@@ -1,5 +1,7 @@
 package com.example.budget.model;
 
+import com.example.budget.paymentmethod.model.PaymentMethod;
+
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;

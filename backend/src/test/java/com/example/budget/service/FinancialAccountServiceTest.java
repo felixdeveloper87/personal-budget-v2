@@ -1,5 +1,7 @@
 package com.example.budget.service;
 
+import com.example.budget.paymentmethod.model.PaymentMethodType;
+
 import com.example.budget.dto.FinancialAccountRequest;
 import com.example.budget.model.*;
 import com.example.budget.repository.AccountTransferRepository;

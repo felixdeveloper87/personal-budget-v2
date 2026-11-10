@@ -128,7 +128,7 @@ class CashFlowForecastServiceTest {
         when(transactionRepository.findByUserAndPaymentDateBetweenOrderByPaymentDateAscIdAsc(
                 user, currentMonth.atDay(1), lastForecastMonth.atEndOfMonth()))
                 .thenReturn(List.of());
-        when(creditCardBillingService.resolvePaymentDate(any(LocalDate.class), nullable(com.example.budget.model.PaymentMethod.class)))
+        when(creditCardBillingService.resolvePaymentDate(any(LocalDate.class), nullable(com.example.budget.paymentmethod.model.PaymentMethod.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
         var result = service.forecast(user);

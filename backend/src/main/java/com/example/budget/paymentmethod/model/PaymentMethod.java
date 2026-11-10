@@ -1,4 +1,8 @@
-package com.example.budget.model;
+package com.example.budget.paymentmethod.model;
+
+import com.example.budget.model.User;
+
+import com.example.budget.model.FinancialAccount;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;

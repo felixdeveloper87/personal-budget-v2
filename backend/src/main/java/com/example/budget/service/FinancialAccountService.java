@@ -1,5 +1,7 @@
 package com.example.budget.service;
 
+import com.example.budget.paymentmethod.model.PaymentMethodType;
+
 import com.example.budget.dto.*;
 import com.example.budget.exception.AccessDeniedException;
 import com.example.budget.exception.EntityNotFoundException;

@@ -1,7 +1,7 @@
 package com.example.budget.report.service;
 
 import com.example.budget.report.dto.ReportResponse;
-import com.example.budget.model.PaymentMethod;
+import com.example.budget.paymentmethod.model.PaymentMethod;
 import com.example.budget.model.Transaction;
 import com.example.budget.model.TransactionType;
 import com.example.budget.model.User;

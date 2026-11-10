@@ -1,6 +1,6 @@
-package com.example.budget.repository;
+package com.example.budget.paymentmethod.repository;
 
-import com.example.budget.model.PaymentMethod;
+import com.example.budget.paymentmethod.model.PaymentMethod;
 import com.example.budget.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;

@@ -5,7 +5,7 @@ import com.example.budget.model.TransactionType;
 import com.example.budget.model.TransactionStatus;
 import com.example.budget.model.User;
 import com.example.budget.model.FinancialAccount;
-import com.example.budget.model.PaymentMethodType;
+import com.example.budget.paymentmethod.model.PaymentMethodType;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
