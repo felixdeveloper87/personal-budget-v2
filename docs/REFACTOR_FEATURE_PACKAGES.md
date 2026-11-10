@@ -47,7 +47,7 @@ Ordem sugerida: da funcionalidade mais isolada para a mais compartilhada.
 
 - [x] 0. Criar a branch `refactor/feature-packages`
 - [x] 1. `household`, o piloto: 51 arquivos + 15 testes movidos (2026-11-10) e testado no Docker. Depois reorganizado em subpastas `controller/ dto/ model/ repository/ service/` (regra 6).
-- [ ] 2. `business`
+- [x] 2. `business` (5 arquivos + 1 teste, nenhum ajuste de import)
 - [ ] 3. `goals`
 - [ ] 4. `push`
 - [ ] 5. `report`

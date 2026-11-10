@@ -1,13 +1,13 @@
-package com.example.budget.service;
+package com.example.budget.business.service;
 
-import com.example.budget.dto.BusinessDTOs.CostBasis;
-import com.example.budget.dto.BusinessDTOs.ManualSessionRequest;
-import com.example.budget.dto.BusinessDTOs.Summary;
-import com.example.budget.dto.BusinessDTOs.WorkSessionDTO;
+import com.example.budget.business.dto.BusinessDTOs.CostBasis;
+import com.example.budget.business.dto.BusinessDTOs.ManualSessionRequest;
+import com.example.budget.business.dto.BusinessDTOs.Summary;
+import com.example.budget.business.dto.BusinessDTOs.WorkSessionDTO;
 import com.example.budget.model.TransactionType;
-import com.example.budget.model.WorkSession;
+import com.example.budget.business.model.WorkSession;
 import com.example.budget.repository.TransactionRepository;
-import com.example.budget.repository.WorkSessionRepository;
+import com.example.budget.business.repository.WorkSessionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

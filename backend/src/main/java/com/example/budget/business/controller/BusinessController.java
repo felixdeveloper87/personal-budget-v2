@@ -1,11 +1,11 @@
-package com.example.budget.controller;
+package com.example.budget.business.controller;
 
-import com.example.budget.dto.BusinessDTOs.ManualSessionRequest;
-import com.example.budget.dto.BusinessDTOs.StartRequest;
-import com.example.budget.dto.BusinessDTOs.Summary;
-import com.example.budget.dto.BusinessDTOs.WorkSessionDTO;
+import com.example.budget.business.dto.BusinessDTOs.ManualSessionRequest;
+import com.example.budget.business.dto.BusinessDTOs.StartRequest;
+import com.example.budget.business.dto.BusinessDTOs.Summary;
+import com.example.budget.business.dto.BusinessDTOs.WorkSessionDTO;
 import com.example.budget.model.User;
-import com.example.budget.service.BusinessService;
+import com.example.budget.business.service.BusinessService;
 import jakarta.validation.Valid;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;

@@ -1,6 +1,6 @@
-package com.example.budget.repository;
+package com.example.budget.business.repository;
 
-import com.example.budget.model.WorkSession;
+import com.example.budget.business.model.WorkSession;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDate;

@@ -1,15 +1,15 @@
-package com.example.budget.service;
+package com.example.budget.business.service;
 
-import com.example.budget.dto.BusinessDTOs.CostBasis;
-import com.example.budget.dto.BusinessDTOs.DaySummary;
-import com.example.budget.dto.BusinessDTOs.ManualSessionRequest;
-import com.example.budget.dto.BusinessDTOs.Summary;
-import com.example.budget.dto.BusinessDTOs.Totals;
-import com.example.budget.dto.BusinessDTOs.WorkSessionDTO;
+import com.example.budget.business.dto.BusinessDTOs.CostBasis;
+import com.example.budget.business.dto.BusinessDTOs.DaySummary;
+import com.example.budget.business.dto.BusinessDTOs.ManualSessionRequest;
+import com.example.budget.business.dto.BusinessDTOs.Summary;
+import com.example.budget.business.dto.BusinessDTOs.Totals;
+import com.example.budget.business.dto.BusinessDTOs.WorkSessionDTO;
 import com.example.budget.model.TransactionType;
-import com.example.budget.model.WorkSession;
+import com.example.budget.business.model.WorkSession;
 import com.example.budget.repository.TransactionRepository;
-import com.example.budget.repository.WorkSessionRepository;
+import com.example.budget.business.repository.WorkSessionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
