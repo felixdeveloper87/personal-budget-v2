@@ -1,7 +1,7 @@
 package com.example.budget.service;
 
 import com.example.budget.model.AccountTransfer;
-import com.example.budget.model.CategoryBudget;
+import com.example.budget.planning.model.CategoryBudget;
 import com.example.budget.model.FinancialAccount;
 import com.example.budget.model.InstallmentPlan;
 import com.example.budget.model.PaymentMethod;
@@ -11,7 +11,7 @@ import com.example.budget.goals.model.SavingsGoalContribution;
 import com.example.budget.model.Transaction;
 import com.example.budget.model.User;
 import com.example.budget.repository.AccountTransferRepository;
-import com.example.budget.repository.CategoryBudgetRepository;
+import com.example.budget.planning.repository.CategoryBudgetRepository;
 import com.example.budget.repository.FinancialAccountRepository;
 import com.example.budget.repository.InstallmentPlanRepository;
 import com.example.budget.repository.PaymentMethodRepository;

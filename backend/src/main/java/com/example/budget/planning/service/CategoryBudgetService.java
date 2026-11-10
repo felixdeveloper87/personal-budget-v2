@@ -1,14 +1,14 @@
-package com.example.budget.service;
+package com.example.budget.planning.service;
 
-import com.example.budget.dto.CategoryBudgetDTO;
-import com.example.budget.dto.CategoryBudgetRequest;
+import com.example.budget.planning.dto.CategoryBudgetDTO;
+import com.example.budget.planning.dto.CategoryBudgetRequest;
 import com.example.budget.exception.AccessDeniedException;
 import com.example.budget.exception.EntityNotFoundException;
-import com.example.budget.model.CategoryBudget;
+import com.example.budget.planning.model.CategoryBudget;
 import com.example.budget.model.Transaction;
 import com.example.budget.model.TransactionType;
 import com.example.budget.model.User;
-import com.example.budget.repository.CategoryBudgetRepository;
+import com.example.budget.planning.repository.CategoryBudgetRepository;
 import com.example.budget.repository.TransactionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

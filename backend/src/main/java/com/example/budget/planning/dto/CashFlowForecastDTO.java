@@ -1,4 +1,4 @@
-package com.example.budget.dto;
+package com.example.budget.planning.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

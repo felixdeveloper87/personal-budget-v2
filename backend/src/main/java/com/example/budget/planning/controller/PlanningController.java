@@ -1,13 +1,13 @@
-package com.example.budget.controller;
+package com.example.budget.planning.controller;
 
-import com.example.budget.dto.CashFlowForecastDTO;
-import com.example.budget.dto.CategoryBudgetDTO;
-import com.example.budget.dto.CategoryBudgetRequest;
-import com.example.budget.dto.IncomePlanRequest;
-import com.example.budget.dto.VariableExpensePlanRequest;
+import com.example.budget.planning.dto.CashFlowForecastDTO;
+import com.example.budget.planning.dto.CategoryBudgetDTO;
+import com.example.budget.planning.dto.CategoryBudgetRequest;
+import com.example.budget.planning.dto.IncomePlanRequest;
+import com.example.budget.planning.dto.VariableExpensePlanRequest;
 import com.example.budget.model.User;
-import com.example.budget.service.CashFlowForecastService;
-import com.example.budget.service.CategoryBudgetService;
+import com.example.budget.planning.service.CashFlowForecastService;
+import com.example.budget.planning.service.CategoryBudgetService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;

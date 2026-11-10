@@ -1,4 +1,4 @@
-package com.example.budget.dto;
+package com.example.budget.planning.dto;
 
 import jakarta.validation.constraints.PositiveOrZero;
 
