@@ -1,6 +1,6 @@
 package com.example.budget.installment.cache;
 
-import com.example.budget.cache.BaseCachedList;
+import com.example.budget.shared.cache.BaseCachedList;
 
 import com.example.budget.installment.dto.InstallmentPlanDTO;
 

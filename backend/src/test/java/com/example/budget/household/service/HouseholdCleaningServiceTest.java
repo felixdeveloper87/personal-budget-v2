@@ -17,7 +17,7 @@ import com.example.budget.household.model.HouseholdNotificationType;
 import com.example.budget.household.model.Household;
 import com.example.budget.household.model.HouseholdCleaningDutyCompletion;
 
-import com.example.budget.exception.AccessDeniedException;
+import com.example.budget.shared.exception.AccessDeniedException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

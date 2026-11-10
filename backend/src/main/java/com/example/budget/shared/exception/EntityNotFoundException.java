@@ -1,4 +1,4 @@
-package com.example.budget.exception;
+package com.example.budget.shared.exception;
 
 /**
  * Exception thrown when a requested entity is not found in the database.

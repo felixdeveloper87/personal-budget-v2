@@ -1,4 +1,4 @@
-package com.example.budget.exception;
+package com.example.budget.shared.exception;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpInputMessage;

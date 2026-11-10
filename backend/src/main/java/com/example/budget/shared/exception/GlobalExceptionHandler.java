@@ -1,4 +1,4 @@
-package com.example.budget.exception;
+package com.example.budget.shared.exception;
 
 import com.example.budget.auth.exception.InvalidCredentialsException;
 

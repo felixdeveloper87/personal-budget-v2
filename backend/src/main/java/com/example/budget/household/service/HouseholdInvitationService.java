@@ -9,7 +9,7 @@ import com.example.budget.household.model.HouseholdRole;
 import com.example.budget.household.model.HouseholdNotificationType;
 import com.example.budget.household.model.HouseholdInvitationStatus;
 
-import com.example.budget.exception.EntityNotFoundException;
+import com.example.budget.shared.exception.EntityNotFoundException;
 import com.example.budget.user.model.User;
 import com.example.budget.user.repository.UserRepository;
 import org.springframework.stereotype.Service;

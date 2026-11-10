@@ -6,17 +6,17 @@ import com.example.budget.account.service.CreditCardBillingService;
 
 import com.example.budget.paymentmethod.service.PaymentMethodService;
 
-import com.example.budget.cache.CacheInvalidationService;
+import com.example.budget.shared.cache.CacheInvalidationService;
 import com.example.budget.transaction.cache.CachedTransactionList;
-import com.example.budget.cache.RedisCacheSafety;
+import com.example.budget.shared.cache.RedisCacheSafety;
 import com.example.budget.config.RedisCacheConfig;
 import com.example.budget.transaction.dto.MonthlySummary;
 import com.example.budget.transaction.dto.CreateTransactionRequest;
 import com.example.budget.transaction.dto.ImportResultDTO;
 import com.example.budget.transaction.dto.ImportTransactionRow;
 import com.example.budget.transaction.dto.UpdateTransactionRequest;
-import com.example.budget.exception.AccessDeniedException;
-import com.example.budget.exception.EntityNotFoundException;
+import com.example.budget.shared.exception.AccessDeniedException;
+import com.example.budget.shared.exception.EntityNotFoundException;
 import com.example.budget.transaction.mapper.TransactionMapper;
 import com.example.budget.paymentmethod.model.PaymentMethod;
 import com.example.budget.account.model.FinancialAccount;

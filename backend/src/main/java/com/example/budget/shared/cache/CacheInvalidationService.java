@@ -1,4 +1,4 @@
-package com.example.budget.cache;
+package com.example.budget.shared.cache;
 
 import com.example.budget.config.RedisCacheConfig;
 import com.example.budget.user.model.User;

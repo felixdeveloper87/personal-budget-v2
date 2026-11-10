@@ -9,7 +9,7 @@ import com.example.budget.household.model.HouseholdSettlement;
 import com.example.budget.household.model.HouseholdNotificationType;
 import com.example.budget.household.dto.HouseholdPaymentHistoryDTO;
 
-import com.example.budget.exception.EntityNotFoundException;
+import com.example.budget.shared.exception.EntityNotFoundException;
 import com.example.budget.user.model.User;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;

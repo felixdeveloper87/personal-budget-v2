@@ -1,4 +1,4 @@
-package com.example.budget.cache;
+package com.example.budget.shared.cache;
 
 import java.util.ArrayList;
 import java.util.List;

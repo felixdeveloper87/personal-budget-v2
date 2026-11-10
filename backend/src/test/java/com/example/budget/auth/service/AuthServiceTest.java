@@ -5,7 +5,7 @@ import com.example.budget.auth.dto.LoginRequest;
 import com.example.budget.auth.dto.RegisterRequest;
 import com.example.budget.auth.exception.AccountPendingApprovalException;
 import com.example.budget.auth.exception.EmailAlreadyExistsException;
-import com.example.budget.exception.EntityNotFoundException;
+import com.example.budget.shared.exception.EntityNotFoundException;
 import com.example.budget.user.mapper.UserMapper;
 import com.example.budget.user.model.User;
 import com.example.budget.user.model.UserPlan;

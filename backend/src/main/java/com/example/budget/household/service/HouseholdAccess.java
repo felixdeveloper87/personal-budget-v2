@@ -5,7 +5,7 @@ import com.example.budget.household.model.HouseholdExpense;
 import com.example.budget.household.repository.HouseholdMemberRepository;
 import com.example.budget.household.model.HouseholdRole;
 
-import com.example.budget.exception.AccessDeniedException;
+import com.example.budget.shared.exception.AccessDeniedException;
 import com.example.budget.user.model.User;
 import org.springframework.stereotype.Component;
 

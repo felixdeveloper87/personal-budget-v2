@@ -59,7 +59,7 @@ Ordem sugerida: da funcionalidade mais isolada para a mais compartilhada.
 - [x] 11. `transaction` (20 arquivos + 4 testes; `merchant/` ficou onde está)
 - [x] 12. `user` + `admin` (11 arquivos, tudo em `user/`; removidos imports curinga de `model.*` e `repository.*`, que ficaram vazios)
 - [x] 13. `auth` (12 arquivos + testes)
-- [ ] 14. `shared` (exception, cache, util) e apagar as pastas antigas vazias
+- [x] 14. `shared` (`shared/exception`, `shared/cache`: 6 arquivos + 1 teste) e pastas antigas vazias apagadas
 - [ ] 15. Rodar o app no Docker e testar as telas principais
 - [ ] 16. Merge da branch no `main`
 

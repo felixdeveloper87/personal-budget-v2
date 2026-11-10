@@ -1,6 +1,6 @@
 package com.example.budget.transaction.cache;
 
-import com.example.budget.cache.BaseCachedList;
+import com.example.budget.shared.cache.BaseCachedList;
 
 import com.example.budget.transaction.model.Transaction;
 

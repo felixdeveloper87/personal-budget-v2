@@ -4,7 +4,7 @@ import com.example.budget.account.service.FinancialAccountService;
 
 import com.example.budget.paymentmethod.dto.PaymentMethodDTO;
 import com.example.budget.paymentmethod.dto.PaymentMethodRequest;
-import com.example.budget.exception.EntityNotFoundException;
+import com.example.budget.shared.exception.EntityNotFoundException;
 import com.example.budget.paymentmethod.mapper.PaymentMethodMapper;
 import com.example.budget.paymentmethod.model.PaymentMethod;
 import com.example.budget.paymentmethod.model.PaymentMethodType;

@@ -1,6 +1,6 @@
 package com.example.budget.user.service;
 
-import com.example.budget.cache.CacheInvalidationService;
+import com.example.budget.shared.cache.CacheInvalidationService;
 import com.example.budget.user.model.User;
 import com.example.budget.account.repository.AccountTransferRepository;
 import com.example.budget.planning.repository.CategoryBudgetRepository;

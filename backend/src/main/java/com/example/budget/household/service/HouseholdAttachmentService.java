@@ -14,8 +14,8 @@ import com.example.budget.household.model.HouseholdSettlement;
 import com.example.budget.household.model.HouseholdRole;
 import com.example.budget.household.model.Household;
 
-import com.example.budget.exception.AccessDeniedException;
-import com.example.budget.exception.EntityNotFoundException;
+import com.example.budget.shared.exception.AccessDeniedException;
+import com.example.budget.shared.exception.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;

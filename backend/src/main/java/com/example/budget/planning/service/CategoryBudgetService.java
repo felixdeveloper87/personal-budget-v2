@@ -2,8 +2,8 @@ package com.example.budget.planning.service;
 
 import com.example.budget.planning.dto.CategoryBudgetDTO;
 import com.example.budget.planning.dto.CategoryBudgetRequest;
-import com.example.budget.exception.AccessDeniedException;
-import com.example.budget.exception.EntityNotFoundException;
+import com.example.budget.shared.exception.AccessDeniedException;
+import com.example.budget.shared.exception.EntityNotFoundException;
 import com.example.budget.planning.model.CategoryBudget;
 import com.example.budget.transaction.model.Transaction;
 import com.example.budget.transaction.model.TransactionType;

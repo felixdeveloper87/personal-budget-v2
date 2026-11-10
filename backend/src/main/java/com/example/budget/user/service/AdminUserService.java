@@ -2,8 +2,8 @@ package com.example.budget.user.service;
 
 import com.example.budget.user.dto.AdminUserResponse;
 import com.example.budget.user.dto.UpdateUserPlanRequest;
-import com.example.budget.exception.AccessDeniedException;
-import com.example.budget.exception.EntityNotFoundException;
+import com.example.budget.shared.exception.AccessDeniedException;
+import com.example.budget.shared.exception.EntityNotFoundException;
 import com.example.budget.user.model.User;
 import com.example.budget.user.repository.UserRepository;
 import org.springframework.stereotype.Service;

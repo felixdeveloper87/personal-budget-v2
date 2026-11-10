@@ -5,7 +5,7 @@ import com.example.budget.account.service.FinancialAccountService;
 import com.example.budget.account.service.CreditCardBillingService;
 
 import com.example.budget.planning.dto.CashFlowForecastDTO;
-import com.example.budget.exception.EntityNotFoundException;
+import com.example.budget.shared.exception.EntityNotFoundException;
 import com.example.budget.recurring.model.RecurringTransaction;
 import com.example.budget.transaction.model.Transaction;
 import com.example.budget.transaction.model.TransactionType;

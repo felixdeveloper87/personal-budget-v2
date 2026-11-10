@@ -1,6 +1,6 @@
 package com.example.budget.transaction.service;
 
-import com.example.budget.cache.CacheInvalidationService;
+import com.example.budget.shared.cache.CacheInvalidationService;
 import com.example.budget.transaction.model.Transaction;
 import com.example.budget.transaction.model.TransactionStatus;
 import com.example.budget.transaction.repository.TransactionRepository;

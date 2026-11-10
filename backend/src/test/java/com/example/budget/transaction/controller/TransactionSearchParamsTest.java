@@ -1,6 +1,6 @@
 package com.example.budget.transaction.controller;
 
-import com.example.budget.exception.GlobalExceptionHandler;
+import com.example.budget.shared.exception.GlobalExceptionHandler;
 import com.example.budget.transaction.mapper.TransactionMapper;
 import com.example.budget.transaction.model.TransactionType;
 import com.example.budget.user.model.User;

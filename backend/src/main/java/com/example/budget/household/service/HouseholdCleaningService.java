@@ -18,8 +18,8 @@ import com.example.budget.household.model.HouseholdNotificationType;
 import com.example.budget.household.model.Household;
 import com.example.budget.household.model.HouseholdCleaningDutyCompletion;
 
-import com.example.budget.exception.AccessDeniedException;
-import com.example.budget.exception.EntityNotFoundException;
+import com.example.budget.shared.exception.AccessDeniedException;
+import com.example.budget.shared.exception.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

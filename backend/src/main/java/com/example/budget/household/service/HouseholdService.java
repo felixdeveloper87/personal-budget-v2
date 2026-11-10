@@ -8,7 +8,7 @@ import com.example.budget.household.repository.HouseholdRepository;
 import com.example.budget.household.model.HouseholdNotificationType;
 import com.example.budget.household.model.Household;
 
-import com.example.budget.exception.EntityNotFoundException;
+import com.example.budget.shared.exception.EntityNotFoundException;
 import com.example.budget.user.model.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

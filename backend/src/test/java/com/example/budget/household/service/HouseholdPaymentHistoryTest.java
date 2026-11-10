@@ -14,7 +14,7 @@ import com.example.budget.household.repository.HouseholdRepository;
 import com.example.budget.household.model.Household;
 import com.example.budget.household.repository.HouseholdExpenseShareRepository;
 
-import com.example.budget.exception.AccessDeniedException;
+import com.example.budget.shared.exception.AccessDeniedException;
 import com.example.budget.user.model.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

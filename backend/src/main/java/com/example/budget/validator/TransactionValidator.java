@@ -1,7 +1,7 @@
 package com.example.budget.validator;
 
-import com.example.budget.exception.AccessDeniedException;
-import com.example.budget.exception.EntityNotFoundException;
+import com.example.budget.shared.exception.AccessDeniedException;
+import com.example.budget.shared.exception.EntityNotFoundException;
 import com.example.budget.transaction.model.Transaction;
 import com.example.budget.user.model.User;
 import org.springframework.stereotype.Component;

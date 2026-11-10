@@ -1,4 +1,4 @@
-package com.example.budget.exception;
+package com.example.budget.shared.exception;
 
 /**
  * Exception thrown when a user attempts to access or modify a resource they don't own.
