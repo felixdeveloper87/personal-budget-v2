@@ -1,6 +1,6 @@
 import type { Transaction } from '../../types'
 
-/** Same rules as the mobile app (mobile/src/utils/variableSpending.ts, monthToDate.ts). */
+/** Rules for the dashboard hero metrics (variable spending and month-to-date). */
 
 function isCommitment(transaction: Transaction) {
   return Boolean(transaction.isInstallment)
