@@ -23,7 +23,6 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/installment-plans")
-@CrossOrigin
 public class InstallmentPlanController {
 
     private final InstallmentPlanService installmentPlanService;

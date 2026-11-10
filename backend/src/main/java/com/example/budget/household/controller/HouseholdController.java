@@ -26,7 +26,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin
 public class HouseholdController {
     private final HouseholdService service;
     private final HouseholdDashboardService dashboardService;

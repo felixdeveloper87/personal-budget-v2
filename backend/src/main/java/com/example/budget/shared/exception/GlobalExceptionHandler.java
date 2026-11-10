@@ -1,13 +1,13 @@
 package com.example.budget.shared.exception;
 
-import com.example.budget.auth.exception.InvalidCredentialsException;
-
-import com.example.budget.auth.exception.EmailAlreadyExistsException;
-
 import com.example.budget.auth.exception.AccountPendingApprovalException;
+import com.example.budget.auth.exception.EmailAlreadyExistsException;
+import com.example.budget.auth.exception.InvalidCredentialsException;
+import com.example.budget.auth.exception.TooManyLoginAttemptsException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -30,6 +30,18 @@ import java.util.Map;
 @ControllerAdvice
 public class GlobalExceptionHandler {
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+    /**
+     * Login blocked after too many failed attempts. Retry-After tells clients when to retry.
+     */
+    @ExceptionHandler(TooManyLoginAttemptsException.class)
+    public ResponseEntity<Map<String, String>> handleTooManyLoginAttempts(TooManyLoginAttemptsException ex) {
+        Map<String, String> error = new HashMap<>();
+        error.put("error", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .header(HttpHeaders.RETRY_AFTER, String.valueOf(ex.getRetryAfterSeconds()))
+                .body(error);
+    }
 
     /**
      * Login rejected: account exists but is not approved yet.
@@ -152,16 +164,20 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Handles generic RuntimeException as a fallback for unexpected errors.
-     * 
-     * @param ex The exception containing the error message
-     * @return ResponseEntity with HTTP 500 INTERNAL SERVER ERROR status and error message
+     * Fallback for unexpected errors.
+     *
+     * <p>The full exception (message and stack trace) goes to the server log only. The client
+     * gets a generic message, because internal messages can expose SQL, file paths or library
+     * details. Errors meant for the user use their own exception and handler above.
+     *
+     * @param ex the unexpected exception
+     * @return HTTP 500 with a generic error message
      */
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<Map<String, String>> handleRuntimeException(RuntimeException ex) {
         log.error("Unhandled runtime exception", ex);
         Map<String, String> error = new HashMap<>();
-        error.put("error", ex.getMessage());
+        error.put("error", "An unexpected error occurred. Please try again.");
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
 }

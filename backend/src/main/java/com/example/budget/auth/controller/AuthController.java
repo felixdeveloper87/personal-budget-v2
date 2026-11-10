@@ -4,9 +4,12 @@ import com.example.budget.auth.dto.AuthResponse;
 import com.example.budget.auth.dto.LoginRequest;
 import com.example.budget.auth.dto.RegisterRequest;
 import com.example.budget.auth.dto.ResetPasswordRequest;
+import com.example.budget.auth.exception.InvalidCredentialsException;
 import com.example.budget.auth.service.AuthService;
+import com.example.budget.auth.service.LoginAttemptService;
 import com.example.budget.auth.service.PasswordResetService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 import org.springframework.http.HttpStatus;
@@ -21,14 +24,18 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin
 public class AuthController {
     private final AuthService authService;
     private final PasswordResetService passwordResetService;
+    private final LoginAttemptService loginAttempts;
 
-    public AuthController(AuthService authService, PasswordResetService passwordResetService) {
+    public AuthController(
+            AuthService authService,
+            PasswordResetService passwordResetService,
+            LoginAttemptService loginAttempts) {
         this.authService = authService;
         this.passwordResetService = passwordResetService;
+        this.loginAttempts = loginAttempts;
     }
 
     /**
@@ -55,8 +62,21 @@ public class AuthController {
      * @return ResponseEntity with AuthResponse containing user info and JWT token (HTTP 200 OK)
      */
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
-        return ResponseEntity.ok(authService.login(request));
+    public ResponseEntity<AuthResponse> login(
+            @Valid @RequestBody LoginRequest request,
+            HttpServletRequest httpRequest) {
+        // Real client IP: Spring resolves X-Forwarded-For from nginx
+        // (server.forward-headers-strategy=native, trusted only from internal proxies).
+        String ip = httpRequest.getRemoteAddr();
+        loginAttempts.checkAllowed(request.getEmail(), ip);
+        try {
+            AuthResponse response = authService.login(request);
+            loginAttempts.recordSuccess(request.getEmail());
+            return ResponseEntity.ok(response);
+        } catch (InvalidCredentialsException ex) {
+            loginAttempts.recordFailure(request.getEmail(), ip);
+            throw ex;
+        }
     }
 
     /**

@@ -13,7 +13,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/payment-methods")
-@CrossOrigin
 public class PaymentMethodController {
 
     private final PaymentMethodService service;

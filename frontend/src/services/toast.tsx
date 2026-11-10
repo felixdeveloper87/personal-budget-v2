@@ -288,6 +288,15 @@ export function getApiErrorMessage(error: unknown): ApiErrorMessage {
     }
   }
 
+  if (status === 429) {
+    return {
+      title: translateNow('error.tooManyAttempts.title'),
+      description: displayServerMessage ?? translateNow('error.tooManyAttempts.description'),
+      status: 'warning',
+      dedupeKey: 'http-429',
+    }
+  }
+
   if (status >= 500) {
     return {
       title: translateNow('error.server.title'),

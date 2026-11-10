@@ -16,7 +16,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/push")
-@CrossOrigin
 public class PushController {
     private final PushNotificationService pushNotificationService;
     private final UserRepository userRepository;

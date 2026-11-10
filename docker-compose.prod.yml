@@ -46,7 +46,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     ports:
-      - "8080:8080"
+      - "127.0.0.1:8080:8080"  # only nginx on this host can reach the backend
     environment:
       - DB_HOST=db
       - DB_PORT=5432

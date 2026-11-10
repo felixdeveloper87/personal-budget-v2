@@ -22,4 +22,18 @@ class GlobalExceptionHandlerTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(response.getBody()).containsEntry("error", "Malformed request body");
     }
+
+    @Test
+    void unexpectedErrorDoesNotLeakItsInternalMessage() {
+        GlobalExceptionHandler handler = new GlobalExceptionHandler();
+        RuntimeException exception = new IllegalStateException(
+                "could not execute statement; SQL [insert into users ...]; constraint [users_pkey]");
+
+        var response = handler.handleRuntimeException(exception);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+        assertThat(response.getBody())
+                .containsEntry("error", "An unexpected error occurred. Please try again.");
+        assertThat(response.getBody().values()).noneMatch(value -> value.contains("SQL"));
+    }
 }

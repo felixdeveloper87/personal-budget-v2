@@ -17,7 +17,6 @@ import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api/business")
-@CrossOrigin
 public class BusinessController {
     private final BusinessService businessService;
 

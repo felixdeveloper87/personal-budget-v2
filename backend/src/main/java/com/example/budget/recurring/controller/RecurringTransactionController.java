@@ -17,7 +17,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/recurring-transactions")
-@CrossOrigin
 public class RecurringTransactionController {
 
     private final RecurringTransactionService recurringTransactionService;

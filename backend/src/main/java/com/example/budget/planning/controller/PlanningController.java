@@ -17,7 +17,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/planning")
-@CrossOrigin
 public class PlanningController {
     private final CategoryBudgetService budgetService;
     private final CashFlowForecastService forecastService;

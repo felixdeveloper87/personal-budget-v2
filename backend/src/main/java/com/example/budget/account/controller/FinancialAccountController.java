@@ -25,7 +25,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/accounts")
-@CrossOrigin
 public class FinancialAccountController {
     private final FinancialAccountService service;
 

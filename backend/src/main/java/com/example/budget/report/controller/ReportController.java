@@ -5,7 +5,6 @@ import com.example.budget.user.model.User;
 import com.example.budget.report.service.ReportService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -15,7 +14,6 @@ import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api/reports")
-@CrossOrigin
 public class ReportController {
     private final ReportService reportService;
 

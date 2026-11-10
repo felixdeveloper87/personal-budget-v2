@@ -14,7 +14,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/goals")
-@CrossOrigin
 public class SavingsGoalController {
     private final SavingsGoalService service;
 
