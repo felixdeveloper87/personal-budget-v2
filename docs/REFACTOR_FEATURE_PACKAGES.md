@@ -53,7 +53,7 @@ Ordem sugerida: da funcionalidade mais isolada para a mais compartilhada.
 - [x] 5. `report` (9 arquivos + 5 testes)
 - [x] 6. `planning` (10 arquivos + 1 teste)
 - [x] 7. `paymentmethod` (8 arquivos)
-- [ ] 8. `installment`
+- [x] 8. `installment` (9 arquivos + 1 teste; `cache/BaseCachedList` virou `public`)
 - [ ] 9. `recurring`
 - [ ] 10. `account`
 - [ ] 11. `transaction`

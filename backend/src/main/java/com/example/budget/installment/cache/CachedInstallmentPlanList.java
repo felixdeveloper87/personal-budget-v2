@@ -1,6 +1,8 @@
-package com.example.budget.cache;
+package com.example.budget.installment.cache;
 
-import com.example.budget.dto.InstallmentPlanDTO;
+import com.example.budget.cache.BaseCachedList;
+
+import com.example.budget.installment.dto.InstallmentPlanDTO;
 
 import java.util.List;
 

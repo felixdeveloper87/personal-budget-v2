@@ -1,11 +1,11 @@
-package com.example.budget.controller;
+package com.example.budget.installment.controller;
 
 import com.example.budget.dto.AssignAccountRequest;
-import com.example.budget.dto.CreateInstallmentPlanRequest;
-import com.example.budget.dto.InstallmentPlanDTO;
-import com.example.budget.dto.UpdateInstallmentPlanRequest;
+import com.example.budget.installment.dto.CreateInstallmentPlanRequest;
+import com.example.budget.installment.dto.InstallmentPlanDTO;
+import com.example.budget.installment.dto.UpdateInstallmentPlanRequest;
 import com.example.budget.model.User;
-import com.example.budget.service.InstallmentPlanService;
+import com.example.budget.installment.service.InstallmentPlanService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

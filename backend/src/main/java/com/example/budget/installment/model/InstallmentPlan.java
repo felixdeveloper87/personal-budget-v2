@@ -1,4 +1,10 @@
-package com.example.budget.model;
+package com.example.budget.installment.model;
+
+import com.example.budget.model.User;
+
+import com.example.budget.model.Transaction;
+
+import com.example.budget.model.FinancialAccount;
 
 import com.example.budget.paymentmethod.model.PaymentMethod;
 

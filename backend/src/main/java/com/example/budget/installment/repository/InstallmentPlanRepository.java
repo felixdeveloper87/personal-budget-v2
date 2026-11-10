@@ -1,6 +1,6 @@
-package com.example.budget.repository;
+package com.example.budget.installment.repository;
 
-import com.example.budget.model.InstallmentPlan;
+import com.example.budget.installment.model.InstallmentPlan;
 import com.example.budget.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;

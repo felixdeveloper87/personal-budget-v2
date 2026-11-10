@@ -1,5 +1,7 @@
 package com.example.budget.model;
 
+import com.example.budget.installment.model.InstallmentPlan;
+
 import com.example.budget.paymentmethod.model.PaymentMethod;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;

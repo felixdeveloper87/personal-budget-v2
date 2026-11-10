@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * Shared envelope for Redis JSON list payloads; concrete subclasses fix the element type for Jackson.
  */
-abstract class BaseCachedList<T> {
+public abstract class BaseCachedList<T> {
 
     private List<T> items;
 

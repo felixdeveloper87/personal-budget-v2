@@ -9,7 +9,7 @@ import com.example.budget.dto.MonthlySummary;
 import com.example.budget.mapper.TransactionMapper;
 import com.example.budget.exception.AccessDeniedException;
 import com.example.budget.exception.EntityNotFoundException;
-import com.example.budget.model.InstallmentPlan;
+import com.example.budget.installment.model.InstallmentPlan;
 import com.example.budget.paymentmethod.model.PaymentMethod;
 import com.example.budget.paymentmethod.model.PaymentMethodType;
 import com.example.budget.model.Transaction;

@@ -1,23 +1,25 @@
-package com.example.budget.service;
+package com.example.budget.installment.service;
+
+import com.example.budget.service.FinancialAccountService;
 
 import com.example.budget.paymentmethod.service.PaymentMethodService;
 
 import com.example.budget.cache.CacheInvalidationService;
-import com.example.budget.cache.CachedInstallmentPlanList;
+import com.example.budget.installment.cache.CachedInstallmentPlanList;
 import com.example.budget.config.RedisCacheConfig;
-import com.example.budget.dto.CreateInstallmentPlanRequest;
-import com.example.budget.dto.InstallmentPlanDTO;
-import com.example.budget.dto.UpdateInstallmentPlanRequest;
+import com.example.budget.installment.dto.CreateInstallmentPlanRequest;
+import com.example.budget.installment.dto.InstallmentPlanDTO;
+import com.example.budget.installment.dto.UpdateInstallmentPlanRequest;
 import com.example.budget.exception.AccessDeniedException;
 import com.example.budget.exception.EntityNotFoundException;
-import com.example.budget.mapper.InstallmentPlanMapper;
-import com.example.budget.model.InstallmentPlan;
+import com.example.budget.installment.mapper.InstallmentPlanMapper;
+import com.example.budget.installment.model.InstallmentPlan;
 import com.example.budget.paymentmethod.model.PaymentMethod;
 import com.example.budget.paymentmethod.model.PaymentMethodType;
 import com.example.budget.model.Transaction;
 import com.example.budget.model.TransactionStatus;
 import com.example.budget.model.User;
-import com.example.budget.repository.InstallmentPlanRepository;
+import com.example.budget.installment.repository.InstallmentPlanRepository;
 import com.example.budget.repository.TransactionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

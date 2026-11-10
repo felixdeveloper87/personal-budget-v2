@@ -1,4 +1,4 @@
-package com.example.budget.dto;
+package com.example.budget.installment.dto;
 
 import jakarta.validation.constraints.Positive;
 

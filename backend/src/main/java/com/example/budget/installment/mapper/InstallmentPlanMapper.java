@@ -1,8 +1,8 @@
-package com.example.budget.mapper;
+package com.example.budget.installment.mapper;
 
-import com.example.budget.dto.CreateInstallmentPlanRequest;
-import com.example.budget.dto.InstallmentPlanDTO;
-import com.example.budget.model.InstallmentPlan;
+import com.example.budget.installment.dto.CreateInstallmentPlanRequest;
+import com.example.budget.installment.dto.InstallmentPlanDTO;
+import com.example.budget.installment.model.InstallmentPlan;
 import com.example.budget.model.Transaction;
 import com.example.budget.model.TransactionType;
 import com.example.budget.model.TransactionStatus;
