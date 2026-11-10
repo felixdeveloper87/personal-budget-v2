@@ -1,4 +1,4 @@
-package com.example.budget.dto;
+package com.example.budget.goals.dto;
 
 import jakarta.validation.constraints.NotNull;
 

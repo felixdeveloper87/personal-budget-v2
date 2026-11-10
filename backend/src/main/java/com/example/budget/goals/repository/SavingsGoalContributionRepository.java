@@ -1,6 +1,6 @@
-package com.example.budget.repository;
+package com.example.budget.goals.repository;
 
-import com.example.budget.model.SavingsGoalContribution;
+import com.example.budget.goals.model.SavingsGoalContribution;
 import com.example.budget.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;

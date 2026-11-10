@@ -1,10 +1,10 @@
-package com.example.budget.service;
+package com.example.budget.goals.service;
 
-import com.example.budget.dto.SavingsGoalRequest;
-import com.example.budget.model.SavingsGoal;
+import com.example.budget.goals.dto.SavingsGoalRequest;
+import com.example.budget.goals.model.SavingsGoal;
 import com.example.budget.model.User;
-import com.example.budget.repository.SavingsGoalContributionRepository;
-import com.example.budget.repository.SavingsGoalRepository;
+import com.example.budget.goals.repository.SavingsGoalContributionRepository;
+import com.example.budget.goals.repository.SavingsGoalRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;

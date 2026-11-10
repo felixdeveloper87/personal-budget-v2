@@ -1,15 +1,15 @@
-package com.example.budget.service;
+package com.example.budget.goals.service;
 
-import com.example.budget.dto.SavingsGoalContributionRequest;
-import com.example.budget.dto.SavingsGoalDTO;
-import com.example.budget.dto.SavingsGoalRequest;
+import com.example.budget.goals.dto.SavingsGoalContributionRequest;
+import com.example.budget.goals.dto.SavingsGoalDTO;
+import com.example.budget.goals.dto.SavingsGoalRequest;
 import com.example.budget.exception.AccessDeniedException;
 import com.example.budget.exception.EntityNotFoundException;
-import com.example.budget.model.SavingsGoal;
-import com.example.budget.model.SavingsGoalContribution;
+import com.example.budget.goals.model.SavingsGoal;
+import com.example.budget.goals.model.SavingsGoalContribution;
 import com.example.budget.model.User;
-import com.example.budget.repository.SavingsGoalContributionRepository;
-import com.example.budget.repository.SavingsGoalRepository;
+import com.example.budget.goals.repository.SavingsGoalContributionRepository;
+import com.example.budget.goals.repository.SavingsGoalRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

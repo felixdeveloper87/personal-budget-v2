@@ -1,10 +1,10 @@
-package com.example.budget.controller;
+package com.example.budget.goals.controller;
 
-import com.example.budget.dto.SavingsGoalContributionRequest;
-import com.example.budget.dto.SavingsGoalDTO;
-import com.example.budget.dto.SavingsGoalRequest;
+import com.example.budget.goals.dto.SavingsGoalContributionRequest;
+import com.example.budget.goals.dto.SavingsGoalDTO;
+import com.example.budget.goals.dto.SavingsGoalRequest;
 import com.example.budget.model.User;
-import com.example.budget.service.SavingsGoalService;
+import com.example.budget.goals.service.SavingsGoalService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
