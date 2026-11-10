@@ -1,5 +1,11 @@
 package com.example.budget.exception;
 
+import com.example.budget.auth.exception.InvalidCredentialsException;
+
+import com.example.budget.auth.exception.EmailAlreadyExistsException;
+
+import com.example.budget.auth.exception.AccountPendingApprovalException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;

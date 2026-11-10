@@ -1,4 +1,4 @@
-package com.example.budget.dto;
+package com.example.budget.auth.dto;
 
 import com.example.budget.user.model.UserPlan;
 

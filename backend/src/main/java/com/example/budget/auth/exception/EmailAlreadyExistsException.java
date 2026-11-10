@@ -1,4 +1,4 @@
-package com.example.budget.exception;
+package com.example.budget.auth.exception;
 
 /**
  * Exception thrown when attempting to register a user with an email that already exists.

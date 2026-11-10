@@ -1,16 +1,16 @@
-package com.example.budget.service;
+package com.example.budget.auth.service;
 
-import com.example.budget.dto.AuthResponse;
-import com.example.budget.dto.LoginRequest;
-import com.example.budget.dto.RegisterRequest;
-import com.example.budget.exception.AccountPendingApprovalException;
-import com.example.budget.exception.EmailAlreadyExistsException;
+import com.example.budget.auth.dto.AuthResponse;
+import com.example.budget.auth.dto.LoginRequest;
+import com.example.budget.auth.dto.RegisterRequest;
+import com.example.budget.auth.exception.AccountPendingApprovalException;
+import com.example.budget.auth.exception.EmailAlreadyExistsException;
 import com.example.budget.exception.EntityNotFoundException;
 import com.example.budget.user.mapper.UserMapper;
 import com.example.budget.user.model.User;
 import com.example.budget.user.model.UserPlan;
 import com.example.budget.user.repository.UserRepository;
-import com.example.budget.util.JwtUtil;
+import com.example.budget.auth.util.JwtUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -89,7 +89,7 @@ class AuthServiceTest {
         when(userRepository.findByEmail("x@y.com")).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> authService.login(request))
-                .isInstanceOf(com.example.budget.exception.InvalidCredentialsException.class);
+                .isInstanceOf(com.example.budget.auth.exception.InvalidCredentialsException.class);
 
         verify(passwordEncoder, never()).matches(any(), any());
     }
@@ -104,7 +104,7 @@ class AuthServiceTest {
         when(passwordEncoder.matches("wrong", "encoded-hash")).thenReturn(false);
 
         assertThatThrownBy(() -> authService.login(request))
-                .isInstanceOf(com.example.budget.exception.InvalidCredentialsException.class);
+                .isInstanceOf(com.example.budget.auth.exception.InvalidCredentialsException.class);
 
         verify(jwtUtil, never()).generateToken(any(), any(), anyInt());
     }

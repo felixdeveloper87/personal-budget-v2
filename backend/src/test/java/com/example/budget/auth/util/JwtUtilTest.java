@@ -1,4 +1,4 @@
-package com.example.budget.util;
+package com.example.budget.auth.util;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;

@@ -1,4 +1,4 @@
-package com.example.budget.service;
+package com.example.budget.auth.service;
 
 import com.example.budget.user.model.User;
 import com.example.budget.user.repository.UserRepository;

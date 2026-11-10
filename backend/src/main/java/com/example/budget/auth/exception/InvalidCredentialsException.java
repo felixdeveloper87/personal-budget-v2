@@ -1,4 +1,4 @@
-package com.example.budget.exception;
+package com.example.budget.auth.exception;
 
 /**
  * Exception thrown when user authentication fails due to invalid credentials.

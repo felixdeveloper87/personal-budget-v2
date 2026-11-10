@@ -1,6 +1,6 @@
 package com.example.budget.config;
 
-import com.example.budget.security.JwtAuthenticationFilter;
+import com.example.budget.auth.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;

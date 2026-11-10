@@ -1,11 +1,11 @@
-package com.example.budget.controller;
+package com.example.budget.auth.controller;
 
-import com.example.budget.dto.AuthResponse;
-import com.example.budget.dto.LoginRequest;
-import com.example.budget.dto.RegisterRequest;
-import com.example.budget.dto.ResetPasswordRequest;
-import com.example.budget.service.AuthService;
-import com.example.budget.service.PasswordResetService;
+import com.example.budget.auth.dto.AuthResponse;
+import com.example.budget.auth.dto.LoginRequest;
+import com.example.budget.auth.dto.RegisterRequest;
+import com.example.budget.auth.dto.ResetPasswordRequest;
+import com.example.budget.auth.service.AuthService;
+import com.example.budget.auth.service.PasswordResetService;
 
 import jakarta.validation.Valid;
 

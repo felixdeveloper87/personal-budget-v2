@@ -1,4 +1,4 @@
-package com.example.budget.exception;
+package com.example.budget.auth.exception;
 
 /**
  * Login rejected because the account exists but has not been approved yet.

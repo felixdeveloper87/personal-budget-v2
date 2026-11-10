@@ -1,4 +1,4 @@
-package com.example.budget.util;
+package com.example.budget.auth.util;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
