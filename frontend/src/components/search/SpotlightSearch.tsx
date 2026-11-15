@@ -16,9 +16,9 @@ import {
 } from '@chakra-ui/react'
 
 import { Search, X, ChevronLeft, ChevronRight } from '../ui/icons'
-import { listTransactions } from '../../api'
 import { ToastService } from '../../services/toast'
 import type { Transaction } from '../../types'
+import { useTransactionsSearch, useTransactionsWindow } from '../../queries/hooks'
 
 import { PremiumModal } from '../ui'
 
@@ -35,6 +35,9 @@ interface SpotlightSearchProps {
 
 /** Results per page — newest first, paged so we never render a huge ledger. */
 const PAGE_SIZE = 50
+
+/** Typed text shorter than this only searches the cached recent window. */
+const MIN_SERVER_SEARCH_LENGTH = 2
 
 /** Today as a local "YYYY-MM-DD" string (comparable to ledger day keys). */
 function todayIso(): string {
@@ -88,20 +91,20 @@ function Chip({
 }
 
 /**
- * Spotlight search — a single editorial modal that searches across all
- * transactions and shows live results as you type, grouped by day with the same
- * ledger styling used on the Transactions page. Self-contained: it loads the
- * full transaction set once, then the text query and filter chips both run
- * client-side over it — so typing and chip toggles are instant.
+ * Spotlight search — a single editorial modal that searches transactions and
+ * shows live results as you type, grouped by day with the same ledger styling
+ * used on the Transactions page.
+ *
+ * It matches client-side over the cached date window the dashboard already
+ * loaded (previous year → two years ahead), so typing and chip toggles are
+ * instant. Typed text also runs a server search by description over the whole
+ * history, so older purchases still turn up; both sets are merged.
  */
 export default function SpotlightSearch({ isOpen, onClose }: SpotlightSearchProps) {
   const { t } = useI18n()
   const [q, setQ] = useState('')
   const [filter, setFilter] = useState<TxFilter>('all')
   const [page, setPage] = useState(0)
-  const [raw, setRaw] = useState<Transaction[]>([])
-  const [loading, setLoading] = useState(false)
-  const reqId = useRef(0)
   const inputRef = useRef<HTMLInputElement>(null)
 
   // Split the raw query into free text + optional month/year tokens, so
@@ -120,39 +123,38 @@ export default function SpotlightSearch({ isOpen, onClose }: SpotlightSearchProp
   // Reset everything when the modal closes.
   useEffect(() => {
     if (!isOpen) {
-      reqId.current += 1
       setQ('')
       setFilter('all')
       setPage(0)
-      setRaw([])
-      setLoading(false)
     }
   }, [isOpen])
 
-  // Load the full transaction set once per open. Both the text query and the
-  // filter chips then run client-side over this set (like the Transactions
-  // page), so every keystroke and chip toggle is instant.
+  // Wait for a pause in typing before asking the server.
+  const [serverText, setServerText] = useState('')
   useEffect(() => {
-    if (!isOpen) return
-    const id = ++reqId.current
-    setLoading(true)
-    ;(async () => {
-      try {
-        const data = await listTransactions()
-        if (id === reqId.current) setRaw(data)
-      } catch (err) {
-        if (id === reqId.current) {
-          setRaw([])
-          ToastService.apiError(err, {
-            title: t('search.loadFailed'),
-            dedupeKey: 'spotlight-search-failed',
-          })
-        }
-      } finally {
-        if (id === reqId.current) setLoading(false)
-      }
-    })()
-  }, [isOpen, t])
+    const id = window.setTimeout(() => setServerText(text.trim()), 250)
+    return () => window.clearTimeout(id)
+  }, [text])
+
+  const now = useMemo(() => new Date(), [])
+  const windowQuery = useTransactionsWindow(now, { enabled: isOpen })
+  const searchQuery = useTransactionsSearch(
+    isOpen && serverText.length >= MIN_SERVER_SEARCH_LENGTH ? { text: serverText } : null,
+  )
+  const loading = windowQuery.isPending && windowQuery.fetchStatus !== 'idle'
+
+  const loadError = windowQuery.error ?? searchQuery.error
+  useEffect(() => {
+    if (loadError) ToastService.apiError(loadError, { title: t('search.loadFailed'), dedupeKey: 'spotlight-search-failed' })
+  }, [loadError, t])
+
+  const raw = useMemo<Transaction[]>(() => {
+    const recent = windowQuery.data ?? []
+    const older = searchQuery.data ?? []
+    if (older.length === 0) return recent
+    const seen = new Set(recent.map((tx) => tx.id))
+    return [...recent, ...older.filter((tx) => !seen.has(tx.id))]
+  }, [windowQuery.data, searchQuery.data])
 
   const vm = useMemo(() => toViewModel(raw), [raw])
 

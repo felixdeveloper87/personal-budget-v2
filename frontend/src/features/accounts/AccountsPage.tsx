@@ -1,8 +1,11 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 import { Box, Button, Flex, Icon, Spinner, Text } from '@chakra-ui/react'
 
-import { archiveAccount, getAccountSummary } from '../../api'
-import type { AccountSummary, FinancialAccount } from '../../types'
+import { archiveAccount } from '../../api'
+import type { FinancialAccount } from '../../types'
+import { useAccountSummary } from '../../queries/hooks'
+import { PAGE_PATHS, accountPath } from '../../routes'
 import { ToastService } from '../../services/toast'
 import { useI18n } from '../../i18n'
 import { ConfirmDeleteDialog } from '../../components/ui'
@@ -18,16 +21,13 @@ import { NU_SHEET_PB, NU_SHEET_WRAP } from '../dashboard/components/nu'
 
 const BALANCE_VISIBILITY_KEY = 'accounts:hide-balances'
 
-function accountIdFromPath() {
-  const match = window.location.pathname.match(/^\/accounts\/(\d+)\/?$/)
-  return match ? Number(match[1]) : null
-}
-
 export default function AccountsPage() {
   const { t, locale } = useI18n()
-  const [summary, setSummary] = useState<AccountSummary | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [selectedId, setSelectedId] = useState<number | null>(accountIdFromPath)
+  const navigate = useNavigate()
+  const { accountId } = useParams()
+  const parsedId = accountId ? Number(accountId) : NaN
+  const selectedId = Number.isFinite(parsedId) ? parsedId : null
+  const { data: summary, isPending: loading, error: loadError } = useAccountSummary()
   const [formAccount, setFormAccount] = useState<FinancialAccount | null | undefined>(undefined)
   const [accountToDelete, setAccountToDelete] = useState<FinancialAccount | null>(null)
   const [deleting, setDeleting] = useState(false)
@@ -37,36 +37,16 @@ export default function AccountsPage() {
     try { return localStorage.getItem(BALANCE_VISIBILITY_KEY) === 'true' } catch { return false }
   })
 
-  const load = useCallback(async () => {
-    setLoading(true)
-    try { setSummary(await getAccountSummary()) }
-    catch (err) { ToastService.apiError(err, { title: t('accounts.toast.loadFailed'), dedupeKey: 'accounts-page-load-failed' }) }
-    finally { setLoading(false) }
-  }, [t])
-
-  useEffect(() => { void load() }, [load])
   useEffect(() => {
-    const handlePopState = () => setSelectedId(accountIdFromPath())
-    window.addEventListener('popstate', handlePopState)
-    return () => window.removeEventListener('popstate', handlePopState)
-  }, [])
+    if (loadError) ToastService.apiError(loadError, { title: t('accounts.toast.loadFailed'), dedupeKey: 'accounts-page-load-failed' })
+  }, [loadError, t])
 
   const accounts = useMemo(() => (summary?.accounts ?? []).filter((account) => account.active).sort((a, b) => a.name.localeCompare(b.name, locale)), [locale, summary])
   const selectedAccount = accounts.find((account) => account.id === selectedId) ?? null
-  const detailOpen = selectedId !== null
+  const detailOpen = accountId !== undefined
 
-  const navigateToList = (replace = false) => {
-    const state = { ...(window.history.state ?? {}), appPage: 'accounts' }
-    window.history[replace ? 'replaceState' : 'pushState'](state, '', '/accounts')
-    setSelectedId(null)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
-
-  const navigateToAccount = (id: number) => {
-    window.history.pushState({ ...(window.history.state ?? {}), appPage: 'accounts' }, '', `/accounts/${id}`)
-    setSelectedId(id)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
+  const navigateToList = (replace = false) => navigate(PAGE_PATHS.accounts, { replace })
+  const navigateToAccount = (id: number) => navigate(accountPath(id))
 
   const toggleHide = () => setHideBalances((current) => {
     const next = !current
@@ -82,7 +62,6 @@ export default function AccountsPage() {
       const deletedSelected = selectedId === accountToDelete.id
       setAccountToDelete(null)
       if (deletedSelected) navigateToList(true)
-      await load()
       ToastService.success({ title: t('accounts.toast.deleted'), dedupeKey: `account-archived:${accountToDelete.id}` })
     } catch (err) {
       ToastService.apiError(err, { title: t('accounts.toast.deleteFailed'), dedupeKey: `account-archive-failed:${accountToDelete.id}` })
@@ -197,10 +176,10 @@ export default function AccountsPage() {
         isOpen={formAccount !== undefined}
         account={formAccount}
         onClose={() => setFormAccount(undefined)}
-        onSaved={async () => { await load(); setDetailVersion((version) => version + 1) }}
+        onSaved={() => setDetailVersion((version) => version + 1)}
         onDelete={(account) => { setFormAccount(undefined); setAccountToDelete(account) }}
       />
-      <TransferModal isOpen={transferOpen} onClose={() => setTransferOpen(false)} accounts={accounts} initialFromAccountId={selectedAccount?.id ?? null} hideBalances={hideBalances} onTransferred={async () => { await load(); setDetailVersion((version) => version + 1) }} />
+      <TransferModal isOpen={transferOpen} onClose={() => setTransferOpen(false)} accounts={accounts} initialFromAccountId={selectedAccount?.id ?? null} hideBalances={hideBalances} onTransferred={() => setDetailVersion((version) => version + 1)} />
       <ConfirmDeleteDialog isOpen={accountToDelete !== null} onClose={() => setAccountToDelete(null)} onConfirm={archive} isLoading={deleting} title={t('accounts.delete.title')} itemName={accountToDelete?.name} description={t('accounts.delete.description')} />
     </Box>
   )

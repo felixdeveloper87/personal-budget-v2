@@ -1,14 +1,17 @@
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Box, Button, Flex, Icon, Spinner, Text } from '@chakra-ui/react'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
-import { deletePaymentMethod, listPaymentMethods, listTransactions } from '../../api'
-import type { PaymentMethod, Transaction } from '../../types'
-import { buildCardStatements, type CardStatement } from '../../utils/creditCardStatements'
+import { deletePaymentMethod } from '../../api'
+import type { CardOverview, PaymentMethod } from '../../types'
+import { parseLocalDate, toCardStatement, toIsoDay } from '../../utils/creditCardStatements'
 import { ConfirmDeleteDialog } from '../../components/ui'
 import { AlertTriangle, ChevronLeft, CreditCard, Eye, EyeOff, Plus } from '../../components/ui/icons'
 import CardFormModal from '../../components/cards/CardFormModal'
 import { ToastService } from '../../services/toast'
 import { useI18n } from '../../i18n'
+import { useCardStatements, useCardsOverview, usePaymentMethods } from '../../queries/hooks'
+import { PAGE_PATHS, cardPath } from '../../routes'
 import NuHero from '../dashboard/components/NuHero'
 import '../dashboard/theme/pb-tokens.css'
 import { NU_SHEET_PB, NU_SHEET_WRAP } from '../dashboard/components/nu'
@@ -18,37 +21,41 @@ import CardsTotalHero from './components/CardsTotalHero'
 
 const CARD_BALANCE_VISIBILITY_KEY = 'cards:hide-values'
 
-interface CardsPageProps {
-  statementTarget?: { cardId: number; paymentDate: string } | null
-  onStatementTargetHandled?: () => void
-}
-
+/** Server numbers for one card, with dates parsed for display. */
 interface CardSnapshot {
-  statements: CardStatement[]
-  /** Total of the statement whose billing cycle is still open. */
   currentTotal: number
-  /** Every statement not yet due — it keeps consuming the limit until paid. */
   outstanding: number
   nextPayment: { amount: number; date: Date } | null
 }
 
-const isoDate = (value: Date) =>
-  `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(2, '0')}-${String(value.getDate()).padStart(2, '0')}`
+const EMPTY_SNAPSHOT: CardSnapshot = { currentTotal: 0, outstanding: 0, nextPayment: null }
 
-function cardIdFromPath() {
-  const match = window.location.pathname.match(/^\/cards\/(\d+)\/?$/)
-  return match ? Number(match[1]) : null
+function toSnapshot(overview: CardOverview | undefined): CardSnapshot {
+  if (!overview) return EMPTY_SNAPSHOT
+  return {
+    currentTotal: Number(overview.currentTotal),
+    outstanding: Number(overview.outstanding),
+    nextPayment: overview.nextPaymentDate
+      ? { amount: Number(overview.nextPaymentAmount), date: parseLocalDate(overview.nextPaymentDate) }
+      : null,
+  }
 }
 
-export default function CardsPage({ statementTarget = null, onStatementTargetHandled }: CardsPageProps) {
+export default function CardsPage() {
   const { t, locale } = useI18n()
-  const [cards, setCards] = useState<PaymentMethod[]>([])
-  const [transactions, setTransactions] = useState<Transaction[]>([])
-  const [loading, setLoading] = useState(true)
-  const [loaded, setLoaded] = useState(false)
-  const [error, setError] = useState(false)
-  const [selectedId, setSelectedId] = useState<number | null>(cardIdFromPath)
-  const [initialStatementKey, setInitialStatementKey] = useState<string | null>(null)
+  const navigate = useNavigate()
+  const { cardId } = useParams()
+  const [searchParams] = useSearchParams()
+  const parsedId = cardId ? Number(cardId) : NaN
+  const selectedId = Number.isFinite(parsedId) ? parsedId : null
+  const detailOpen = cardId !== undefined
+  /** Payment date (yyyy-MM-dd) of a statement to open, e.g. from the payments page. */
+  const statementParam = searchParams.get('statement')
+
+  const methodsQuery = usePaymentMethods()
+  const overviewQuery = useCardsOverview()
+  const statementsQuery = useCardStatements(selectedId)
+
   const [formCard, setFormCard] = useState<PaymentMethod | null | undefined>(undefined)
   const [cardToDelete, setCardToDelete] = useState<PaymentMethod | null>(null)
   const [deleting, setDeleting] = useState(false)
@@ -57,55 +64,27 @@ export default function CardsPage({ statementTarget = null, onStatementTargetHan
     try { return localStorage.getItem(CARD_BALANCE_VISIBILITY_KEY) === 'true' } catch { return false }
   })
 
-  const load = useCallback(async () => {
-    setLoading(true)
-    setError(false)
-    try {
-      const [methods, txs] = await Promise.all([listPaymentMethods(), listTransactions()])
-      setCards(methods.filter((method) => method.type === 'CREDIT_CARD'))
-      setTransactions(txs)
-      setLoaded(true)
-    } catch (err) {
-      setError(true)
-      ToastService.apiError(err, { title: t('cards.toast.loadFailed'), dedupeKey: 'cards-page-load-failed' })
-    } finally {
-      setLoading(false)
-    }
-  }, [t])
-
-  useEffect(() => { void load() }, [load])
+  const loadError = methodsQuery.error ?? overviewQuery.error
   useEffect(() => {
-    const handlePopState = () => { setSelectedId(cardIdFromPath()); setInitialStatementKey(null) }
-    window.addEventListener('popstate', handlePopState)
-    return () => window.removeEventListener('popstate', handlePopState)
-  }, [])
+    if (loadError) ToastService.apiError(loadError, { title: t('cards.toast.loadFailed'), dedupeKey: 'cards-page-load-failed' })
+  }, [loadError, t])
 
+  const cards = useMemo(
+    () => (methodsQuery.data ?? []).filter((method) => method.type === 'CREDIT_CARD'),
+    [methodsQuery.data],
+  )
   const sortedCards = useMemo(
     () => [...cards].sort((a, b) => Number(b.active) - Number(a.active) || a.name.localeCompare(b.name, locale)),
     [cards, locale],
   )
-
   const snapshots = useMemo(() => {
-    const now = new Date()
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()
     const map = new Map<number, CardSnapshot>()
-    for (const card of cards) {
-      const statements = buildCardStatements(card, transactions)
-      const due = statements
-        .filter((statement) => statement.paymentDate.getTime() >= today)
-        .sort((a, b) => a.paymentDate.getTime() - b.paymentDate.getTime())
-      map.set(card.id, {
-        statements,
-        currentTotal: statements.find((statement) => statement.status === 'open')?.total ?? 0,
-        outstanding: due.reduce((sum, statement) => sum + statement.total, 0),
-        nextPayment: due[0] ? { amount: due[0].total, date: due[0].paymentDate } : null,
-      })
-    }
+    for (const item of overviewQuery.data ?? []) map.set(item.cardId, toSnapshot(item))
     return map
-  }, [cards, transactions])
+  }, [overviewQuery.data])
 
   const overview = useMemo(() => {
-    const all = Array.from(snapshots.values())
+    const all = cards.map((card) => snapshots.get(card.id) ?? EMPTY_SNAPSHOT)
     const nextPayment = all
       .map((snapshot) => snapshot.nextPayment)
       .filter((payment): payment is NonNullable<CardSnapshot['nextPayment']> => payment !== null)
@@ -118,38 +97,18 @@ export default function CardsPage({ statementTarget = null, onStatementTargetHan
     }
   }, [cards, snapshots])
 
+  const statements = useMemo(() => (statementsQuery.data ?? []).map(toCardStatement), [statementsQuery.data])
+  const initialStatementKey = statementParam
+    ? statements.find((statement) => toIsoDay(statement.paymentDate) === statementParam)?.key ?? null
+    : null
+
   const selectedCard = cards.find((card) => card.id === selectedId) ?? null
-  const selectedSnapshot = selectedCard ? snapshots.get(selectedCard.id) ?? null : null
-  const detailOpen = selectedId !== null
+  const selectedSnapshot = selectedCard ? snapshots.get(selectedCard.id) ?? EMPTY_SNAPSHOT : null
 
-  const navigateToList = (replace = false) => {
-    const state = { ...(window.history.state ?? {}), appPage: 'cards' }
-    window.history[replace ? 'replaceState' : 'pushState'](state, '', '/cards')
-    setSelectedId(null)
-    setInitialStatementKey(null)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
+  const listLoading = methodsQuery.isPending || overviewQuery.isPending
+  const listFailed = !methodsQuery.data && Boolean(loadError)
 
-  const navigateToCard = useCallback((id: number, statementKey: string | null = null) => {
-    window.history.pushState({ ...(window.history.state ?? {}), appPage: 'cards' }, '', `/cards/${id}`)
-    setSelectedId(id)
-    setInitialStatementKey(statementKey)
-    setDetailVersion((version) => version + 1)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }, [])
-
-  // Arriving from another page (e.g. payments) with a specific statement to open.
-  useEffect(() => {
-    if (!loaded || !statementTarget) return
-    const card = cards.find((item) => item.id === statementTarget.cardId)
-    if (card) {
-      const statement = snapshots.get(card.id)?.statements.find(
-        (item) => isoDate(item.paymentDate) === statementTarget.paymentDate,
-      )
-      navigateToCard(card.id, statement?.key ?? null)
-    }
-    onStatementTargetHandled?.()
-  }, [cards, loaded, navigateToCard, onStatementTargetHandled, snapshots, statementTarget])
+  const navigateToList = (replace = false) => navigate(PAGE_PATHS.cards, { replace })
 
   const toggleValues = () => setHideValues((current) => {
     const next = !current
@@ -165,13 +124,17 @@ export default function CardsPage({ statementTarget = null, onStatementTargetHan
       const deletedSelected = selectedId === cardToDelete.id
       setCardToDelete(null)
       if (deletedSelected) navigateToList(true)
-      await load()
       ToastService.success({ title: t('cards.toast.deleted'), dedupeKey: `card-deleted:${cardToDelete.id}` })
     } catch (err) {
       ToastService.apiError(err, { title: t('cards.toast.deleteFailed'), dedupeKey: `card-delete-failed:${cardToDelete.id}` })
     } finally {
       setDeleting(false)
     }
+  }
+
+  const retry = () => {
+    void methodsQuery.refetch()
+    void overviewQuery.refetch()
   }
 
   return (
@@ -215,29 +178,32 @@ export default function CardsPage({ statementTarget = null, onStatementTargetHan
 
       <Box {...NU_SHEET_WRAP}>
         <Box className="nu-dashboard" pb={NU_SHEET_PB} bg="var(--nu-page)" borderTopRadius="24px" borderBottomRadius={{ base: 0, md: '24px' }} overflow="hidden">
-          {loading && !loaded ? (
+          {listLoading && !listFailed ? (
             <Flex justify="center" py={24}><Spinner color="var(--nu-brand, #820ad1)" /></Flex>
-          ) : error && !loaded ? (
+          ) : listFailed ? (
             <Flex direction="column" align="center" py={16} px={6} textAlign="center">
               <Text fontSize="md" fontWeight={600} color="var(--pb-ink)">{t('cards.toast.loadFailed')}</Text>
-              <Button mt={4} onClick={() => void load()} borderRadius="full" bg="var(--nu-brand, #820ad1)" color="white" _hover={{ bg: '#6f00b8' }}>{t('cards.action.retry')}</Button>
+              <Button mt={4} onClick={retry} borderRadius="full" bg="var(--nu-brand, #820ad1)" color="white" _hover={{ bg: '#6f00b8' }}>{t('cards.action.retry')}</Button>
             </Flex>
           ) : detailOpen ? (
-            selectedCard && selectedSnapshot ? (
-              <CardDetail
-                key={`${selectedCard.id}-${detailVersion}`}
-                card={selectedCard}
-                statements={selectedSnapshot.statements}
-                outstanding={selectedSnapshot.outstanding}
-                hideValues={hideValues}
-                initialStatementKey={initialStatementKey}
-                onSettings={() => setFormCard(selectedCard)}
-              />
-            ) : (
+            !selectedCard ? (
               <Flex direction="column" align="center" py={16}>
                 <Text fontSize="lg" fontWeight={600} color="var(--pb-ink)">{t('cards.page.notFound')}</Text>
                 <Button mt={4} onClick={() => navigateToList(true)} borderRadius="full" bg="var(--nu-brand, #820ad1)" color="white" _hover={{ bg: '#6f00b8' }}>{t('cards.action.back')}</Button>
               </Flex>
+            ) : statementsQuery.isPending ? (
+              <Flex justify="center" py={24}><Spinner color="var(--nu-brand, #820ad1)" /></Flex>
+            ) : (
+              <CardDetail
+                // Remount when arriving at another statement link so its initial tab/open row apply.
+                key={`${selectedCard.id}-${statementParam ?? ''}-${detailVersion}`}
+                card={selectedCard}
+                statements={statements}
+                outstanding={selectedSnapshot?.outstanding ?? 0}
+                hideValues={hideValues}
+                initialStatementKey={initialStatementKey}
+                onSettings={() => setFormCard(selectedCard)}
+              />
             )
           ) : (
             <Box px={{ base: 4, md: 6 }} py={{ base: 5, md: 6 }}>
@@ -267,7 +233,7 @@ export default function CardsPage({ statementTarget = null, onStatementTargetHan
                       card={card}
                       currentTotal={snapshots.get(card.id)?.currentTotal ?? 0}
                       hideValues={hideValues}
-                      onSelect={() => navigateToCard(card.id)}
+                      onSelect={() => navigate(cardPath(card.id))}
                     />
                   ))}
                 </Box>
@@ -283,7 +249,7 @@ export default function CardsPage({ statementTarget = null, onStatementTargetHan
         isOpen={formCard !== undefined}
         card={formCard}
         onClose={() => setFormCard(undefined)}
-        onSaved={async () => { await load(); setDetailVersion((version) => version + 1) }}
+        onSaved={() => setDetailVersion((version) => version + 1)}
         onDelete={(card) => { setFormCard(undefined); setCardToDelete(card) }}
       />
       <ConfirmDeleteDialog

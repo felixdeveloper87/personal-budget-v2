@@ -6,7 +6,10 @@ import com.example.budget.transaction.model.TransactionStatus;
 import com.example.budget.user.model.User;
 import com.example.budget.account.model.FinancialAccount;
 import com.example.budget.paymentmethod.model.PaymentMethodType;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
@@ -259,4 +262,51 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
     @Modifying(clearAutomatically = true)
     @Query("DELETE FROM Transaction t WHERE t.user = :user")
     void deleteAllByUser(@Param("user") User user);
+
+    /**
+     * Paged search; fetches the card and account with each row so mapping a page
+     * to DTOs does not fire one extra query per transaction.
+     */
+    @Override
+    @EntityGraph(attributePaths = {"paymentMethod", "account"})
+    Page<Transaction> findAll(Specification<Transaction> spec, Pageable pageable);
+
+    /**
+     * Transactions that touch a date window, by purchase date or by payment date.
+     * Both dates matter: card purchases are analysed on the day they happened and
+     * on the day the statement is paid.
+     */
+    @Query("SELECT t FROM Transaction t " +
+                    "LEFT JOIN FETCH t.paymentMethod " +
+                    "LEFT JOIN FETCH t.account " +
+                    "WHERE t.user = :user " +
+                    "AND ((t.transactionDate BETWEEN :from AND :to) OR (t.paymentDate BETWEEN :from AND :to))")
+    List<Transaction> findInWindow(
+                    @Param("user") User user,
+                    @Param("from") LocalDate from,
+                    @Param("to") LocalDate to);
+
+    /** Every expense charged to one of the user's credit cards (input for statement calculation). */
+    @Query("SELECT t FROM Transaction t " +
+                    "JOIN FETCH t.paymentMethod paymentMethod " +
+                    "LEFT JOIN FETCH t.account " +
+                    "WHERE t.user = :user " +
+                    "AND t.type = :expenseType " +
+                    "AND paymentMethod.type = :creditCardType")
+    List<Transaction> findCreditCardCharges(
+                    @Param("user") User user,
+                    @Param("expenseType") TransactionType expenseType,
+                    @Param("creditCardType") PaymentMethodType creditCardType);
+
+    /** Expenses charged to one card (input for that card's statements). */
+    @Query("SELECT t FROM Transaction t " +
+                    "JOIN FETCH t.paymentMethod paymentMethod " +
+                    "LEFT JOIN FETCH t.account " +
+                    "WHERE t.user = :user " +
+                    "AND t.type = :expenseType " +
+                    "AND paymentMethod.id = :cardId")
+    List<Transaction> findCardCharges(
+                    @Param("user") User user,
+                    @Param("cardId") Long cardId,
+                    @Param("expenseType") TransactionType expenseType);
 }

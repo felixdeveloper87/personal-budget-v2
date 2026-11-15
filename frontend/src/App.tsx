@@ -1,4 +1,6 @@
 import { Spinner, Center, VStack, Text } from '@chakra-ui/react'
+import { Fragment, useCallback, useEffect, useRef, useState } from 'react'
+import { Navigate, Route, Routes, useLocation, useNavigate, useNavigationType } from 'react-router-dom'
 import { useAuth } from './contexts/AuthContext'
 import Dashboard from './pages/Dashboard'
 import BehaviourPage from './pages/BehaviourPage'
@@ -16,93 +18,65 @@ import HouseholdPage from './pages/HouseholdPage'
 import BusinessPage from './pages/BusinessPage'
 import { AuthModal, Layout } from './components'
 import LandingV3 from './pages/landing-v3/LandingV3'
-import { Fragment, useState, useEffect, useCallback } from 'react'
 import PullToRefresh from './components/layout/PullToRefresh'
 import { useRefreshOnReturn } from './hooks/useRefreshOnReturn'
 import type { AppPage } from './components/layout/header/navigation.config'
 import { useI18n } from './i18n'
+import { PAGE_PATHS, cardPath, pageFromPath } from './routes'
+import { queryClient } from './queries/queryClient'
 
-interface PageRenderArgs {
-  onPageChange: (page: AppPage) => void
-  cardStatementTarget: CardStatementTarget | null
-  onOpenCardStatement: (target: CardStatementTarget) => void
-  onCardStatementTargetHandled: () => void
-}
-
-interface CardStatementTarget {
-  cardId: number
-  paymentDate: string
-}
-
-const PAGE_RENDERERS: Record<AppPage, (args: PageRenderArgs) => JSX.Element> = {
-  dashboard: ({ onPageChange }) => <Dashboard onPageChange={onPageChange} />,
-  household: () => <HouseholdPage />,
-  accounts: () => <AccountsPage />,
-  cards: ({ cardStatementTarget, onCardStatementTargetHandled }) => (
-    <CardsPage statementTarget={cardStatementTarget} onStatementTargetHandled={onCardStatementTargetHandled} />
-  ),
-  installments: ({ onPageChange }) => <CommitmentsPage onPageChange={onPageChange} initialTab="installments" />,
-  'fixed-payments': ({ onPageChange }) => <CommitmentsPage onPageChange={onPageChange} initialTab="fixed" />,
-  commitments: ({ onPageChange }) => <CommitmentsPage onPageChange={onPageChange} />,
-  behaviour: () => <BehaviourPage />,
-  earnings: () => <EarningsPage />,
-  business: () => <BusinessPage />,
-  'all-transactions': () => <AllTransactionsPage />,
-  payments: ({ onOpenCardStatement }) => <PaymentsPage onOpenCardStatement={onOpenCardStatement} />,
-  goals: () => <GoalsPage />,
-  planning: ({ onPageChange }) => <PlanningPage onPageChange={onPageChange} />,
-  reports: () => <ReportsPage />,
-  admin: ({ onPageChange }) => <AdminDashboardPage onPageChange={onPageChange} />,
-}
-
-function pageFromBrowserLocation(): AppPage {
-  if (window.location.pathname === '/household') return 'household'
-  if (window.location.pathname === '/accounts' || window.location.pathname.startsWith('/accounts/')) return 'accounts'
-  if (window.location.pathname === '/cards' || window.location.pathname.startsWith('/cards/')) return 'cards'
-  const statePage = window.history.state?.appPage
-  return typeof statePage === 'string' && statePage in PAGE_RENDERERS
-    ? statePage as AppPage
-    : 'dashboard'
-}
-
-function authTabFromBrowserLocation(): 'signIn' | 'signUp' | null {
-  const value = new URLSearchParams(window.location.search).get('auth')
+function authTabFromSearch(search: string): 'signIn' | 'signUp' | null {
+  const value = new URLSearchParams(search).get('auth')
   if (value === 'signup') return 'signUp'
   if (value === 'signin') return 'signIn'
   return null
+}
+
+/** New pages open at the top; back/forward (POP) keeps the browser's own scroll handling. */
+function useScrollToTopOnNavigate() {
+  const { pathname } = useLocation()
+  const navigationType = useNavigationType()
+  useEffect(() => {
+    if (navigationType !== 'POP') window.scrollTo({ top: 0 })
+  }, [pathname, navigationType])
 }
 
 function AppContent() {
   const refreshKey = useRefreshOnReturn()
   const { user, loading } = useAuth()
   const { t } = useI18n()
-  const [showAuth, setShowAuth] = useState(() => authTabFromBrowserLocation() !== null)
+  const location = useLocation()
+  const navigate = useNavigate()
+  const [showAuth, setShowAuth] = useState(() => authTabFromSearch(location.search) !== null)
   const [authTab, setAuthTab] = useState<'signIn' | 'signUp'>(
-    () => authTabFromBrowserLocation() ?? 'signIn',
+    () => authTabFromSearch(location.search) ?? 'signIn',
   )
-  const [currentPage, setCurrentPage] = useState<AppPage>(pageFromBrowserLocation)
-  const [cardStatementTarget, setCardStatementTarget] = useState<CardStatementTarget | null>(null)
+  useScrollToTopOnNavigate()
 
+  const currentPage: AppPage = pageFromPath(location.pathname) ?? 'dashboard'
+
+  /** Kept for the many buttons that navigate by page id; it now just changes the URL. */
   const navigateToPage = useCallback((page: AppPage) => {
-    setCurrentPage(page)
-    const nextPath = page === 'household' ? '/household'
-      : page === 'accounts' ? '/accounts'
-        : page === 'cards' ? '/cards'
-          : '/'
-    const nextState = { ...(window.history.state ?? {}), appPage: page }
-    if (window.location.pathname !== nextPath) {
-      window.history.pushState(nextState, '', nextPath)
-      // Let pages with in-page routes (e.g. /cards/:id → /cards) resync with the URL.
-      window.dispatchEvent(new PopStateEvent('popstate', { state: nextState }))
-    } else {
-      window.history.replaceState(nextState, '', nextPath)
-    }
-  }, [])
+    navigate(PAGE_PATHS[page])
+  }, [navigate])
 
-  const openCardStatement = (target: CardStatementTarget) => {
-    setCardStatementTarget(target)
-    navigateToPage('cards')
-  }
+  const openCardStatement = useCallback((target: { cardId: number; paymentDate: string }) => {
+    navigate(cardPath(target.cardId, target.paymentDate))
+  }, [navigate])
+
+  // Cached data belongs to one user: drop it on logout or account switch, and
+  // leave whatever deep link the session ended on.
+  const previousUserId = useRef(user?.id)
+  useEffect(() => {
+    if (previousUserId.current === user?.id) return
+    previousUserId.current = user?.id
+    queryClient.clear()
+    if (!user && location.pathname !== '/') navigate('/', { replace: true })
+  }, [user, location.pathname, navigate])
+
+  useEffect(() => {
+    if (user) setShowAuth(false)
+  }, [user])
 
   const openAuth = (tab: 'signIn' | 'signUp') => {
     setAuthTab(tab)
@@ -111,49 +85,19 @@ function AppContent() {
 
   const closeAuth = () => {
     setShowAuth(false)
-    const url = new URL(window.location.href)
-    if (!url.searchParams.has('auth')) return
-    url.searchParams.delete('auth')
-    window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`)
+    const params = new URLSearchParams(location.search)
+    if (!params.has('auth')) return
+    params.delete('auth')
+    const search = params.toString()
+    navigate({ pathname: location.pathname, search: search ? `?${search}` : '' }, { replace: true })
   }
-
-  useEffect(() => {
-    const onPopState = () => setCurrentPage(pageFromBrowserLocation())
-    window.addEventListener('popstate', onPopState)
-    window.history.replaceState(
-      { ...(window.history.state ?? {}), appPage: currentPage },
-      '',
-      window.location.pathname,
-    )
-    return () => window.removeEventListener('popstate', onPopState)
-  }, [])
-
-  useEffect(() => {
-    if (user?.admin) {
-      setCurrentPage('admin')
-    } else if (user) {
-      setCurrentPage(pageFromBrowserLocation())
-    }
-  }, [user?.admin, user?.id])
-
-  useEffect(() => {
-    if (user && currentPage === 'admin' && !user.admin) {
-      setCurrentPage('dashboard')
-    }
-  }, [user, currentPage])
-
-  useEffect(() => {
-    if (user) {
-      setShowAuth(false)
-    }
-  }, [user])
 
   if (loading) {
     return (
       <Center minH="100vh" bg="var(--pb-paper)">
         <VStack spacing={4}>
-          <Spinner 
-            size="xl" 
+          <Spinner
+            size="xl"
             color="brand.500"
             thickness="4px"
             speed="0.8s"
@@ -168,52 +112,15 @@ function AppContent() {
     )
   }
 
-  // Se usuário está logado, mostrar página atual
-  if (user) {
-    if (user.admin) {
-      return (
-        <>
-          <Layout
-            currentPage="admin"
-            onPageChange={navigateToPage}
-            showFooter={false}
-          >
-            <AdminDashboardPage key={refreshKey} onPageChange={navigateToPage} />
-          </Layout>
-          <PullToRefresh />
-        </>
-      )
-    }
-
-    const renderPage = PAGE_RENDERERS[currentPage] ?? PAGE_RENDERERS.dashboard
-    return (
-      <>
-        <Layout currentPage={currentPage} onPageChange={navigateToPage}>
-          {/* A new key after a long time away remounts the page so it refetches. */}
-          <Fragment key={refreshKey}>
-            {renderPage({
-              onPageChange: navigateToPage,
-              cardStatementTarget,
-              onOpenCardStatement: openCardStatement,
-              onCardStatementTargetHandled: () => setCardStatementTarget(null),
-            })}
-          </Fragment>
-        </Layout>
-        <PullToRefresh />
-      </>
-    )
-  }
-
-  // Se não está logado e não clicou em "Começar", mostrar landing page
-  if (!showAuth) {
+  if (!user) {
     return (
       <>
         <LandingV3
           onRequestAccess={() => openAuth('signUp')}
           onSignIn={() => openAuth('signIn')}
         />
-        <AuthModal 
-          isOpen={showAuth} 
+        <AuthModal
+          isOpen={showAuth}
           onClose={closeAuth}
           initialTab={authTab}
         />
@@ -221,18 +128,46 @@ function AppContent() {
     )
   }
 
-  // Se clicou em "Começar", mostrar modal de login/cadastro
+  if (user.admin) {
+    return (
+      <>
+        <Layout currentPage="admin" onPageChange={navigateToPage} showFooter={false}>
+          <AdminDashboardPage key={refreshKey} onPageChange={navigateToPage} />
+        </Layout>
+        <PullToRefresh />
+      </>
+    )
+  }
+
   return (
     <>
-      <LandingV3
-        onRequestAccess={() => openAuth('signUp')}
-        onSignIn={() => openAuth('signIn')}
-      />
-      <AuthModal 
-        isOpen={showAuth} 
-        onClose={closeAuth}
-        initialTab={authTab}
-      />
+      <Layout currentPage={currentPage} onPageChange={navigateToPage}>
+        {/* A new key after a long time away remounts the page so it refetches. */}
+        <Fragment key={refreshKey}>
+          <Routes>
+            <Route path={PAGE_PATHS.dashboard} element={<Dashboard onPageChange={navigateToPage} />} />
+            <Route path={PAGE_PATHS.household} element={<HouseholdPage />} />
+            <Route path={PAGE_PATHS.accounts} element={<AccountsPage />} />
+            <Route path={`${PAGE_PATHS.accounts}/:accountId`} element={<AccountsPage />} />
+            <Route path={PAGE_PATHS.cards} element={<CardsPage />} />
+            <Route path={`${PAGE_PATHS.cards}/:cardId`} element={<CardsPage />} />
+            <Route path={PAGE_PATHS.installments} element={<CommitmentsPage onPageChange={navigateToPage} initialTab="installments" />} />
+            <Route path={PAGE_PATHS['fixed-payments']} element={<CommitmentsPage onPageChange={navigateToPage} initialTab="fixed" />} />
+            <Route path={PAGE_PATHS.commitments} element={<CommitmentsPage onPageChange={navigateToPage} />} />
+            <Route path={PAGE_PATHS.behaviour} element={<BehaviourPage />} />
+            <Route path={PAGE_PATHS.earnings} element={<EarningsPage />} />
+            <Route path={PAGE_PATHS.business} element={<BusinessPage />} />
+            <Route path={PAGE_PATHS['all-transactions']} element={<AllTransactionsPage />} />
+            <Route path={PAGE_PATHS.payments} element={<PaymentsPage onOpenCardStatement={openCardStatement} />} />
+            <Route path={PAGE_PATHS.goals} element={<GoalsPage />} />
+            <Route path={PAGE_PATHS.planning} element={<PlanningPage onPageChange={navigateToPage} />} />
+            <Route path={PAGE_PATHS.reports} element={<ReportsPage />} />
+            {/* Unknown paths — and /admin for non-admins — land on the dashboard. */}
+            <Route path="*" element={<Navigate to={PAGE_PATHS.dashboard} replace />} />
+          </Routes>
+        </Fragment>
+      </Layout>
+      <PullToRefresh />
     </>
   )
 }

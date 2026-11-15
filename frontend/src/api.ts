@@ -39,10 +39,14 @@ import {
   WorkSession,
   ManualWorkSessionRequest,
   BusinessSummary,
+  CardOverview,
+  CardStatementResponse,
+  TransactionPage,
 } from './types'
 import { AUTH_SESSION_INVALID_EVENT } from './utils/jwtExpiry'
 import { ToastService } from './services/toast'
 import { translateNow } from './i18n'
+import { queryClient } from './queries/queryClient'
 
 function mapAuthToUser(payload: Record<string, unknown>): User {
   const userId =
@@ -103,7 +107,16 @@ api.interceptors.request.use(
 // 🔹 Response Interceptor:
 // Automatically handle expired or invalid tokens (HTTP 401).
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Any successful write can change balances, statements and summaries
+    // anywhere in the app, so drop every cached read (see queries/queryClient.ts).
+    const method = (response.config.method ?? 'get').toLowerCase()
+    const url = String(response.config.url ?? '')
+    if (method !== 'get' && !url.includes('/auth/')) {
+      void queryClient.invalidateQueries()
+    }
+    return response
+  },
   (error) => {
     if (error.response?.status === 401) {
       const url = String(error.config?.url ?? '')
@@ -179,9 +192,23 @@ export async function deleteAdminUser(id: number): Promise<void> {
 // 💸 TRANSACTION ENDPOINTS
 // ----------------------------------------------------
 
-// Get all transactions → GET /transactions
-export async function listTransactions(): Promise<Transaction[]> {
-  const { data } = await api.get<Transaction[]>('/transactions')
+// Transactions bought or paid within [from, to] → GET /transactions?from=&to= (yyyy-MM-dd)
+export async function listTransactionsInWindow(from: string, to: string): Promise<Transaction[]> {
+  const { data } = await api.get<Transaction[]>('/transactions', { params: { from, to } })
+  return data
+}
+
+// One page of transactions, newest first → GET /transactions/page
+export async function getTransactionsPage(params: {
+  page: number
+  size?: number
+  text?: string
+  type?: 'income' | 'expense'
+  category?: string
+  startDate?: string
+  endDate?: string
+}): Promise<TransactionPage> {
+  const { data } = await api.get<TransactionPage>('/transactions/page', { params })
   return data
 }
 
@@ -245,6 +272,18 @@ export async function exportTransactionsCsv(): Promise<Blob> {
 
 export async function listPaymentMethods(): Promise<PaymentMethod[]> {
   const { data } = await api.get<PaymentMethod[]>('/payment-methods')
+  return data
+}
+
+// Per-card statement totals → GET /payment-methods/cards/overview
+export async function getCardsOverview(): Promise<CardOverview[]> {
+  const { data } = await api.get<CardOverview[]>('/payment-methods/cards/overview')
+  return data
+}
+
+// Every statement of a card, with its transactions → GET /payment-methods/:id/statements
+export async function getCardStatements(cardId: number): Promise<CardStatementResponse[]> {
+  const { data } = await api.get<CardStatementResponse[]>(`/payment-methods/${cardId}/statements`)
   return data
 }
 

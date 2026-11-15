@@ -4,6 +4,7 @@ import com.example.budget.transaction.dto.CreateTransactionRequest;
 import com.example.budget.transaction.dto.ImportResultDTO;
 import com.example.budget.transaction.dto.ImportTransactionsRequest;
 import com.example.budget.transaction.dto.TransactionDTO;
+import com.example.budget.transaction.dto.TransactionPageDTO;
 import com.example.budget.transaction.dto.UpdateTransactionRequest;
 import com.example.budget.transaction.mapper.TransactionMapper;
 import com.example.budget.transaction.model.Transaction;
@@ -11,6 +12,7 @@ import com.example.budget.transaction.model.TransactionType;
 import com.example.budget.user.model.User;
 import com.example.budget.transaction.service.TransactionService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
@@ -49,9 +51,42 @@ public class TransactionController {
      * @return List of all transactions belonging to the authenticated user
      */
     @GetMapping
-    public List<TransactionDTO> all(Authentication authentication) {
+    public List<TransactionDTO> all(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+            Authentication authentication) {
         User user = (User) authentication.getPrincipal();
-        return mapper.toDTOList(service.findAllByUser(user));
+        if (from == null && to == null) {
+            return mapper.toDTOList(service.findAllByUser(user));
+        }
+        if (from == null || to == null) {
+            throw new IllegalArgumentException("Both 'from' and 'to' are required to filter by period");
+        }
+        return mapper.toDTOList(service.findInWindow(user, from, to));
+    }
+
+    /**
+     * Paged transactions, newest purchase first. Accepts the same filters as
+     * {@code /search}; {@code size} is capped at {@link TransactionService#MAX_PAGE_SIZE}.
+     */
+    @GetMapping("/page")
+    public TransactionPageDTO page(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "50") int size,
+            @RequestParam(required = false) String text,
+            @RequestParam(required = false) TransactionType type,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            Authentication authentication) {
+        User user = (User) authentication.getPrincipal();
+        Page<Transaction> result = service.searchPage(text, type, category, startDate, endDate, page, size, user);
+        return new TransactionPageDTO(
+                mapper.toDTOList(result.getContent()),
+                result.getNumber(),
+                result.getSize(),
+                result.getTotalElements(),
+                result.hasNext());
     }
 
     /**

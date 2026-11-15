@@ -7,7 +7,10 @@ import {
   extendTheme,
   type ChakraProviderProps,
 } from '@chakra-ui/react'
+import { BrowserRouter } from 'react-router-dom'
+import { QueryClientProvider } from '@tanstack/react-query'
 import App from './App'
+import { queryClient } from './queries/queryClient'
 import ReportPrintPage from './pages/ReportPrintPage'
 import theme from './theme'
 import './styles/button-motion.css'
@@ -21,8 +24,8 @@ if (!window.location.pathname.startsWith('/reports/print')) {
   reloadWhenNewVersionTakesOver()
 }
 
-// The print/export page is a standalone route (no app shell). The project has no
-// router, so we branch on the pathname — nginx already falls back to index.html.
+// The print/export page is a standalone route without the app shell, so it is
+// picked here before the router mounts — nginx already falls back to index.html.
 const isPrintRoute = window.location.pathname.startsWith('/reports/print')
 
 // Force light mode for the printable report, isolated from the app's own
@@ -60,6 +63,8 @@ const lightOnlyColorModeManager: NonNullable<ChakraProviderProps['colorModeManag
 }
 
 const appRoot = (
+  <BrowserRouter>
+  <QueryClientProvider client={queryClient}>
   <I18nProvider>
     <ChakraProvider theme={theme} colorModeManager={lightOnlyColorModeManager}>
       <ColorModeScript initialColorMode="light" />
@@ -71,6 +76,8 @@ const appRoot = (
       <AppToastContainer />
     </ChakraProvider>
   </I18nProvider>
+  </QueryClientProvider>
+  </BrowserRouter>
 )
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

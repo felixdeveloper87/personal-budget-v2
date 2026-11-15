@@ -1,16 +1,11 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { Box, Grid, Skeleton, useDisclosure } from '@chakra-ui/react'
 import { AddTransactionModal } from '../../components/transactions'
 import { useDashboardData } from '../../hooks/useDashboardData'
 import { usePeriodNavigator } from '../../hooks/usePeriodNavigator'
 import { usePeriodData } from '../../hooks/usePeriodData'
 import { useAuth } from '../../contexts/AuthContext'
-import {
-  getMonthlySummary,
-  listInstallmentPlans,
-  listPaymentMethods,
-} from '../../api'
-import type { InstallmentPlan, MonthlySummary } from '../../types'
+import { useInstallmentPlans, useMonthlySummary, usePaymentMethods } from '../../queries/hooks'
 import type { AppPage } from '../../components/layout/header/navigation.config'
 import { type TransactionDateBasis } from '../../utils/transactionDates'
 import './theme/pb-tokens.css'
@@ -68,45 +63,21 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
   // Previous period on the Behaviour lens, so merchant comparisons ("last month
   // you spent £X at Lidl") reflect when purchases actually happened.
   /* ── Side data: installments and credit-card names ── */
-  const [installmentPlans, setInstallmentPlans] = useState<InstallmentPlan[]>([])
-  const [previousSummary, setPreviousSummary] = useState<MonthlySummary | null>(null)
-  const [summaryRefresh, setSummaryRefresh] = useState(0)
+  const installmentPlans = useInstallmentPlans().data ?? []
+  const paymentMethods = usePaymentMethods().data
   // Credit-card id → name, used to fold a card's charges into one fatura row.
-  const [cardNames, setCardNames] = useState<Map<number, string>>(() => new Map())
-
-  useEffect(() => {
-    if (!user?.token) return
-    void listInstallmentPlans().then(setInstallmentPlans).catch(() => {})
-    void listPaymentMethods()
-      .then((methods) => {
-        const map = new Map<number, string>()
-        for (const m of methods) {
-          if (m.type === 'CREDIT_CARD') map.set(m.id, m.name)
-        }
-        setCardNames(map)
-      })
-      .catch(() => {})
-  }, [user?.token])
-
-  useEffect(() => {
-    let active = true
-
-    if (!user?.token) {
-      setPreviousSummary(null)
-      return () => { active = false }
+  const cardNames = useMemo(() => {
+    const map = new Map<number, string>()
+    for (const method of paymentMethods ?? []) {
+      if (method.type === 'CREDIT_CARD') map.set(method.id, method.name)
     }
-
-    const previousMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth() - 1, 1)
-    void getMonthlySummary(previousMonth)
-      .then((summary) => {
-        if (active) setPreviousSummary(summary)
-      })
-      .catch(() => {
-        if (active) setPreviousSummary(null)
-      })
-
-    return () => { active = false }
-  }, [selectedDate, summaryRefresh, user?.token])
+    return map
+  }, [paymentMethods])
+  const previousMonth = useMemo(
+    () => new Date(selectedDate.getFullYear(), selectedDate.getMonth() - 1, 1),
+    [selectedDate],
+  )
+  const previousSummary = useMonthlySummary(previousMonth).data ?? null
 
   /* ── Quick-add modal ── */
   const { isOpen: isModalOpen, onOpen: openModal, onClose: closeModal } = useDisclosure()
@@ -239,8 +210,8 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
         onClose={closeModal}
         type={modalType}
         transactions={transactions}
-        onTransactionCreated={() => { closeModal(); setSummaryRefresh((value) => value + 1); void loadData() }}
-        onRefresh={() => { setSummaryRefresh((value) => value + 1); void loadData() }}
+        onTransactionCreated={() => { closeModal(); void loadData() }}
+        onRefresh={() => { void loadData() }}
       />
     </Box>
     </Box>

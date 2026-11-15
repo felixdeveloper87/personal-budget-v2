@@ -27,6 +27,9 @@ import com.example.budget.transaction.repository.TransactionRepository;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -436,6 +439,49 @@ public class TransactionService {
             LocalDate start,
             LocalDate end,
             User user) {
+        return repository.findAll(searchSpecification(text, txType, category, start, end, user));
+    }
+
+    /** Largest page the paged endpoint will serve, whatever the client asks for. */
+    public static final int MAX_PAGE_SIZE = 200;
+
+    /**
+     * Transactions whose purchase date or payment date falls inside [from, to].
+     * Lets screens load the period they analyse instead of the whole history.
+     */
+    @Transactional(readOnly = true)
+    public List<Transaction> findInWindow(User user, LocalDate from, LocalDate to) {
+        if (from.isAfter(to)) {
+            throw new IllegalArgumentException("'from' must be on or before 'to'");
+        }
+        return repository.findInWindow(user, from, to);
+    }
+
+    /** One page of the search, newest purchase first (ties broken by id). */
+    @Transactional(readOnly = true)
+    public Page<Transaction> searchPage(
+            String text,
+            TransactionType txType,
+            String category,
+            LocalDate start,
+            LocalDate end,
+            int page,
+            int size,
+            User user) {
+        int safeSize = Math.max(1, Math.min(size, MAX_PAGE_SIZE));
+        Sort sort = Sort.by(Sort.Order.desc("transactionDate"), Sort.Order.desc("id"));
+        return repository.findAll(
+                searchSpecification(text, txType, category, start, end, user),
+                PageRequest.of(Math.max(page, 0), safeSize, sort));
+    }
+
+    private Specification<Transaction> searchSpecification(
+            String text,
+            TransactionType txType,
+            String category,
+            LocalDate start,
+            LocalDate end,
+            User user) {
 
         Specification<Transaction> spec = (root, query, cb) -> cb.conjunction();
 
@@ -463,7 +509,7 @@ public class TransactionService {
             spec = spec.and((root, query, cb) -> cb.lessThanOrEqualTo(root.get("paymentDate"), end));
         }
 
-        return repository.findAll(spec);
+        return spec;
     }
 
     private void prepareDates(Transaction transaction, PaymentMethod paymentMethod) {

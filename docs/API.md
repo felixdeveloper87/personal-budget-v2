@@ -15,6 +15,10 @@ Base URL: `http://localhost:8080` (dev) or your deployed backend URL. All endpoi
 
 ## Transactions
 - `GET /api/transactions` — list authenticated user's transactions.
+  - Optional `from` + `to` (`yyyy-MM-dd`, both required together): only transactions whose purchase date **or** payment date falls in the window. The web app always sends them; without them the whole history is returned.
+- `GET /api/transactions/page` — one page, newest purchase first.
+  - Query params: `page` (default `0`), `size` (default `50`, max `200`), plus the same optional filters as `/search`.
+  - Response: `{ items, page, size, totalElements, hasNext }`.
 - `POST /api/transactions`
   - Body: `{ description, type: "income"|"expense", category, amount, dateTime, installmentPlanId? }`
   - Response: created transaction.
@@ -23,6 +27,11 @@ Base URL: `http://localhost:8080` (dev) or your deployed backend URL. All endpoi
 - `GET /api/transactions/search`
   - Query params (all optional): `text`, `type` (`income|expense`), `category`, `startDate` (`yyyy-MM-dd`), `endDate` (`yyyy-MM-dd`).
   - Response includes `merchantName` and `merchantDomain` when the description matches the server merchant catalog.
+
+## Credit card statements
+Statements (faturas) are computed on the server by `CreditCardStatementCalculator`, using the same closing/payment rules as `CreditCardBillingService`.
+- `GET /api/payment-methods/cards/overview` — per credit card: `{ cardId, currentTotal, outstanding, nextPaymentDate, nextPaymentAmount, statementCount }`. `outstanding` sums every statement not yet due. No transactions in the payload.
+- `GET /api/payment-methods/{id}/statements` — every statement of one card, newest first: `{ key ("YYYY-MM"), periodStart, closingDate, paymentDate, status ("open"|"closed"|"upcoming"), total, transactionCount, transactions[] }`. `404` if the card is not the user's credit card.
 
 ## Analytics
 - `GET /api/summary/month`

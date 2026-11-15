@@ -20,15 +20,25 @@ import { useI18n } from '../i18n'
 
 interface AllTransactionsSectionProps {
   transactions: Transaction[]
+  /** Total on the server — more than `transactions` while older pages are not loaded. */
+  totalCount?: number
   hasFilters: boolean
   onRefresh: () => void
+  hasMore?: boolean
+  loadingMore?: boolean
+  onLoadMore?: () => void
 }
 
 export default function AllTransactionsSection({
   transactions,
+  totalCount,
   hasFilters,
   onRefresh,
+  hasMore = false,
+  loadingMore = false,
+  onLoadMore,
 }: AllTransactionsSectionProps) {
+  const count = totalCount ?? transactions.length
   const { t } = useI18n()
   const [groupByMonth, setGroupByMonth] = useState(true)
   // All-transactions is a management view — fixed to the purchase-date basis;
@@ -58,7 +68,7 @@ export default function AllTransactionsSection({
           stats={[
             {
               label: t('nav.all-transactions.label'),
-              value: t(transactions.length === 1 ? 'transactions.count' : 'transactions.countPlural', { count: transactions.length }),
+              value: t(count === 1 ? 'transactions.count' : 'transactions.countPlural', { count }),
             },
             ...(hasFilters ? [{ label: t('transactions.filtered'), value: '✓' }] : []),
           ]}
@@ -98,6 +108,22 @@ export default function AllTransactionsSection({
             onTransactionDeleted={onRefresh}
             dateBasis={dateBasis}
           />
+        )}
+        {hasMore && onLoadMore && (
+          <Flex justify="center" pt={4} pb={2}>
+            <Button
+              size="sm"
+              variant="ghost"
+              borderRadius="full"
+              color="var(--nu-brand, #820ad1)"
+              bg="var(--nu-brand-tint, #f3e8fc)"
+              _hover={{ bg: '#ead6fa' }}
+              isLoading={loadingMore}
+              onClick={onLoadMore}
+            >
+              {t('transactions.loadMore')}
+            </Button>
+          </Flex>
         )}
       </Box>
     </Box>

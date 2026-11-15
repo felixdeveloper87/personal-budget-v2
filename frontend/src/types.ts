@@ -64,6 +64,39 @@ export interface PaymentMethod {
   updatedAt?: string
 }
 
+/** Per-card statement numbers computed by the server (GET /payment-methods/cards/overview). */
+export interface CardOverview {
+  cardId: number
+  /** Total of the statement whose billing cycle is still open. */
+  currentTotal: number
+  /** Every statement not yet due — it keeps consuming the limit until paid. */
+  outstanding: number
+  nextPaymentDate: string | null
+  nextPaymentAmount: number
+  statementCount: number
+}
+
+/** A statement as returned by GET /payment-methods/:id/statements (dates as yyyy-MM-dd). */
+export interface CardStatementResponse {
+  key: string
+  periodStart: string
+  closingDate: string
+  paymentDate: string
+  status: 'open' | 'closed' | 'upcoming'
+  total: number
+  transactionCount: number
+  transactions: Transaction[]
+}
+
+/** One page of GET /transactions/page. */
+export interface TransactionPage {
+  items: Transaction[]
+  page: number
+  size: number
+  totalElements: number
+  hasNext: boolean
+}
+
 export interface PaymentMethodRequest {
   name: string
   type: PaymentMethodType
