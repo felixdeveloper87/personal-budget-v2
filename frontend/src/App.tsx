@@ -58,6 +58,7 @@ const PAGE_RENDERERS: Record<AppPage, (args: PageRenderArgs) => JSX.Element> = {
 function pageFromBrowserLocation(): AppPage {
   if (window.location.pathname === '/household') return 'household'
   if (window.location.pathname === '/accounts' || window.location.pathname.startsWith('/accounts/')) return 'accounts'
+  if (window.location.pathname === '/cards' || window.location.pathname.startsWith('/cards/')) return 'cards'
   const statePage = window.history.state?.appPage
   return typeof statePage === 'string' && statePage in PAGE_RENDERERS
     ? statePage as AppPage
@@ -84,10 +85,15 @@ function AppContent() {
 
   const navigateToPage = useCallback((page: AppPage) => {
     setCurrentPage(page)
-    const nextPath = page === 'household' ? '/household' : page === 'accounts' ? '/accounts' : '/'
+    const nextPath = page === 'household' ? '/household'
+      : page === 'accounts' ? '/accounts'
+        : page === 'cards' ? '/cards'
+          : '/'
     const nextState = { ...(window.history.state ?? {}), appPage: page }
     if (window.location.pathname !== nextPath) {
       window.history.pushState(nextState, '', nextPath)
+      // Let pages with in-page routes (e.g. /cards/:id → /cards) resync with the URL.
+      window.dispatchEvent(new PopStateEvent('popstate', { state: nextState }))
     } else {
       window.history.replaceState(nextState, '', nextPath)
     }

@@ -44,6 +44,7 @@ import QuickTransactionPresets from './QuickTransactionPresets'
 import { FinancialAccount, PaymentMethod, Transaction } from '../../../types'
 import { ToastService } from '../../../services/toast'
 import { toLocalIsoDateTimeFromYMD } from '../../../utils/dateTime'
+import { transactionAccountOptions } from '../../../utils/transactionAccount'
 import { useI18n } from '../../../i18n'
 
 /** Calendar date in local TZ (avoid UTC drift from `toISOString().slice`). */
@@ -152,7 +153,7 @@ export default function TransactionForm({
       .then((items) => {
         if (!active) return
         setAccounts(items)
-        setAccountId((current) => current ?? items.find((account) => account.active)?.id ?? null)
+        setAccountId((current) => current ?? transactionAccountOptions(items)[0]?.id ?? null)
       })
       .catch((err) => {
         ToastService.apiError(err, {
@@ -195,11 +196,12 @@ export default function TransactionForm({
     (id: number | null) => {
       setPaymentMethodId(id)
       const card = paymentMethods.find((method) => method.id === id)
-      if (card?.settlementAccountId) {
-        setAccountId(card.settlementAccountId)
+      const settlementId = card?.settlementAccountId
+      if (settlementId && transactionAccountOptions(accounts).some((account) => account.id === settlementId)) {
+        setAccountId(settlementId)
       }
     },
-    [paymentMethods],
+    [accounts, paymentMethods],
   )
 
   const selectedCard = paymentMethods.find((method) => method.id === paymentMethodId) ?? null

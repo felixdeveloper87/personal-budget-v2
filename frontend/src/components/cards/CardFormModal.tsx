@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import {
   Box,
   Button,
+  Divider,
   FormControl,
   FormHelperText,
   FormLabel,
@@ -15,12 +16,13 @@ import {
   Select,
   SimpleGrid,
   Switch,
+  Text,
   VStack,
 } from '@chakra-ui/react'
 import { createPaymentMethod, listAccounts, updatePaymentMethod } from '../../api'
 import type { FinancialAccount, PaymentMethod, PaymentMethodRequest } from '../../types'
 import { BankCombobox, ModalHeader, PremiumModal } from '../ui'
-import { Check, Plus } from '../ui/icons'
+import { Check, Plus, Trash2 } from '../ui/icons'
 import { ToastService } from '../../services/toast'
 import { useI18n } from '../../i18n'
 
@@ -30,6 +32,8 @@ export interface CardFormModalProps {
   /** Card being edited, or `null`/`undefined` to create a new one. */
   card?: PaymentMethod | null
   onSaved: () => void
+  /** When set (and editing), shows a delete action at the bottom of the form. */
+  onDelete?: (card: PaymentMethod) => void
 }
 
 interface FormState {
@@ -52,7 +56,7 @@ const DEFAULT_STATE: FormState = {
   settlementAccountId: null,
 }
 
-export default function CardFormModal({ isOpen, onClose, card, onSaved }: CardFormModalProps) {
+export default function CardFormModal({ isOpen, onClose, card, onSaved, onDelete }: CardFormModalProps) {
   const { t } = useI18n()
   const isEditing = Boolean(card)
   const [state, setState] = useState<FormState>(DEFAULT_STATE)
@@ -251,6 +255,32 @@ export default function CardFormModal({ isOpen, onClose, card, onSaved }: CardFo
               colorScheme="purple"
             />
           </FormControl>
+
+          {card && onDelete ? (
+            <>
+              <Divider />
+              <Box>
+                <Text fontSize="sm" fontWeight={600} color="var(--pb-coral)">
+                  {t('cards.delete.title')}
+                </Text>
+                <Text mt={1} fontSize="xs" color="var(--pb-ink-soft)">
+                  {t('cards.delete.description')}
+                </Text>
+                <Button
+                  mt={3}
+                  size="sm"
+                  variant="outline"
+                  leftIcon={<Icon as={Trash2} boxSize={4} />}
+                  color="var(--pb-coral)"
+                  borderColor="var(--pb-coral)"
+                  onClick={() => onDelete(card)}
+                  _hover={{ bg: 'var(--pb-tint-coral)' }}
+                >
+                  {t('cards.delete.title')}
+                </Button>
+              </Box>
+            </>
+          ) : null}
         </VStack>
       </Box>
     </PremiumModal>

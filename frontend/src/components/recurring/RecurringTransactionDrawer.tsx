@@ -38,6 +38,7 @@ import { useI18n } from '../../i18n'
 import '../../features/dashboard/theme/pb-tokens.css'
 import { SHEET_SX, sheetContainerProps, sheetGrabberProps } from '../ui/modalLayout'
 import NuDetailSheet, { NU_FIELD, NU_SHEET_COLORS, NuFacts, NuSheetBadge, NuSheetButton, nuButtonProps } from '../ui/NuDetailSheet'
+import { transactionAccountOptions } from '../../utils/transactionAccount'
 
 interface RecurringTransactionDrawerProps {
   recurringTransaction: RecurringTransaction | null
@@ -304,7 +305,7 @@ export default function RecurringTransactionDrawer({
                   onChange={(e) => setDraftAccountId(e.target.value ? Number(e.target.value) : null)}
                   placeholder={t('recurring.selectAccount')}
                 >
-                  {accounts.filter((a) => a.active).map((a) => (
+                  {transactionAccountOptions(accounts, draftAccountId ?? null).map((a) => (
                     <option key={a.id} value={a.id}>{a.name}</option>
                   ))}
                 </Select>

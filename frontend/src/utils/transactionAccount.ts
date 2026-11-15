@@ -1,4 +1,4 @@
-import type { Transaction } from '../types'
+import type { FinancialAccount, Transaction } from '../types'
 import { translateNow } from '../i18n'
 import { formatDateBR } from './dateTime'
 
@@ -41,5 +41,19 @@ export function formatTransactionAccount(
   return translateNow(
     scheduled ? 'transaction.account.expense.scheduled' : 'transaction.account.expense.paid',
     { account: transaction.accountName, date: onDate },
+  )
+}
+
+/**
+ * Accounts a transaction (income or expense) can be booked against.
+ * Savings accounts only move money through transfers, so they are left out;
+ * `keepId` keeps an already-linked account visible when editing older records.
+ */
+export function transactionAccountOptions<T extends Pick<FinancialAccount, 'id' | 'type' | 'active'>>(
+  accounts: T[],
+  keepId: number | null = null,
+): T[] {
+  return accounts.filter(
+    (account) => (account.active && account.type !== 'SAVINGS') || (keepId !== null && account.id === keepId),
   )
 }

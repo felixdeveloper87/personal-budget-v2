@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useState } from 'react'
 import { Box, Flex, HStack, Icon, IconButton, Spinner, Text } from '@chakra-ui/react'
 import { getAccountDetails, getAccountActivityPage } from '../../../api'
 import type { AccountActivityItem, AccountActivityPage, AccountDetails, FinancialAccount } from '../../../types'
@@ -7,7 +7,7 @@ import { ChevronLeft, ChevronRight, Repeat, Settings } from '../../../components
 import { ACCOUNT_LABELS } from '../data/accountMeta'
 import { useI18n } from '../../../i18n'
 import AccountAvatar from '../../../components/accounts/AccountAvatar'
-import { NuSection } from '../../dashboard/components/nu'
+import { NuInfoRow as InfoRow, NuQuickAction as QuickAction, NuSection } from '../../dashboard/components/nu'
 import Segmented from '../../dashboard/components/Segmented'
 import AccountActivityRow from './RecentActivity'
 
@@ -289,48 +289,5 @@ export default function AccountDetail({ account, hideBalances, onTransfer, onSet
         )}
       </NuSection>
     </Box>
-  )
-}
-
-/** Nubank-style round shortcut: grey circle + label underneath. */
-function QuickAction({ icon, label, onClick }: { icon: ReactNode; label: string; onClick: () => void }) {
-  return (
-    <Flex
-      as="button"
-      type="button"
-      onClick={onClick}
-      aria-label={label}
-      direction="column"
-      align="center"
-      w="76px"
-      gap={2}
-      role="group"
-      _focusVisible={{ outline: 'none' }}
-    >
-      <Flex
-        w="60px"
-        h="60px"
-        align="center"
-        justify="center"
-        borderRadius="full"
-        bg="var(--nu-surface)"
-        color="var(--pb-ink)"
-        transition="background-color .15s ease, transform .15s ease"
-        _groupHover={{ bg: 'var(--nu-surface-hover)', transform: 'translateY(-1px)' }}
-        _groupFocusVisible={{ boxShadow: '0 0 0 2px var(--nu-brand)' }}
-      >
-        {icon}
-      </Flex>
-      <Text fontSize="sm" fontWeight={600} color="var(--pb-ink)" noOfLines={1}>{label}</Text>
-    </Flex>
-  )
-}
-
-function InfoRow({ label, value }: { label: string; value: string }) {
-  return (
-    <Flex align="center" justify="space-between" gap={3} minH="48px" py={3} borderBottom="1px solid var(--pb-hair)">
-      <Text fontSize="sm" color="var(--pb-ink-soft)">{label}</Text>
-      <Text fontSize="sm" fontWeight={600} color="var(--pb-ink)" textAlign="right" noOfLines={1}>{value}</Text>
-    </Flex>
   )
 }

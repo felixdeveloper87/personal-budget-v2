@@ -179,6 +179,7 @@ export default function EditTransactionModal({
             onChange={setAccountId}
             accounts={accounts}
             loading={paymentMethodsLoading}
+            keepSelected
           />
           {type === 'EXPENSE' && (
             <PaymentMethodSelector

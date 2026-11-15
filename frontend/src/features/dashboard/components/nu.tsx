@@ -1,4 +1,4 @@
-import { Box, Text } from '@chakra-ui/react'
+import { Box, Flex, Text } from '@chakra-ui/react'
 import type { BoxProps } from '@chakra-ui/react'
 import type { ReactNode } from 'react'
 
@@ -49,6 +49,49 @@ export function NuTitle({ children }: { children: ReactNode }) {
     <Text as="h2" fontSize={{ base: 'lg', md: 'xl' }} fontWeight={600} letterSpacing="-0.01em" color="var(--pb-ink)">
       {children}
     </Text>
+  )
+}
+
+/** Nubank-style round shortcut: grey circle + label underneath. */
+export function NuQuickAction({ icon, label, onClick }: { icon: ReactNode; label: string; onClick: () => void }) {
+  return (
+    <Flex
+      as="button"
+      type="button"
+      onClick={onClick}
+      aria-label={label}
+      direction="column"
+      align="center"
+      w="76px"
+      gap={2}
+      role="group"
+      _focusVisible={{ outline: 'none' }}
+    >
+      <Flex
+        w="60px"
+        h="60px"
+        align="center"
+        justify="center"
+        borderRadius="full"
+        bg="var(--nu-surface)"
+        color="var(--pb-ink)"
+        transition="background-color .15s ease, transform .15s ease"
+        _groupHover={{ bg: 'var(--nu-surface-hover)', transform: 'translateY(-1px)' }}
+        _groupFocusVisible={{ boxShadow: '0 0 0 2px var(--nu-brand)' }}
+      >
+        {icon}
+      </Flex>
+      <Text fontSize="sm" fontWeight={600} color="var(--pb-ink)" noOfLines={1}>{label}</Text>
+    </Flex>
+  )
+}
+
+export function NuInfoRow({ label, value }: { label: string; value: string }) {
+  return (
+    <Flex align="center" justify="space-between" gap={3} minH="48px" py={3} borderBottom="1px solid var(--pb-hair)">
+      <Text fontSize="sm" color="var(--pb-ink-soft)">{label}</Text>
+      <Text fontSize="sm" fontWeight={600} color="var(--pb-ink)" textAlign="right" noOfLines={1}>{value}</Text>
+    </Flex>
   )
 }
 

@@ -10,6 +10,7 @@ import AccountAvatar from '../../accounts/AccountAvatar'
 import PagedGrid, { tileStyle } from './PagedGrid'
 import { FinancialAccount } from '../../../types'
 import { useI18n } from '../../../i18n'
+import { transactionAccountOptions } from '../../../utils/transactionAccount'
 
 interface AccountSelectorProps {
   value: number | null
@@ -17,6 +18,8 @@ interface AccountSelectorProps {
   accounts: FinancialAccount[]
   loading?: boolean
   showBalances?: boolean
+  /** Keep the current value listed even if it is no longer selectable (editing older records). */
+  keepSelected?: boolean
 }
 
 export default function AccountSelector({
@@ -25,12 +28,14 @@ export default function AccountSelector({
   accounts,
   loading = false,
   showBalances = true,
+  keepSelected = false,
 }: AccountSelectorProps) {
   const { t, formatCurrency } = useI18n()
   const borderColor = useColorModeValue('gray.200', 'whiteAlpha.200')
   const captionColor = useColorModeValue('gray.500', 'gray.400')
 
-  const activeAccounts = accounts.filter((account) => account.active)
+  // Savings accounts are moved via transfers only, never picked for income or spending.
+  const activeAccounts = transactionAccountOptions(accounts, keepSelected ? value : null)
   const selected = activeAccounts.find((account) => account.id === value)
 
   return (

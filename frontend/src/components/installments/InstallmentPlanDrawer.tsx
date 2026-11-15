@@ -31,6 +31,7 @@ import { ToastService } from '../../services/toast'
 import PlanLogo from './PlanLogo'
 import { isInstallmentPlanCompleted } from './InstallmentPlanCard'
 import { getInstallmentPlanTitle } from '../../utils/installments'
+import { transactionAccountOptions } from '../../utils/transactionAccount'
 import { useI18n } from '../../i18n'
 import PremiumModal from '../ui/PremiumModal'
 import NuModalHeader from '../ui/NuModalHeader'
@@ -482,7 +483,7 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
                 onChange={(event) => setDraftAccountId(event.target.value ? Number(event.target.value) : null)}
                 placeholder={t('installments.drawer.editModal.selectAccount')}
               >
-                {accounts.filter((account) => account.active).map((account) => (
+                {transactionAccountOptions(accounts, draftAccountId ?? null).map((account) => (
                   <option key={account.id} value={account.id}>{account.name}</option>
                 ))}
               </Select>
