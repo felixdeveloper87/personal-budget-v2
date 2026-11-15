@@ -18,6 +18,7 @@ public record FinancialAccountDTO(
         BigDecimal overdraftUsed,
         BigDecimal overdraftAvailable,
         BigDecimal overdraftPercentageUsed,
+        BigDecimal interestRate,
         boolean active,
         LocalDateTime createdAt,
         LocalDateTime updatedAt

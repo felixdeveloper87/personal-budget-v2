@@ -35,7 +35,7 @@ public class UserDataExportService {
     private static final List<String> HEADERS = List.of(
             "Record Type", "ID", "Date", "Type", "Category", "Description", "Amount",
             "Payment Method", "Account", "Payment Date", "Status", "Name", "Institution",
-            "Currency", "Opening Balance", "Overdraft Limit", "Balance Anchor At", "Active",
+            "Currency", "Opening Balance", "Overdraft Limit", "Interest Rate", "Balance Anchor At", "Active",
             "Issuer", "Statement Closing Day", "Payment Day", "Total Installments",
             "Installment Value", "Total Amount", "First Date", "Last Date", "Frequency",
             "Start Date", "End Date", "Next Run Date", "Day Of Month", "From Account",
@@ -94,6 +94,7 @@ public class UserDataExportService {
                         "Currency", account.getCurrency(),
                         "Opening Balance", account.getOpeningBalance(),
                         "Overdraft Limit", account.getOverdraftLimit(),
+                        "Interest Rate", account.getInterestRate(),
                         "Balance Anchor At", account.getBalanceAnchorAt(),
                         "Active", account.isActive(),
                         "Created At", account.getCreatedAt(),

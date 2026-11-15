@@ -315,6 +315,10 @@ public class FinancialAccountService {
         if (request.getType() != AccountType.CURRENT && overdraftLimit.signum() > 0) {
             throw new IllegalArgumentException("Overdraft is only supported for current accounts");
         }
+        BigDecimal interestRate = request.getInterestRate();
+        if (request.getType() != AccountType.SAVINGS && interestRate != null && interestRate.signum() > 0) {
+            throw new IllegalArgumentException("Interest rate is only supported for savings accounts");
+        }
         account.setName(request.getName().trim());
         account.setType(request.getType());
         account.setInstitution(StringUtils.hasText(request.getInstitution())
@@ -325,6 +329,7 @@ public class FinancialAccountService {
                 : "GBP");
         account.setOpeningBalance(request.getOpeningBalance());
         account.setOverdraftLimit(overdraftLimit);
+        account.setInterestRate(request.getType() == AccountType.SAVINGS ? interestRate : null);
         account.setActive(request.isActive());
     }
 
@@ -360,6 +365,7 @@ public class FinancialAccountService {
                 overdraftUsed,
                 overdraftAvailable,
                 overdraftPercentageUsed,
+                account.getType() == AccountType.SAVINGS ? account.getInterestRate() : null,
                 account.isActive(),
                 account.getCreatedAt(),
                 account.getUpdatedAt());

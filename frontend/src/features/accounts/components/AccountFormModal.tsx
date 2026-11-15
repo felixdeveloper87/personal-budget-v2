@@ -15,6 +15,7 @@ import {
   Input,
   InputGroup,
   InputLeftElement,
+  InputRightElement,
   NumberInput,
   NumberInputField,
   Select,
@@ -47,6 +48,7 @@ export default function AccountFormModal({ isOpen, onClose, account, onSaved, on
   const [type, setType] = useState<AccountType>('CURRENT')
   const [openingBalance, setOpeningBalance] = useState('0')
   const [overdraftLimit, setOverdraftLimit] = useState(0)
+  const [interestRate, setInterestRate] = useState('')
   const [saving, setSaving] = useState(false)
 
   const muted = 'var(--pb-ink-soft)'
@@ -62,11 +64,13 @@ export default function AccountFormModal({ isOpen, onClose, account, onSaved, on
       setType(account.type)
       setOpeningBalance(String(account.currentBalance))
       setOverdraftLimit(account.overdraftLimit)
+      setInterestRate(account.interestRate != null ? String(account.interestRate) : '')
     } else {
       setInstitution('')
       setType('CURRENT')
       setOpeningBalance('0')
       setOverdraftLimit(0)
+      setInterestRate('')
     }
   }, [isOpen, account])
 
@@ -83,6 +87,20 @@ export default function AccountFormModal({ isOpen, onClose, account, onSaved, on
       })
       return
     }
+    const trimmedRate = interestRate.trim()
+    const parsedInterestRate = trimmedRate === '' || trimmedRate === '.' ? null : Number(trimmedRate)
+    if (
+      type === 'SAVINGS' &&
+      parsedInterestRate !== null &&
+      (!Number.isFinite(parsedInterestRate) || parsedInterestRate < 0 || parsedInterestRate > 100)
+    ) {
+      ToastService.error({
+        title: t('accounts.form.invalidInterestRate.title'),
+        description: t('accounts.form.invalidInterestRate.description'),
+        dedupeKey: 'invalid-account-interest-rate',
+      })
+      return
+    }
     setSaving(true)
     try {
       const request = {
@@ -92,6 +110,7 @@ export default function AccountFormModal({ isOpen, onClose, account, onSaved, on
         currency: 'GBP',
         openingBalance: parsedOpeningBalance,
         overdraftLimit: type === 'CURRENT' ? overdraftLimit : 0,
+        interestRate: type === 'SAVINGS' ? parsedInterestRate : null,
         active: true,
       }
       if (account) {
@@ -199,6 +218,7 @@ export default function AccountFormModal({ isOpen, onClose, account, onSaved, on
                   const nextType = event.target.value as AccountType
                   setType(nextType)
                   if (nextType !== 'CURRENT') setOverdraftLimit(0)
+                  if (nextType !== 'SAVINGS') setInterestRate('')
                 }}
               >
                 {typeOptions.map((value) => (
@@ -265,6 +285,30 @@ export default function AccountFormModal({ isOpen, onClose, account, onSaved, on
                   <NumberInputField bg={fieldBg} pl={8} />
                 </NumberInput>
                 <FormHelperText>{t('accounts.form.overdraftHelp')}</FormHelperText>
+              </FormControl>
+            )}
+            {type === 'SAVINGS' && (
+              <FormControl>
+                <FormLabel>{t('accounts.form.interestRate')}</FormLabel>
+                <InputGroup>
+                  <Input
+                    bg={fieldBg}
+                    type="text"
+                    inputMode="decimal"
+                    value={interestRate}
+                    onChange={(event) => {
+                      const value = event.target.value.replace(',', '.')
+                      if (/^\d{0,3}(\.\d{0,3})?$/.test(value)) {
+                        setInterestRate(value)
+                      }
+                    }}
+                    placeholder="4.50"
+                  />
+                  <InputRightElement pointerEvents="none" color={muted} fontWeight={700}>
+                    %
+                  </InputRightElement>
+                </InputGroup>
+                <FormHelperText>{t('accounts.form.interestRateHelp')}</FormHelperText>
               </FormControl>
             )}
           </SimpleGrid>

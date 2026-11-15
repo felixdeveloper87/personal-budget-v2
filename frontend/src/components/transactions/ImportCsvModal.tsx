@@ -189,6 +189,7 @@ export default function ImportCsvModal({ isOpen, onClose, onImported }: ImportCs
             currency: get(row.values, 'currency') || 'GBP',
             openingBalance: number(get(row.values, 'opening balance')),
             overdraftLimit: number(get(row.values, 'overdraft limit')),
+            interestRate: optionalNumber(get(row.values, 'interest rate')) ?? null,
             active: bool(get(row.values, 'active')),
           }
           const created = await createAccount(request)

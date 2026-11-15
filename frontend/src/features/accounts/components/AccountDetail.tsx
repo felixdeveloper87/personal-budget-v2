@@ -32,7 +32,7 @@ interface AccountDetailProps {
 
 /** Body of the account page's white sheet — the balance itself lives in the purple hero. */
 export default function AccountDetail({ account, hideBalances, onTransfer, onSettings }: AccountDetailProps) {
-  const { t, formatCurrency, formatDate } = useI18n()
+  const { t, formatCurrency, formatDate, formatNumber } = useI18n()
   const [details, setDetails] = useState<AccountDetails | null>(null)
 
   useEffect(() => {
@@ -94,6 +94,10 @@ export default function AccountDetail({ account, hideBalances, onTransfer, onSet
   const typeLabel = t(`accounts.type.${shown.type}`, undefined, ACCOUNT_LABELS[shown.type])
   const overdraftPercentage = Math.max(0, Math.min(100, shown.overdraftPercentageUsed || 0))
   const overdraftDanger = overdraftPercentage >= 75
+  const interestRate = shown.type === 'SAVINGS' && shown.interestRate != null ? shown.interestRate : null
+  const estimatedAnnualInterest = interestRate !== null && shown.currentBalance > 0
+    ? (shown.currentBalance * interestRate) / 100
+    : null
   const fullDate = (value: string) => formatDate(value, { day: '2-digit', month: 'long', year: 'numeric' })
 
   const items = tab === 'recent' ? activity?.items ?? [] : details?.upcomingActivity ?? []
@@ -150,6 +154,15 @@ export default function AccountDetail({ account, hideBalances, onTransfer, onSet
           <InfoRow label={t('accounts.detail.info.type')} value={typeLabel} />
           <InfoRow label={t('accounts.detail.info.currency')} value={shown.currency} />
           <InfoRow label={t('accounts.openingBalance')} value={mask(shown.openingBalance)} />
+          {interestRate !== null && (
+            <InfoRow
+              label={t('accounts.detail.info.interestRate')}
+              value={`${formatNumber(interestRate, { maximumFractionDigits: 3 })}%`}
+            />
+          )}
+          {estimatedAnnualInterest !== null && (
+            <InfoRow label={t('accounts.detail.info.estimatedInterest')} value={mask(estimatedAnnualInterest)} />
+          )}
           <InfoRow label={t('accounts.detail.info.anchor')} value={fullDate(shown.balanceAnchorAt)} />
           {shown.createdAt && <InfoRow label={t('accounts.detail.info.created')} value={fullDate(shown.createdAt)} />}
         </Box>

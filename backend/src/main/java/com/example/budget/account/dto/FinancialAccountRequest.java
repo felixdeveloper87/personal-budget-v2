@@ -1,6 +1,8 @@
 package com.example.budget.account.dto;
 
 import com.example.budget.account.model.AccountType;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -28,6 +30,11 @@ public class FinancialAccountRequest {
     @PositiveOrZero(message = "Overdraft limit cannot be negative")
     private BigDecimal overdraftLimit = BigDecimal.ZERO;
 
+    @PositiveOrZero(message = "Interest rate cannot be negative")
+    @DecimalMax(value = "100", message = "Interest rate cannot exceed 100%")
+    @Digits(integer = 3, fraction = 3, message = "Interest rate supports up to 3 decimal places")
+    private BigDecimal interestRate;
+
     private boolean active = true;
 
     public String getName() { return name; }
@@ -42,6 +49,8 @@ public class FinancialAccountRequest {
     public void setOpeningBalance(BigDecimal openingBalance) { this.openingBalance = openingBalance; }
     public BigDecimal getOverdraftLimit() { return overdraftLimit; }
     public void setOverdraftLimit(BigDecimal overdraftLimit) { this.overdraftLimit = overdraftLimit; }
+    public BigDecimal getInterestRate() { return interestRate; }
+    public void setInterestRate(BigDecimal interestRate) { this.interestRate = interestRate; }
     public boolean isActive() { return active; }
     public void setActive(boolean active) { this.active = active; }
 }

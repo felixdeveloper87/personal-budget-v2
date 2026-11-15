@@ -88,6 +88,8 @@ export interface FinancialAccount {
   overdraftUsed: number
   overdraftAvailable: number
   overdraftPercentageUsed: number
+  /** Annual interest rate (AER, %) — savings accounts only. */
+  interestRate?: number | null
   active: boolean
   createdAt?: string
   updatedAt?: string
@@ -100,6 +102,7 @@ export interface FinancialAccountRequest {
   currency: string
   openingBalance: number
   overdraftLimit: number
+  interestRate?: number | null
   active: boolean
 }
 

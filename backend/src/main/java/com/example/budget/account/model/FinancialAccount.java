@@ -40,6 +40,9 @@ public class FinancialAccount {
     @Column(name = "overdraft_limit", nullable = false, precision = 14, scale = 2)
     private BigDecimal overdraftLimit = BigDecimal.ZERO;
 
+    @Column(name = "interest_rate", precision = 6, scale = 3)
+    private BigDecimal interestRate;
+
     @Column(name = "balance_anchor_at", nullable = false)
     private LocalDateTime balanceAnchorAt;
 
@@ -91,6 +94,8 @@ public class FinancialAccount {
     public void setOpeningBalance(BigDecimal openingBalance) { this.openingBalance = openingBalance; }
     public BigDecimal getOverdraftLimit() { return overdraftLimit; }
     public void setOverdraftLimit(BigDecimal overdraftLimit) { this.overdraftLimit = overdraftLimit; }
+    public BigDecimal getInterestRate() { return interestRate; }
+    public void setInterestRate(BigDecimal interestRate) { this.interestRate = interestRate; }
     public LocalDateTime getBalanceAnchorAt() { return balanceAnchorAt; }
     public void setBalanceAnchorAt(LocalDateTime balanceAnchorAt) { this.balanceAnchorAt = balanceAnchorAt; }
     public boolean isActive() { return active; }
