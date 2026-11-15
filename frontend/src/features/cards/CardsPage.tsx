@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
-import { Box, Button, Flex, Icon, Spinner, Text } from '@chakra-ui/react'
+import { Box, Button, Flex, Icon, Text } from '@chakra-ui/react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
 import { deletePaymentMethod } from '../../api'
@@ -18,6 +18,7 @@ import { NU_SHEET_PB, NU_SHEET_WRAP } from '../dashboard/components/nu'
 import CardRow from './components/CardRow'
 import CardDetail, { CARD_LIMIT_WARNING_PCT } from './components/CardDetail'
 import CardsTotalHero from './components/CardsTotalHero'
+import ListSkeleton from '../../components/ui/ListSkeleton'
 
 const CARD_BALANCE_VISIBILITY_KEY = 'cards:hide-values'
 
@@ -179,7 +180,7 @@ export default function CardsPage() {
       <Box {...NU_SHEET_WRAP}>
         <Box className="nu-dashboard" pb={NU_SHEET_PB} bg="var(--nu-page)" borderTopRadius="24px" borderBottomRadius={{ base: 0, md: '24px' }} overflow="hidden">
           {listLoading && !listFailed ? (
-            <Flex justify="center" py={24}><Spinner color="var(--nu-brand, #820ad1)" /></Flex>
+            <ListSkeleton withSummary />
           ) : listFailed ? (
             <Flex direction="column" align="center" py={16} px={6} textAlign="center">
               <Text fontSize="md" fontWeight={600} color="var(--pb-ink)">{t('cards.toast.loadFailed')}</Text>
@@ -192,7 +193,7 @@ export default function CardsPage() {
                 <Button mt={4} onClick={() => navigateToList(true)} borderRadius="full" bg="var(--nu-brand, #820ad1)" color="white" _hover={{ bg: '#6f00b8' }}>{t('cards.action.back')}</Button>
               </Flex>
             ) : statementsQuery.isPending ? (
-              <Flex justify="center" py={24}><Spinner color="var(--nu-brand, #820ad1)" /></Flex>
+              <ListSkeleton withSummary />
             ) : (
               <CardDetail
                 // Remount when arriving at another statement link so its initial tab/open row apply.

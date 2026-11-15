@@ -9,7 +9,7 @@ import { UserProfileModal, UserSettingsModal } from '../user'
 import Footer from './Footer'
 import Header, { MOBILE_NAV_SAFE_HEIGHT } from './header/Header'
 import Sidebar, { SIDEBAR_COLLAPSED_W, SIDEBAR_EXPANDED_W } from './Sidebar'
-import type { AppPage } from './header/navigation.config'
+import type { AppPage, PageChangeHandler } from './header/navigation.config'
 import { ADMIN_NAV_ITEM, NAV_ITEMS } from './header/navigation.config'
 
 /* -------------------------------------------------------------------------- */
@@ -45,7 +45,7 @@ function useSidebarCollapse() {
 interface LayoutProps {
   children: React.ReactNode
   currentPage?: AppPage
-  onPageChange?: (page: AppPage) => void
+  onPageChange?: PageChangeHandler
   /** Set false for admin-only shell (no marketing footer). */
   showFooter?: boolean
 }
@@ -137,7 +137,12 @@ export default function Layout({
           </Box>
         </Box>
 
-        {showFooter ? <Footer /> : null}
+        {/* Apps have no footer: on phones the tab bar closes the screen. */}
+        {showFooter ? (
+          <Box mt="auto" display={{ base: user ? 'none' : 'block', md: 'block' }}>
+            <Footer />
+          </Box>
+        ) : null}
 
         {/* Lets the final content/footer scroll fully above the fixed mobile nav. */}
         {user && <Box display={{ base: 'block', md: 'none' }} flexShrink={0} h={MOBILE_NAV_SAFE_HEIGHT} />}

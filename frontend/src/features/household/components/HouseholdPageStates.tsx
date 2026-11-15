@@ -9,7 +9,6 @@ import {
   HStack,
   Icon,
   Input,
-  Spinner,
   Stack,
   Text,
   VStack,
@@ -26,6 +25,7 @@ import NuHero from '../../dashboard/components/NuHero'
 import { HouseLineArt } from '../HouseholdHeader'
 import type { ApplyHouseholdAction } from '../hooks/useHouseholdPageController'
 import { NU_SHEET_PB, NU_SHEET_WRAP } from '../../dashboard/components/nu'
+import ListSkeleton from '../../../components/ui/ListSkeleton'
 
 /* Same frame as the loaded page: purple hero, then a white sheet tucked over it. */
 function HouseholdStateFrame({ hero, children }: { hero: ReactNode; children: ReactNode }) {
@@ -82,13 +82,9 @@ const pillPrimary: ButtonProps = {
 }
 
 export function HouseholdLoadingState() {
-  const { t } = useI18n()
   return (
     <HouseholdStateFrame hero={null}>
-      <VStack spacing={3} py={10}>
-        <Spinner color="var(--nu-brand)" thickness="3px" />
-        <Text color="var(--pb-ink-soft)" fontSize="sm">{t('household.loading')}</Text>
-      </VStack>
+      <ListSkeleton withSummary />
     </HouseholdStateFrame>
   )
 }

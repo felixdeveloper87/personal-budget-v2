@@ -18,6 +18,8 @@ export const SHEET_RADIUS = '28px'
 
 /** Everything narrower than Chakra's `md` breakpoint (48em) is "mobile". */
 export const MOBILE_MEDIA = '@media screen and (max-width: 47.99em)'
+/** Same breakpoint for `matchMedia`. */
+export const MOBILE_QUERY = '(max-width: 47.99em)'
 
 /**
  * `!important` because callers still pass their own responsive sizes (for
@@ -66,6 +68,9 @@ export const SHEET_SX = sheetContentProps().sx
 export const sheetContainerProps = {
   alignItems: { base: 'flex-end', md: 'center' },
   justifyContent: 'center',
+  // Hooks the mobile slide-up animation (theme.ts global styles). A data
+  // attribute because Chakra overwrites the container's className.
+  'data-pb-sheet': '',
 } as const
 
 /** Small "grabber" bar drawn at the top of a sheet (mobile only). */

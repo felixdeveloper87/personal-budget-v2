@@ -9,7 +9,8 @@ import {
 import TransactionForm from './TransactionForm/TransactionForm'
 import { Transaction } from '../../types'
 import { PremiumModal } from '../ui'
-import { SHEET_HEIGHT, SHEET_RADIUS, sheetGrabberProps } from '../ui/modalLayout'
+import { SHEET_HEIGHT, SHEET_RADIUS } from '../ui/modalLayout'
+import SheetGrabber from '../ui/SheetGrabber'
 import TransactionModalHeader from './TransactionModalHeader'
 import { useEditorialPalette } from '../../editorial'
 
@@ -88,7 +89,7 @@ export default function AddTransactionModal({
         boxShadow="0 -20px 50px -20px rgba(20, 35, 32, 0.35)"
         overflow="hidden"
       >
-        <Box {...sheetGrabberProps} />
+        <SheetGrabber />
         <TransactionModalHeader type={type} onClose={onClose} useMobileSafeArea={false} />
         <DrawerBody
           display="flex"

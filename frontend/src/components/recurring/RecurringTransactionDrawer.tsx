@@ -36,7 +36,8 @@ import { ToastService } from '../../services/toast'
 import { useEd } from '../../editorial'
 import { useI18n } from '../../i18n'
 import '../../features/dashboard/theme/pb-tokens.css'
-import { SHEET_SX, sheetContainerProps, sheetGrabberProps } from '../ui/modalLayout'
+import { SHEET_SX, sheetContainerProps } from '../ui/modalLayout'
+import SheetGrabber from '../ui/SheetGrabber'
 import NuDetailSheet, { NU_FIELD, NU_SHEET_COLORS, NuFacts, NuSheetBadge, NuSheetButton, nuButtonProps } from '../ui/NuDetailSheet'
 import { transactionAccountOptions } from '../../utils/transactionAccount'
 
@@ -357,7 +358,7 @@ export default function RecurringTransactionDrawer({
       >
         <AlertDialogOverlay bg="blackAlpha.600" backdropFilter="blur(8px)">
           <AlertDialogContent bg={dialogBg} borderRadius="xl" maxW="440px" mx={4} containerProps={sheetContainerProps} sx={SHEET_SX}>
-            <Box {...sheetGrabberProps} />
+            <SheetGrabber />
             <AlertDialogHeader px={6} pt={5} pb={3} display="flex" alignItems="center" gap={3}>
               <Box
                 w={9}

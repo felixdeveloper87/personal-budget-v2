@@ -42,15 +42,46 @@ const theme = extendTheme({
       // 👇 Estilos específicos para navegadores móveis (Safari/Chrome no iPhone)
       html: {
         colorScheme: 'light',
-        // Suporte para safe areas em navegadores móveis
-        paddingTop: 'env(safe-area-inset-top, 0px)',
-        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
-        paddingLeft: 'env(safe-area-inset-left, 0px)',
-        paddingRight: 'env(safe-area-inset-right, 0px)',
+        // Safe areas are NOT padded here: every fixed/sticky surface (header,
+        // bottom nav, sheets, landing) pads its own edge, so the purple bar can
+        // run under the status bar instead of leaving an empty band.
         // Melhor scroll no iOS
         WebkitOverflowScrolling: 'touch',
         // Previne zoom indesejado no iOS
         touchAction: 'manipulation',
+        // Native apps do not flash a grey box on tap.
+        WebkitTapHighlightColor: 'transparent',
+      },
+      // Controls behave like native ones: no text selection or long-press
+      // "copy / open link" callout when a finger rests on them. Form fields
+      // and content text stay selectable.
+      'button, a, nav, header, label, summary, [role="button"], [role="tab"], [role="menuitem"], [role="switch"], [role="checkbox"]': {
+        WebkitUserSelect: 'none',
+        userSelect: 'none',
+        WebkitTouchCallout: 'none',
+      },
+      img: {
+        WebkitTouchCallout: 'none',
+        WebkitUserDrag: 'none',
+      },
+      // Installed app: no rubber-band bounce or browser pull-to-refresh — the
+      // app's own PullToRefresh owns that gesture.
+      '@media (display-mode: standalone)': {
+        'html, body': {
+          overscrollBehaviorY: 'none',
+        },
+      },
+      // Phones: sheets rise from the bottom edge like native sheets.
+      '@keyframes pb-sheet-in': {
+        from: { transform: 'translateY(100%)' },
+        to: { transform: 'translateY(0)' },
+      },
+      '@media screen and (max-width: 47.99em) and (prefers-reduced-motion: no-preference)': {
+        '[data-pb-sheet]': {
+          // `backwards` only: once finished the animation lets go of
+          // `transform`, so drag-to-dismiss can move the sheet.
+          animation: 'pb-sheet-in 340ms cubic-bezier(0.32, 0.72, 0, 1) backwards',
+        },
       },
       body: {
         // Garante que o body use toda a altura disponível

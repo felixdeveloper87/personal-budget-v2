@@ -2,6 +2,7 @@ import { useEffect, useRef, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { Box, Button, Flex, IconButton, SimpleGrid, Text, type ButtonProps } from '@chakra-ui/react'
 import { X } from './icons'
+import { SheetDragHandle } from './SheetGrabber'
 import { useI18n } from '../../i18n'
 
 const NU = {
@@ -125,9 +126,18 @@ export default function NuDetailSheet({
             boxShadow="0 0 0 40px rgba(255,255,255,0.03), 0 0 0 41px rgba(255,255,255,0.1)"
             pointerEvents="none"
           />
-          <Flex justify="center" mb={2} display={{ base: 'flex', sm: 'none' }} aria-hidden="true">
-            <Box w="40px" h="4px" borderRadius="full" bg="rgba(255,255,255,0.4)" />
-          </Flex>
+          {/* Room for the drag handle, which is positioned over it. */}
+          <Box h="12px" display={{ base: 'block', sm: 'none' }} aria-hidden="true" />
+          <SheetDragHandle
+            onClose={onClose}
+            resolveTarget={(zone) => zone.closest<HTMLElement>('[role="dialog"]')}
+            mediaQuery="(max-width: 29.99em)"
+            display={{ base: 'block', sm: 'none' }}
+            top="12px"
+            w="40px"
+            h="4px"
+            bg="rgba(255,255,255,0.4)"
+          />
 
           <Flex position="relative" align="center" gap={3} pt={{ base: 0, sm: 2 }}>
             <Box

@@ -1,4 +1,4 @@
-import { Box, VStack, Spinner, Text } from '@chakra-ui/react'
+import { Box } from '@chakra-ui/react'
 import AllTransactionsSection from '../../sections/AllTransactionsSection'
 import { useEffect, useMemo, type ReactNode } from 'react'
 import { hasActiveFilters } from '../../utils/filters'
@@ -9,6 +9,7 @@ import { useI18n } from '../../i18n'
 import { useInstallmentPlans, useTransactionPages } from '../../queries/hooks'
 import { PAGE_BOTTOM_PADDING } from '../dashboard/components/nu'
 import '../dashboard/theme/pb-tokens.css'
+import ListSkeleton from '../../components/ui/ListSkeleton'
 
 /**
  * Every transaction, loaded from the server a page at a time (newest first).
@@ -42,7 +43,6 @@ export default function AllTransactionsPage() {
   )
   const total = pagesQuery.data?.pages[0]?.totalElements ?? loaded.length
 
-  const textColor = 'var(--pb-ink-soft)'
 
   const sheet = (children: ReactNode) => (
     <Box maxW="appContent" mx="auto" px={{ base: 0, md: 4, lg: 6 }} pt={{ base: 0, md: 5 }} pb={PAGE_BOTTOM_PADDING} minW={0}>
@@ -54,12 +54,7 @@ export default function AllTransactionsPage() {
 
   if (pagesQuery.isPending && pagesQuery.fetchStatus !== 'idle') {
     return sheet(
-      <VStack py={20} spacing={4}>
-        <Spinner size="xl" color="var(--nu-brand, #820ad1)" thickness="3px" speed="0.8s" />
-        <Text fontSize="sm" fontWeight={500} color={textColor}>
-          {t('transactions.loading')}
-        </Text>
-      </VStack>,
+      <ListSkeleton rows={8} />,
     )
   }
 

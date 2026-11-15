@@ -17,7 +17,8 @@ import {
 } from '@chakra-ui/react'
 import { Eye } from '../../../components/ui/icons'
 import { useI18n } from '../../../i18n'
-import { SHEET_SX, sheetContainerProps, sheetGrabberProps } from '../../../components/ui/modalLayout'
+import { SHEET_SX, sheetContainerProps } from '../../../components/ui/modalLayout'
+import SheetGrabber from '../../../components/ui/SheetGrabber'
 
 export interface HiddenSpendingPace {
   key: string
@@ -72,7 +73,7 @@ export default function RestoreSpendingPaceDialog({
         containerProps={sheetContainerProps}
         sx={SHEET_SX}
       >
-        <Box {...sheetGrabberProps} />
+        <SheetGrabber />
         <ModalHeader px={6} pt={5} pb={3}>
           <HStack spacing={3} pr={8}>
             <Box

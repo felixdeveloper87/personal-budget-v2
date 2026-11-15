@@ -4,6 +4,7 @@ import {
     ModalContent,
     ModalBody,
     useColorModeValue,
+    useBreakpointValue,
     Box,
     ModalProps,
 } from '@chakra-ui/react'
@@ -11,7 +12,8 @@ import { motion, useReducedMotion } from 'framer-motion'
 import { ReactNode } from 'react'
 import { useEd } from '../../editorial'
 import { safariStyles, getResponsiveStyles } from './ui'
-import { sheetContainerProps, sheetContentProps, sheetGrabberProps } from './modalLayout'
+import { sheetContainerProps, sheetContentProps } from './modalLayout'
+import SheetGrabber from './SheetGrabber'
 
 export interface PremiumModalProps extends Omit<ModalProps, 'children'> {
     children: ReactNode
@@ -33,6 +35,7 @@ export default function PremiumModal({
 }: PremiumModalProps) {
     const ed = useEd()
     const reduceMotion = useReducedMotion()
+    const isMobile = useBreakpointValue({ base: true, md: false }, { ssr: false }) ?? false
     const responsiveStyles = getResponsiveStyles()
     const {
         sx: contentSx,
@@ -97,12 +100,18 @@ export default function PremiumModal({
             />
 
             <MotionModalContent
-                initial={reduceMotion ? false : { opacity: 0, scale: 0.95, y: 20 }}
+                // Mobile: the sheet container slides up (theme.ts), so the
+                // content only needs to slide back down on close.
+                initial={reduceMotion || isMobile ? false : { opacity: 0, scale: 0.95, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={reduceMotion ? { opacity: 1 } : { opacity: 0, scale: 0.95, y: 20 }}
+                exit={reduceMotion
+                    ? { opacity: 1 }
+                    : isMobile ? { y: '100%' } : { opacity: 0, scale: 0.95, y: 20 }}
                 transition={reduceMotion
                     ? { duration: 0 }
-                    : { duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+                    : isMobile
+                        ? { duration: 0.26, ease: [0.32, 0.72, 0, 1] }
+                        : { duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
                 bg={resolvedContentBg}
                 color={ed?.cream}
                 textStyle={ed ? 'body' : undefined}
@@ -123,7 +132,7 @@ export default function PremiumModal({
                 containerProps={{ ...sheetContainerProps, ...restContentProps.containerProps }}
                 sx={contentSheetSx}
             >
-                <Box {...sheetGrabberProps} />
+                <SheetGrabber />
                 {header && (
                     <Box
                         position="relative"

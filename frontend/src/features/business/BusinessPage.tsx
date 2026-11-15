@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Box, Flex, HStack, IconButton, SimpleGrid, Spinner, Text, VStack, useDisclosure } from '@chakra-ui/react'
+import { Box, Flex, HStack, IconButton, SimpleGrid, Text, VStack, useDisclosure } from '@chakra-ui/react'
 import {
   BriefcaseIcon,
   CurrencyGbpIcon,
@@ -39,6 +39,7 @@ import {
   monthRange,
   weekRange,
 } from './businessTime'
+import ListSkeleton from '../../components/ui/ListSkeleton'
 
 type Period = 'week' | 'month'
 
@@ -255,9 +256,7 @@ export default function BusinessPage() {
       <Box {...NU_SHEET_WRAP}>
         <Box className="nu-dashboard" pb={NU_SHEET_PB} bg="var(--nu-page)" borderTopRadius="24px" borderBottomRadius={{ base: 0, md: '24px' }} overflow="hidden">
           {loading ? (
-            <HStack justify="center" py={16}>
-              <Spinner color="var(--nu-brand, #820ad1)" thickness="3px" speed="0.8s" />
-            </HStack>
+            <ListSkeleton withSummary />
           ) : (
             <>
               <NuSection title={t('business.today')} subtitle={t('business.todayCaption')}>

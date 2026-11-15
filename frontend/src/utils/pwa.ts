@@ -1,3 +1,9 @@
+/** iPhone / iPad (iPadOS reports itself as a Mac with touch). */
+export function isIos(): boolean {
+  const ua = navigator.userAgent
+  return /iPad|iPhone|iPod/.test(ua) || (ua.includes('Macintosh') && navigator.maxTouchPoints > 1)
+}
+
 /** True when running as the installed app (Home Screen / standalone window). */
 export function isStandalone(): boolean {
   return window.matchMedia?.('(display-mode: standalone)').matches

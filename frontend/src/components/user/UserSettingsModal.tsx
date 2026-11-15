@@ -46,7 +46,8 @@ import {
 import { useThemeColors } from '../../hooks/useThemeColors'
 import { useI18n } from '../../i18n'
 import { usePushNotifications } from '../../hooks/usePushNotifications'
-import { SHEET_SX, sheetContainerProps, sheetGrabberProps } from '../ui/modalLayout'
+import { SHEET_SX, sheetContainerProps } from '../ui/modalLayout'
+import SheetGrabber from '../ui/SheetGrabber'
 
 /** Household notifications, in the order they happen through the week. */
 const HOUSEHOLD_SCHEDULE = [
@@ -499,7 +500,7 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
       >
         <AlertDialogOverlay bg="blackAlpha.600" backdropFilter="blur(8px)">
           <AlertDialogContent bg={surfaceBg} borderRadius="xl" mx={4} containerProps={sheetContainerProps} sx={SHEET_SX}>
-            <Box {...sheetGrabberProps} />
+            <SheetGrabber />
             <AlertDialogHeader display="flex" alignItems="center" gap={3}>
               <Box
                 w={9}

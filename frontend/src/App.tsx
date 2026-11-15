@@ -1,6 +1,5 @@
-import { Spinner, Center, VStack, Text } from '@chakra-ui/react'
 import { Fragment, useCallback, useEffect, useRef, useState } from 'react'
-import { Navigate, Route, Routes, useLocation, useNavigate, useNavigationType } from 'react-router-dom'
+import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from './contexts/AuthContext'
 import Dashboard from './pages/Dashboard'
 import BehaviourPage from './pages/BehaviourPage'
@@ -19,9 +18,13 @@ import BusinessPage from './pages/BusinessPage'
 import { AuthModal, Layout } from './components'
 import LandingV3 from './pages/landing-v3/LandingV3'
 import PullToRefresh from './components/layout/PullToRefresh'
+import PageTransition from './components/layout/PageTransition'
+import EdgeSwipeBack from './components/layout/EdgeSwipeBack'
+import AppSplash from './components/layout/AppSplash'
 import { useRefreshOnReturn } from './hooks/useRefreshOnReturn'
-import type { AppPage } from './components/layout/header/navigation.config'
-import { useI18n } from './i18n'
+import { useTabScrollRestoration, type TabNavigationState } from './hooks/useTabScrollRestoration'
+import { useThemeColorDimming } from './hooks/useThemeColorDimming'
+import type { AppPage, PageChangeOptions } from './components/layout/header/navigation.config'
 import { PAGE_PATHS, cardPath, pageFromPath } from './routes'
 import { queryClient } from './queries/queryClient'
 
@@ -32,32 +35,24 @@ function authTabFromSearch(search: string): 'signIn' | 'signUp' | null {
   return null
 }
 
-/** New pages open at the top; back/forward (POP) keeps the browser's own scroll handling. */
-function useScrollToTopOnNavigate() {
-  const { pathname } = useLocation()
-  const navigationType = useNavigationType()
-  useEffect(() => {
-    if (navigationType !== 'POP') window.scrollTo({ top: 0 })
-  }, [pathname, navigationType])
-}
-
 function AppContent() {
   const refreshKey = useRefreshOnReturn()
   const { user, loading } = useAuth()
-  const { t } = useI18n()
   const location = useLocation()
   const navigate = useNavigate()
   const [showAuth, setShowAuth] = useState(() => authTabFromSearch(location.search) !== null)
   const [authTab, setAuthTab] = useState<'signIn' | 'signUp'>(
     () => authTabFromSearch(location.search) ?? 'signIn',
   )
-  useScrollToTopOnNavigate()
+  useTabScrollRestoration()
+  useThemeColorDimming()
 
   const currentPage: AppPage = pageFromPath(location.pathname) ?? 'dashboard'
 
   /** Kept for the many buttons that navigate by page id; it now just changes the URL. */
-  const navigateToPage = useCallback((page: AppPage) => {
-    navigate(PAGE_PATHS[page])
+  const navigateToPage = useCallback((page: AppPage, options?: PageChangeOptions) => {
+    const state: TabNavigationState | undefined = options?.fromTab ? { tab: true } : undefined
+    navigate(PAGE_PATHS[page], { state })
   }, [navigate])
 
   const openCardStatement = useCallback((target: { cardId: number; paymentDate: string }) => {
@@ -92,25 +87,7 @@ function AppContent() {
     navigate({ pathname: location.pathname, search: search ? `?${search}` : '' }, { replace: true })
   }
 
-  if (loading) {
-    return (
-      <Center minH="100vh" bg="var(--pb-paper)">
-        <VStack spacing={4}>
-          <Spinner
-            size="xl"
-            color="brand.500"
-            thickness="4px"
-            speed="0.8s"
-            emptyColor="gray.200"
-            _dark={{ emptyColor: "gray.700" }}
-          />
-          <Text color="var(--pb-ink-soft)" fontSize="sm">
-            {t('common.loadingDashboard')}
-          </Text>
-        </VStack>
-      </Center>
-    )
-  }
+  if (loading) return <AppSplash />
 
   if (!user) {
     return (
@@ -144,6 +121,7 @@ function AppContent() {
       <Layout currentPage={currentPage} onPageChange={navigateToPage}>
         {/* A new key after a long time away remounts the page so it refetches. */}
         <Fragment key={refreshKey}>
+          <PageTransition>
           <Routes>
             <Route path={PAGE_PATHS.dashboard} element={<Dashboard onPageChange={navigateToPage} />} />
             <Route path={PAGE_PATHS.household} element={<HouseholdPage />} />
@@ -165,9 +143,11 @@ function AppContent() {
             {/* Unknown paths — and /admin for non-admins — land on the dashboard. */}
             <Route path="*" element={<Navigate to={PAGE_PATHS.dashboard} replace />} />
           </Routes>
+          </PageTransition>
         </Fragment>
       </Layout>
       <PullToRefresh />
+      <EdgeSwipeBack />
     </>
   )
 }

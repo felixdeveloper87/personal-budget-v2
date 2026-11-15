@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Box, Flex, Spinner } from '@chakra-ui/react'
+import { Box } from '@chakra-ui/react'
 import { CalendarClock } from 'lucide-react'
 
 import { listRecurringTransactions } from '../../api'
@@ -13,6 +13,7 @@ import '../dashboard/theme/pb-tokens.css'
 import { containerV, MotionBox, riseV } from '../dashboard/components/motion'
 import { NuSection, PAGE_BOTTOM_PADDING } from '../dashboard/components/nu'
 import { CommitmentLogo, NuEmpty, NuListRow, NuPill, NuStatStrip } from '../commitments/components/nuCommitments'
+import ListSkeleton from '../../components/ui/ListSkeleton'
 
 interface FixedPaymentsPageProps {
   onPageChange?: (page: AppPage) => void
@@ -74,7 +75,7 @@ export default function FixedPaymentsPage({
   const body = (
     <>
       {loading ? (
-        <Flex justify="center" py={20}><Spinner color="var(--nu-brand, #820ad1)" /></Flex>
+        <ListSkeleton withSummary />
       ) : (
         <MotionBox variants={containerV} initial="hidden" animate="show">
           <MotionBox variants={riseV} px={{ base: 4, md: 6 }} pt={{ base: 5, md: 6 }} pb={{ base: 5, md: 6 }}>

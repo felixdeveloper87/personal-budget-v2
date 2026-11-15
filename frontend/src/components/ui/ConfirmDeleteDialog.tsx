@@ -17,7 +17,8 @@ import {
 } from '@chakra-ui/react'
 import { AlertTriangle } from './icons'
 import { useI18n } from '../../i18n'
-import { SHEET_SX, sheetContainerProps, sheetGrabberProps } from './modalLayout'
+import { SHEET_SX, sheetContainerProps } from './modalLayout'
+import SheetGrabber from './SheetGrabber'
 
 export interface ConfirmDeleteDialogProps {
   isOpen: boolean
@@ -93,7 +94,7 @@ export default function ConfirmDeleteDialog({
           containerProps={sheetContainerProps}
           sx={SHEET_SX}
         >
-          <Box {...sheetGrabberProps} />
+          <SheetGrabber />
           <AlertDialogHeader px={6} pt={5} pb={3} display="flex" alignItems="center" gap={3}>
             <Box
               w={9}

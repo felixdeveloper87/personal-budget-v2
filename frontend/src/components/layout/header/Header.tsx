@@ -12,8 +12,11 @@ import NavBar from './NavBar'
 import UserMenu from './UserMenu'
 import { ON_BRAND, OnBrandContext } from './onBrand'
 import SearchTrigger from './SearchTrigger'
-import type { AppPage } from './navigation.config'
-import { ADMIN_NAV_ITEM, NAV_ITEMS } from './navigation.config'
+import type { AppPage, PageChangeHandler } from './navigation.config'
+import { ADMIN_NAV_ITEM, NAV_ITEMS, localizeNavigationItems, navItemIdFor } from './navigation.config'
+
+/** Scrolled past the page's own (large) title: the bar shows a compact one. */
+const COMPACT_TITLE_AFTER = 64
 
 /** Bottom tab bar on phones: a lighter purple than the top app bar. */
 const MOBILE_NAV_BG = '#9b3de0'
@@ -28,7 +31,7 @@ interface HeaderProps {
   onOpenSettings?: () => void
   onLogin?: () => void
   currentPage?: AppPage
-  onPageChange?: (page: AppPage) => void
+  onPageChange?: PageChangeHandler
   /** When true the desktop NavBar is hidden (sidebar handles navigation). */
   hasSidebar?: boolean
 }
@@ -51,6 +54,7 @@ export default function Header({
   const isAdminOnly = Boolean(user?.admin)
   const { isOpen: isSearchOpen, onOpen: openSearch, onClose: closeSearch } = useDisclosure()
   const [isScrolled, setIsScrolled] = useState(false)
+  const [pastTitle, setPastTitle] = useState(false)
 
   // When the sidebar owns the brand, the header leads with the search bar on the
   // left instead of repeating the logo. Mobile/admin keep the logo + right search.
@@ -58,7 +62,10 @@ export default function Header({
   const showExpandedSearch = useBreakpointValue({ base: false, lg: true }) ?? false
 
   useEffect(() => {
-    const onScroll = () => setIsScrolled(window.scrollY > 12)
+    const onScroll = () => {
+      setIsScrolled(window.scrollY > 12)
+      setPastTitle(window.scrollY > COMPACT_TITLE_AFTER)
+    }
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
@@ -97,6 +104,15 @@ export default function Header({
   const hour = new Date().getHours()
   const firstName = typeof user?.name === 'string' ? user.name.trim().split(/\s+/)[0] : ''
   const greeting = `${t(hour < 12 ? 'dashboard.goodMorning' : hour < 18 ? 'dashboard.goodAfternoon' : 'dashboard.goodEvening')}${firstName ? `, ${firstName}` : ''}`
+  // iOS-style compact title: on phones, once the page's large title has
+  // scrolled away, the bar names the page (the dashboard keeps its greeting).
+  const pageTitle = useMemo(() => {
+    if (!user || isAdminOnly || currentPage === 'dashboard') return null
+    const id = navItemIdFor(currentPage)
+    return localizeNavigationItems(navItems, (key, fallback) => t(key, undefined, fallback))
+      .find((item) => item.id === id)?.label ?? null
+  }, [user, isAdminOnly, currentPage, navItems, t])
+  const showCompactTitle = Boolean(pageTitle) && pastTitle
   const bgOverlayVal = useColorModeValue(
     'linear-gradient(180deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 60%)',
     'linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0) 60%)',
@@ -130,6 +146,8 @@ export default function Header({
         top={0}
         zIndex={1000}
         bg={bg}
+        // Installed app on a notched phone: the bar runs under the status bar.
+        pt="env(safe-area-inset-top, 0px)"
         borderBottom={ed && !onBrand ? `1px solid ${ed.line}` : undefined}
         boxShadow={onBrand ? 'none' : shadow}
         backdropFilter={backdrop}
@@ -187,15 +205,47 @@ export default function Header({
               </Box>
             ) : onBrand ? (
               // The greeting leads the purple bar and opens the account menu (Nubank-style).
-              <Box minW={0} flexShrink={1}>
-                <UserMenu
-                  user={user}
-                  label={greeting}
-                  placement="bottom-start"
-                  onOpenProfile={onOpenProfile}
-                  onOpenSettings={onOpenSettings}
-                  onLogout={logout}
-                />
+              <Box minW={0} flexShrink={1} position="relative">
+                <Box
+                  opacity={{ base: showCompactTitle ? 0 : 1, md: 1 }}
+                  visibility={{ base: showCompactTitle ? 'hidden' : 'visible', md: 'visible' }}
+                  transform={{ base: showCompactTitle ? 'translateY(-6px)' : 'none', md: 'none' }}
+                  transition="opacity 0.2s ease, transform 0.2s ease, visibility 0.2s"
+                >
+                  <UserMenu
+                    user={user}
+                    label={greeting}
+                    placement="bottom-start"
+                    onOpenProfile={onOpenProfile}
+                    onOpenSettings={onOpenSettings}
+                    onLogout={logout}
+                  />
+                </Box>
+                {pageTitle && (
+                  // Tapping the compact title scrolls to the top, like tapping an iOS status bar.
+                  <Box
+                    as="button"
+                    type="button"
+                    aria-label={t('footer.scrollToTop')}
+                    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                    display={{ base: 'flex', md: 'none' }}
+                    alignItems="center"
+                    position="absolute"
+                    left={0}
+                    top={0}
+                    bottom={0}
+                    maxW="60vw"
+                    color={ON_BRAND.ink}
+                    opacity={showCompactTitle ? 1 : 0}
+                    visibility={showCompactTitle ? 'visible' : 'hidden'}
+                    transform={showCompactTitle ? 'none' : 'translateY(6px)'}
+                    transition="opacity 0.2s ease, transform 0.2s ease, visibility 0.2s"
+                  >
+                    <Text as="span" fontSize="lg" fontWeight={700} letterSpacing="-0.01em" noOfLines={1} textAlign="left">
+                      {pageTitle}
+                    </Text>
+                  </Box>
+                )}
               </Box>
             ) : (
               <Logo user={user} />

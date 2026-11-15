@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Box, Flex, HStack, Spinner, Text } from '@chakra-ui/react'
+import { Box, Flex, HStack, Text } from '@chakra-ui/react'
 import { CalendarClock, CheckCircle2, CreditCard } from 'lucide-react'
 
 import { listInstallmentPlans } from '../../api'
@@ -17,6 +17,7 @@ import { NuSection, PAGE_BOTTOM_PADDING } from '../dashboard/components/nu'
 import PlanLogo from '../../components/installments/PlanLogo'
 import { NuEmpty, NuListRow, NuPill, NuProgress, NuStatStrip } from '../commitments/components/nuCommitments'
 import { useI18n } from '../../i18n'
+import ListSkeleton from '../../components/ui/ListSkeleton'
 
 type InstallmentView = 'plans' | 'statements'
 
@@ -103,7 +104,7 @@ export default function InstallmentsPage({ embedded = false, onDataChange }: Ins
   const body = (
     <>
       {loading ? (
-        <Flex justify="center" py={20}><Spinner color="var(--nu-brand, #820ad1)" /></Flex>
+        <ListSkeleton withSummary />
       ) : (
         <MotionBox variants={containerV} initial="hidden" animate="show">
           <MotionBox variants={riseV} px={{ base: 4, md: 6 }} pt={{ base: 5, md: 6 }} pb={{ base: 5, md: 6 }}>

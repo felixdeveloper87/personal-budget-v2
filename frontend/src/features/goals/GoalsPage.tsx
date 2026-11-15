@@ -5,7 +5,6 @@ import {
   HStack,
   Icon,
   SimpleGrid,
-  Spinner,
   Text,
   useDisclosure,
 } from '@chakra-ui/react'
@@ -30,6 +29,7 @@ import { ContributeModal, GoalFormModal } from './components/GoalModals'
 import NuHero, { NuHeroBadge } from '../dashboard/components/NuHero'
 import { NuSection, NU_SHEET_PB, NU_SHEET_WRAP } from '../dashboard/components/nu'
 import '../dashboard/theme/pb-tokens.css'
+import ListSkeleton from '../../components/ui/ListSkeleton'
 
 export default function GoalsPage() {
   const { t, formatCurrency } = useI18n()
@@ -192,9 +192,7 @@ export default function GoalsPage() {
 
           <NuSection title={t('goals.section.monthly')} subtitle={t('goals.section.monthlyCaption')}>
             {balanceLoading ? (
-              <HStack justify="center" py={10}>
-                <Spinner color="var(--nu-brand, #820ad1)" thickness="3px" speed="0.8s" />
-              </HStack>
+              <ListSkeleton rows={3} px={0} py={2} />
             ) : (
               <BalanceBreakEvenPanel
                 currentBalance={periodData.balance}

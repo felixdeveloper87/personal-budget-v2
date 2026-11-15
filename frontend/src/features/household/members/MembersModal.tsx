@@ -6,7 +6,8 @@ import { ToastService } from '../../../services/toast'
 import type { HouseholdDashboard, HouseholdPageState } from '../../../types'
 import { Check, Pencil, Trash2, X } from '../../../components/ui/icons'
 import NuModalHeader from '../../../components/ui/NuModalHeader'
-import { MOBILE_MEDIA, SHEET_SX, sheetContainerProps, sheetGrabberProps } from '../../../components/ui/modalLayout'
+import { MOBILE_MEDIA, SHEET_SX, sheetContainerProps } from '../../../components/ui/modalLayout'
+import SheetGrabber from '../../../components/ui/SheetGrabber'
 
 const BRAND = '#820ad1'
 const BRAND_HOVER = '#6e08b3'
@@ -127,7 +128,7 @@ export function MembersModal({
         containerProps={sheetContainerProps}
         sx={FIT_SHEET_SX}
       >
-        <Box {...sheetGrabberProps} zIndex={2} bg="rgba(255,255,255,0.5)" />
+        <SheetGrabber zIndex={2} bg="rgba(255,255,255,0.5)" />
         <ChakraModalHeader p={0}>
           <NuModalHeader
             title={t('household.manage.title')}

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Box, Button, Flex, Icon, Spinner, Text } from '@chakra-ui/react'
+import { Box, Button, Flex, Icon, Text } from '@chakra-ui/react'
 
 import { archiveAccount } from '../../api'
 import type { FinancialAccount } from '../../types'
@@ -18,6 +18,7 @@ import TransferModal from './components/TransferModal'
 import NuHero from '../dashboard/components/NuHero'
 import '../dashboard/theme/pb-tokens.css'
 import { NU_SHEET_PB, NU_SHEET_WRAP } from '../dashboard/components/nu'
+import ListSkeleton from '../../components/ui/ListSkeleton'
 
 const BALANCE_VISIBILITY_KEY = 'accounts:hide-balances'
 
@@ -130,7 +131,7 @@ export default function AccountsPage() {
       <Box {...NU_SHEET_WRAP}>
         <Box className="nu-dashboard" pb={NU_SHEET_PB} bg="var(--nu-page)" borderTopRadius="24px" borderBottomRadius={{ base: 0, md: '24px' }} overflow="hidden">
           {loading && !summary ? (
-            <Flex justify="center" py={24}><Spinner color="var(--nu-brand, #820ad1)" /></Flex>
+            <ListSkeleton withSummary />
           ) : detailOpen ? (
             selectedAccount ? (
               <AccountDetail

@@ -165,6 +165,13 @@ export function navItemIdFor(page: AppPage): AppPage {
   return page
 }
 
+export interface PageChangeOptions {
+  /** Opened from the tab bar: return to where that tab was scrolled, like native tabs. */
+  fromTab?: boolean
+}
+
+export type PageChangeHandler = (page: AppPage, options?: PageChangeOptions) => void
+
 export const ADMIN_NAV_ITEM: Readonly<NavItem> = {
   id: 'admin',
   label: 'Admin',

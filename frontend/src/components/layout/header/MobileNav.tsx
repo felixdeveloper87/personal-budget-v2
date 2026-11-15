@@ -13,20 +13,25 @@ import {
   usePrefersReducedMotion,
 } from '@chakra-ui/react'
 import { useMemo, useRef } from 'react'
+import { useLocation } from 'react-router-dom'
 import { useI18n } from '../../../i18n'
+import { PAGE_PATHS } from '../../../routes'
+import { haptic } from '../../../utils/haptics'
 import { DotsThreeOutline } from '../../ui/icons'
 import NuModalHeader from '../../ui/NuModalHeader'
+import SheetGrabber from '../../ui/SheetGrabber'
 import { ON_BRAND } from './onBrand'
 import {
   localizeNavigationItems,
   navItemIdFor,
   type AppPage,
   type NavItem,
+  type PageChangeHandler,
 } from './navigation.config'
 
 interface MobileNavProps {
   currentPage: AppPage
-  onPageChange?: (page: AppPage) => void
+  onPageChange?: PageChangeHandler
   items: ReadonlyArray<NavItem>
 }
 
@@ -37,16 +42,9 @@ const PRIMARY_IDS: ReadonlyArray<AppPage> = [
   'behaviour',
 ]
 
-function tapFeedback() {
-  try {
-    navigator.vibrate?.(8)
-  } catch {
-    // Haptics are an enhancement and may be unavailable or disabled.
-  }
-}
-
 export default function MobileNav({ currentPage, onPageChange, items }: MobileNavProps) {
   const { t } = useI18n()
+  const { pathname } = useLocation()
   const menu = useDisclosure()
   const menuButtonRef = useRef<HTMLButtonElement | null>(null)
   const reducedMotion = usePrefersReducedMotion()
@@ -75,14 +73,22 @@ export default function MobileNav({ currentPage, onPageChange, items }: MobileNa
   const activeId = navItemIdFor(currentPage)
   const menuIsActive = overflowItems.some(({ id }) => id === activeId)
 
+  // Native tab bar behaviour: another tab returns to where it was scrolled;
+  // the active tab pops back to its root, or scrolls to the top if already there.
   const selectPage = (page: AppPage, closeMenu = false) => {
-    tapFeedback()
+    haptic()
     if (closeMenu) menu.onClose()
-    onPageChange?.(page)
+    if (navItemIdFor(page) !== activeId) {
+      onPageChange?.(page, { fromTab: true })
+    } else if (pathname.replace(/\/+$/, '') !== PAGE_PATHS[page].replace(/\/+$/, '')) {
+      onPageChange?.(page)
+    } else {
+      window.scrollTo({ top: 0, behavior: reducedMotion ? 'auto' : 'smooth' })
+    }
   }
 
   const openMenu = () => {
-    tapFeedback()
+    haptic()
     menu.onOpen()
   }
 
@@ -156,6 +162,7 @@ export default function MobileNav({ currentPage, onPageChange, items }: MobileNa
           overflow="hidden"
           sx={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
         >
+          <SheetGrabber />
           <NuModalHeader title={t('mobileNav.title')} caption={t('mobileNav.description')} onClose={menu.onClose} />
           <DrawerBody p={3} overflowY="auto">
             <SimpleGrid columns={2} spacing={2.5}>

@@ -23,9 +23,20 @@ export default defineConfig(({ mode }) => {
           start_url: '/',
           scope: '/',
           display: 'standalone',
-          orientation: 'any',
+          // Phone app: portrait, like the native finance apps it sits beside.
+          orientation: 'portrait',
+          categories: ['finance', 'productivity'],
+          // Purple splash with the mark — the same picture as the iOS launch
+          // images, the boot screen in index.html and AppSplash.tsx.
           theme_color: '#820ad1',
           background_color: '#820ad1',
+          // Long-press the home-screen icon (Android) to jump straight in.
+          shortcuts: [
+            { name: 'Transactions', short_name: 'Transactions', url: '/transactions', icons: [{ src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' }] },
+            { name: 'Household', short_name: 'Household', url: '/household', icons: [{ src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' }] },
+            { name: 'Accounts', short_name: 'Accounts', url: '/accounts', icons: [{ src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' }] },
+            { name: 'Payments', short_name: 'Payments', url: '/payments', icons: [{ src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' }] },
+          ],
           icons: [
             { src: 'pwa-64x64.png', sizes: '64x64', type: 'image/png' },
             { src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' },

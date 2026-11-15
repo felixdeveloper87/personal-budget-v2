@@ -183,6 +183,8 @@ export default function Sidebar({
       top={0}
       left={0}
       bottom={0}
+      // Matches the header's status-bar inset (installed app on iPad).
+      pt="env(safe-area-inset-top, 0px)"
       w={`${width}px`}
       bg={surface}
       backgroundImage={isEdLight ? undefined : sidebarWash}
