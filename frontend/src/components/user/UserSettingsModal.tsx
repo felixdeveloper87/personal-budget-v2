@@ -302,7 +302,7 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
                         w="32px"
                         h="32px"
                         borderRadius="full"
-                        bg={ACCENTS[id].main}
+                        bg={`linear-gradient(135deg, ${ACCENTS[id].bright} 0%, ${ACCENTS[id].main} 55%, ${ACCENTS[id].deep} 100%)`}
                         color="white"
                         display="flex"
                         alignItems="center"

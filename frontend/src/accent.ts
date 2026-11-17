@@ -12,7 +12,7 @@
  * `main` colour so the first paint already wears the saved theme — keep them
  * in sync.
  */
-export const ACCENT_IDS = ['purple', 'blue', 'pink'] as const
+export const ACCENT_IDS = ['purple', 'blue', 'graphite'] as const
 export type AccentId = (typeof ACCENT_IDS)[number]
 export const DEFAULT_ACCENT: AccentId = 'purple'
 export const ACCENT_STORAGE_KEY = 'pb-accent'
@@ -85,27 +85,29 @@ export const ACCENTS: Record<AccentId, Accent> = {
       900: '#0b285a',
     },
   },
-  pink: {
-    main: '#c81f6f',
-    rgb: '200, 31, 111',
-    deep: '#aa1a5e',
-    bright: '#cb2c78',
-    tint: '#fae9f1',
-    tintRgb: '250, 233, 241',
-    soft: '#fcf2f6',
-    border: '#f5d7e5',
-    dimmed: '#6c113c',
+  /** Metallic graphite: `bright` is lifted further than the others so the
+   * hero gradient reads as a brushed-metal sheen. */
+  graphite: {
+    main: '#2f353d',
+    rgb: '47, 53, 61',
+    deep: '#22262c',
+    bright: '#4f5761',
+    tint: '#eaebec',
+    tintRgb: '234, 235, 236',
+    soft: '#f3f3f4',
+    border: '#dadbdc',
+    dimmed: '#191d21',
     scale: {
-      50: '#fcf4f8',
-      100: '#f7e0eb',
-      200: '#efbcd4',
-      300: '#e593ba',
-      400: '#d75e97',
-      500: '#c81f6f',
-      600: '#ac1b5f',
-      700: '#901650',
-      800: '#72123f',
-      900: '#540d2f',
+      50: '#f5f5f5',
+      100: '#e2e3e4',
+      200: '#c1c2c5',
+      300: '#9b9ea2',
+      400: '#696e73',
+      500: '#2f353d',
+      600: '#282e34',
+      700: '#22262c',
+      800: '#1b1e23',
+      900: '#14161a',
     },
   },
 }
