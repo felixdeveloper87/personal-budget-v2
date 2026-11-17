@@ -7,6 +7,19 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="theme-color" content="#820ad1" />
+    <!-- Saved accent colour before first paint; mirrors src/accent.ts. -->
+    <script>
+      (function () {
+        try {
+          var accent = localStorage.getItem('pb-accent')
+          var bg = { blue: '#1a5fd6', pink: '#c81f6f' }[accent]
+          if (bg) {
+            document.documentElement.setAttribute('data-accent', accent)
+            document.documentElement.style.background = bg
+          }
+        } catch (e) {}
+      })()
+    </script>
     <meta
       name="description"
       content="Personal Budget brings accounts, spending, commitments, plans and shared household costs into one calm financial view."

@@ -115,10 +115,10 @@ export default function UpcomingPayments({ allTxns }: UpcomingPaymentsProps) {
             px={3.5}
             py={3}
             borderRadius="16px"
-            bg={next ? 'var(--nu-brand-tint, #f3e8fc)' : 'var(--pb-surface)'}
+            bg={next ? 'var(--nu-brand-tint)' : 'var(--pb-surface)'}
             sx={{ scrollSnapAlign: 'start' }}
           >
-            <Text fontSize="xs" fontWeight={next ? 600 : 500} color={next ? 'var(--nu-brand, #820ad1)' : 'var(--pb-ink-soft)'} noOfLines={1}>
+            <Text fontSize="xs" fontWeight={next ? 600 : 500} color={next ? 'var(--nu-brand)' : 'var(--pb-ink-soft)'} noOfLines={1}>
               {formatDate(bucket.date, { weekday: 'short', day: 'numeric', month: 'short' })}
             </Text>
             <Text mt={1} fontSize="lg" fontWeight={700} letterSpacing="-0.01em" color="var(--pb-ink)" style={{ fontVariantNumeric: 'tabular-nums' }}>

@@ -19,7 +19,7 @@ export default function ReportHeader({ report, userName }: ReportHeaderProps) {
       borderColor="gray.200"
       borderRadius="2xl"
       overflow="hidden"
-      bgGradient="linear(to-br, purple.50, blue.50)"
+      bgGradient="linear(to-br, brand.50, blue.50)"
       p={{ base: 6, md: 8 }}
     >
       <Flex justify="space-between" align="flex-start" gap={6} direction={{ base: 'column', md: 'row' }}>

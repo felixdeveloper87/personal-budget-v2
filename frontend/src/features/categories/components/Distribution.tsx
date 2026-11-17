@@ -12,9 +12,12 @@ import { useI18n } from '../../../i18n'
 const MotionGrid = motion(Grid)
 const TRANSACTION_LIMIT = 5
 
-/* Categories are ranked by spend and painted on one purple ramp: the biggest
-   in brand purple, fading to lilac; the long tail shares a neutral grey. */
-const NU_RAMP = ['#820ad1', '#9a3cdd', '#b06be6', '#c495ee', '#d7b9f4', '#e7d5f9']
+/* Categories are ranked by spend and painted on one accent ramp: the biggest
+   in the accent colour, fading towards white; the long tail shares a neutral grey. */
+const NU_RAMP = [82, 64, 48, 32, 20].reduce(
+  (ramp, share) => [...ramp, `color-mix(in srgb, var(--accent) ${share}%, #ffffff)`],
+  ['var(--accent)'],
+)
 const NU_TAIL = '#d4d4dd'
 
 interface DistributionProps {
@@ -175,11 +178,11 @@ function CategoryLegend({
             py={2}
             borderRadius="10px"
             textAlign="left"
-            bg={isActive ? 'var(--nu-brand-tint, #f3e8fc)' : 'transparent'}
+            bg={isActive ? 'var(--nu-brand-tint)' : 'transparent'}
             opacity={activeCat && !isActive ? 0.6 : 1}
             transition="background 0.15s ease, opacity 0.15s ease"
-            _hover={{ bg: isActive ? 'var(--nu-brand-tint, #f3e8fc)' : 'var(--pb-surface-2)' }}
-            _focusVisible={{ outline: '2px solid var(--nu-brand, #820ad1)', outlineOffset: '1px' }}
+            _hover={{ bg: isActive ? 'var(--nu-brand-tint)' : 'var(--pb-surface-2)' }}
+            _focusVisible={{ outline: '2px solid var(--nu-brand)', outlineOffset: '1px' }}
             aria-pressed={isActive}
             onMouseEnter={() => onHover(row.id)}
             onMouseLeave={() => onHover(null)}
@@ -241,7 +244,7 @@ function CategorySpotlight({
       <Flex align="center" justify="space-between" gap={3}>
         <HStack spacing={isNu ? 0 : 2.5} minW={0}>
           {!isNu && (
-            <Flex w="36px" h="36px" align="center" justify="center" borderRadius="full" bg="var(--nu-brand-tint, #f3e8fc)" color="var(--nu-brand, #820ad1)" flexShrink={0}>
+            <Flex w="36px" h="36px" align="center" justify="center" borderRadius="full" bg="var(--nu-brand-tint)" color="var(--nu-brand)" flexShrink={0}>
               <Icon as={cat.icon} boxSize="18px" weight="bold" />
             </Flex>
           )}
@@ -332,14 +335,14 @@ function CategorySpotlight({
             mt={3}
             w="full"
             borderRadius="full"
-            bg="var(--nu-brand-tint, #f3e8fc)"
-            color="var(--nu-brand, #820ad1)"
+            bg="var(--nu-brand-tint)"
+            color="var(--nu-brand)"
             fontSize="sm"
             fontWeight={600}
             cursor="pointer"
             transition="background .15s ease"
-            _hover={{ bg: '#ead6fa' }}
-            _focusVisible={{ outline: '2px solid var(--nu-brand, #820ad1)', outlineOffset: '2px' }}
+            _hover={{ bg: 'var(--accent-border)' }}
+            _focusVisible={{ outline: '2px solid var(--nu-brand)', outlineOffset: '2px' }}
           >
             {t(moreTransactions === 1 ? 'categories.viewMore' : 'categories.viewMorePlural', {
               count: formatNumber(moreTransactions),
@@ -363,7 +366,7 @@ function EmptyState({ side }: { side: Side }) {
   const { t } = useI18n()
   return (
     <VStack spacing={3} py={10} align="center">
-      <Flex w={12} h={12} align="center" justify="center" borderRadius="full" bg="var(--nu-brand-tint, #f3e8fc)" color="var(--nu-brand, #820ad1)">
+      <Flex w={12} h={12} align="center" justify="center" borderRadius="full" bg="var(--nu-brand-tint)" color="var(--nu-brand)">
         <Icon as={Layers} boxSize={6} weight="bold" />
       </Flex>
       <VStack spacing={1}>

@@ -666,7 +666,7 @@ function EndOption({
       opacity={dimmed ? 0.5 : 1}
       cursor={disabled ? 'default' : 'pointer'}
       transition="background-color .15s ease, border-color .15s ease"
-      _hover={disabled ? undefined : { borderColor: accent, bg: primary ? '#ead6fb' : NU_SHEET_COLORS.dangerSoft }}
+      _hover={disabled ? undefined : { borderColor: accent, bg: primary ? 'var(--accent-border)' : NU_SHEET_COLORS.dangerSoft }}
       _focusVisible={{ outline: `2px solid ${accent}`, outlineOffset: '2px' }}
     >
       <Text fontSize="md" fontWeight={800} letterSpacing="-0.01em" color={accent}>

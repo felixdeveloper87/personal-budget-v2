@@ -5,7 +5,7 @@ import type { HouseholdDashboard, HouseholdMember } from '../../../types'
 import { PremiumModal } from '../../../components/ui'
 import NuModalHeader from '../../../components/ui/NuModalHeader'
 
-const BRAND = '#820ad1'
+const BRAND = 'var(--accent)'
 
 /** Points: £1 spent = 1 point. */
 export function memberPoints(member: HouseholdMember) {
@@ -83,7 +83,7 @@ function MemberRow({ member, isCurrent, rank }: { member: HouseholdMember; isCur
   )
 
   return (
-    <Flex px={{ base: 4, md: 6 }} py={3} align="center" gap={3} bg={isCurrent ? 'rgba(130, 10, 209, 0.04)' : undefined}>
+    <Flex px={{ base: 4, md: 6 }} py={3} align="center" gap={3} bg={isCurrent ? 'rgba(var(--accent-rgb), 0.04)' : undefined}>
       <Box minW={0} flex={1}>
         <HStack spacing={1.5} minW={0}>
           <Text fontWeight={700} fontSize="md" color="var(--pb-ink)" noOfLines={1}>{member.name}</Text>
@@ -124,7 +124,7 @@ export function PointsBadge({ member, fontSize = 'md', variant = 'inline' }: {
         {variant === 'pill' ? (
           <Box
             as="button" type="button" flexShrink={0} display="inline-flex" alignItems="center" gap={1}
-            px={2} py={0.5} borderRadius="full" bg="#f3e8fc"
+            px={2} py={0.5} borderRadius="full" bg="var(--accent-tint)"
             fontWeight={800} fontSize={fontSize} color={BRAND} style={{ fontVariantNumeric: 'tabular-nums' }}
             aria-label={t('household.members.pointsInfoAria')}
           >
@@ -158,7 +158,7 @@ export function PointsBadge({ member, fontSize = 'md', variant = 'inline' }: {
 
 function Tag({ children }: { children: string }) {
   return (
-    <Text as="span" flexShrink={0} px={1.5} borderRadius="full" bg="#f3e8fc" color={BRAND} fontSize="10px" fontWeight={800} letterSpacing=".04em" textTransform="uppercase">
+    <Text as="span" flexShrink={0} px={1.5} borderRadius="full" bg="var(--accent-tint)" color={BRAND} fontSize="10px" fontWeight={800} letterSpacing=".04em" textTransform="uppercase">
       {children}
     </Text>
   )

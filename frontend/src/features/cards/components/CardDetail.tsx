@@ -174,9 +174,9 @@ export default function CardDetail({ card, statements, outstanding, hideValues, 
               size="sm"
               variant="ghost"
               borderRadius="full"
-              color="var(--nu-brand, #820ad1)"
-              bg="var(--nu-brand-tint, #f3e8fc)"
-              _hover={{ bg: '#ead6fa' }}
+              color="var(--nu-brand)"
+              bg="var(--nu-brand-tint)"
+              _hover={{ bg: 'var(--accent-border)' }}
               onClick={() => setHistoryLimit((value) => value + HISTORY_PAGE)}
             >
               {t('cards.statements.more', { count: previous.length - historyLimit })}
@@ -210,8 +210,8 @@ function StatementRow({ statement, expanded, onToggle, hideValues }: { statement
         py={3}
         textAlign="left"
         transition="background-color .15s ease"
-        _hover={{ bg: 'rgba(130,10,209,.025)' }}
-        _focusVisible={{ outline: 'none', boxShadow: 'inset 3px 0 0 var(--nu-brand, #820ad1)' }}
+        _hover={{ bg: 'rgba(var(--accent-rgb), .025)' }}
+        _focusVisible={{ outline: 'none', boxShadow: 'inset 3px 0 0 var(--nu-brand)' }}
       >
         <Flex flexShrink={0} w="40px" h="40px" align="center" justify="center" borderRadius="full" color={style.color} bg={style.bg}>
           <Icon as={style.icon} boxSize="16px" />
@@ -240,7 +240,7 @@ function StatementRow({ statement, expanded, onToggle, hideValues }: { statement
         <Icon
           as={ChevronDown}
           boxSize="16px"
-          color="var(--nu-brand, #820ad1)"
+          color="var(--nu-brand)"
           flexShrink={0}
           transform={expanded ? 'rotate(180deg)' : undefined}
           transition="transform .2s ease"

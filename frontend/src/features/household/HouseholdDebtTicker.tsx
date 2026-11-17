@@ -4,7 +4,7 @@ import type { HouseholdDebt, HouseholdMember } from '../../types'
 import { NewsTicker } from './components/NewsTicker'
 
 /** Debtor in purple, the people they owe in light red. */
-const DEBTOR_COLOR = '#820ad1'
+const DEBTOR_COLOR = 'var(--accent)'
 const CREDITOR_COLOR = '#e25555'
 
 /**

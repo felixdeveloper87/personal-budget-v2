@@ -1,13 +1,13 @@
 import { Box, Flex, Text } from '@chakra-ui/react'
 import { Fragment, type ReactNode } from 'react'
 
-const BRAND = '#820ad1'
+const BRAND = 'var(--accent)'
 /** Default seconds each headline stays on the bar, so a longer list scrolls at the same speed. */
 const SECONDS_PER_ITEM = 5
 
 const TONES = {
   /** White CNN-style bar with a purple label and a blinking red dot (the "Live" balances bar). */
-  live: { bg: 'white', ink: 'var(--pb-ink)', separator: 'var(--pb-hair-2)', labelBg: BRAND, labelInk: 'white', shadow: '6px 0 10px -6px rgba(130,10,209,.35)' },
+  live: { bg: 'white', ink: 'var(--pb-ink)', separator: 'var(--pb-hair-2)', labelBg: BRAND, labelInk: 'white', shadow: '6px 0 10px -6px rgba(var(--accent-rgb), .35)' },
 } as const
 
 /**

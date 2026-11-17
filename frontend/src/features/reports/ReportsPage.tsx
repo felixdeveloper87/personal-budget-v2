@@ -99,7 +99,7 @@ export default function ReportsPage() {
             flexShrink={0}
             borderRadius="full"
             bg="white"
-            color="var(--nu-brand, #820ad1)"
+            color="var(--nu-brand)"
             fontSize="sm"
             fontWeight={700}
             transition="transform .15s ease, box-shadow .15s ease"

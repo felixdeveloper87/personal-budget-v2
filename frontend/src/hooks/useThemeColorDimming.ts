@@ -1,9 +1,8 @@
 import { useEffect } from 'react'
+import { ACCENTS, DEFAULT_ACCENT, currentAccent } from '../accent'
 
-/** The brand purple, as the manifest and index.html declare it. */
-export const THEME_COLOR = '#820ad1'
-/** The purple seen through a sheet's dark overlay. */
-const DIMMED_THEME_COLOR = '#46056f'
+/** The brand purple, as the manifest, index.html and the launch splash declare it. */
+export const THEME_COLOR = ACCENTS[DEFAULT_ACCENT].main
 
 const OPEN_DIALOG = '[role="dialog"][aria-modal="true"], [role="alertdialog"][aria-modal="true"]'
 
@@ -11,6 +10,7 @@ const OPEN_DIALOG = '[role="dialog"][aria-modal="true"], [role="alertdialog"][ar
  * Android paints the status bar (installed app) and the address bar (Chrome)
  * with `theme-color`, which sits outside the page, so a sheet's overlay cannot
  * dim it. Follow open dialogs instead, the way native sheets dim the status bar.
+ * The colour follows the user's accent (accent.ts).
  */
 export function useThemeColorDimming() {
   useEffect(() => {
@@ -20,7 +20,8 @@ export function useThemeColorDimming() {
     let frame = 0
     const sync = () => {
       frame = 0
-      const color = document.querySelector(OPEN_DIALOG) ? DIMMED_THEME_COLOR : THEME_COLOR
+      const accent = ACCENTS[currentAccent()]
+      const color = document.querySelector(OPEN_DIALOG) ? accent.dimmed : accent.main
       if (meta.content !== color) meta.content = color
     }
     const schedule = () => {
@@ -34,11 +35,13 @@ export function useThemeColorDimming() {
       attributes: true,
       attributeFilter: ['aria-modal'],
     })
+    window.addEventListener('pb-accent-change', schedule)
     sync()
     return () => {
       observer.disconnect()
+      window.removeEventListener('pb-accent-change', schedule)
       window.cancelAnimationFrame(frame)
-      meta.content = THEME_COLOR
+      meta.content = ACCENTS[currentAccent()].main
     }
   }, [])
 }

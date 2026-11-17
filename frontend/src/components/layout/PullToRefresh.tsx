@@ -127,8 +127,8 @@ export default function PullToRefresh() {
         display="flex"
         alignItems="center"
         justifyContent="center"
-        bg={ready || refreshing ? '#820ad1' : 'white'}
-        color={ready || refreshing ? 'white' : '#820ad1'}
+        bg={ready || refreshing ? 'var(--accent)' : 'white'}
+        color={ready || refreshing ? 'white' : 'var(--accent)'}
         boxShadow="0 6px 18px -6px rgba(31, 10, 50, 0.45)"
         transition="background 0.15s ease, color 0.15s ease"
       >

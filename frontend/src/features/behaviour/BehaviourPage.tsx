@@ -336,7 +336,7 @@ function SelectedDayExpenses({
 
   return (
     <Box borderTop="1px solid var(--pb-hair)" borderBottom="1px solid var(--pb-hair)" bg="var(--nu-page)">
-      <Box px={{ base: 4, md: 6 }} py={{ base: 4, md: 5 }} bg="rgba(130, 10, 209, 0.035)">
+      <Box px={{ base: 4, md: 6 }} py={{ base: 4, md: 5 }} bg="rgba(var(--accent-rgb), 0.035)">
         <Flex align="flex-start" justify="space-between" gap={4}>
           <Box minW={0}>
             <Text
@@ -373,14 +373,14 @@ function SelectedDayExpenses({
             color="var(--nu-brand)"
             bg="transparent"
             transition="background-color .14s ease"
-            _hover={{ bg: 'rgba(130, 10, 209, 0.08)' }}
+            _hover={{ bg: 'rgba(var(--accent-rgb), 0.08)' }}
             _focusVisible={{ outline: '2px solid var(--nu-brand)', outlineOffset: '2px' }}
           >
             <Icon as={X} boxSize="17px" strokeWidth={2.25} />
           </Flex>
         </Flex>
 
-        <Flex mt={3} pt={3} borderTop="1px solid rgba(130, 10, 209, 0.1)" align="center" justify="space-between" gap={4}>
+        <Flex mt={3} pt={3} borderTop="1px solid rgba(var(--accent-rgb), 0.1)" align="center" justify="space-between" gap={4}>
           <Text color="var(--pb-ink-soft)" fontSize="12px" fontWeight={500}>
             {t('behaviour.day.total')}
           </Text>

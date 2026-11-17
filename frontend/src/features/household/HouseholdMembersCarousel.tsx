@@ -14,7 +14,7 @@ export function HouseholdMembersCarousel({ household, onViewBalances }: {
   const rankBadge = (rank: number) => (
     <Flex
       w="26px" h="26px" flexShrink={0} align="center" justify="center" borderRadius="full"
-      bg="#f3e8fc" color="#820ad1" fontSize="11px" fontWeight={800}
+      bg="var(--accent-tint)" color="var(--accent)" fontSize="11px" fontWeight={800}
     >
       {t('household.members.rank', { rank: formatNumber(rank) })}
     </Flex>

@@ -91,7 +91,7 @@ export default function ActivityIntensityStrip({
     // Square-root intensity keeps quieter days visible when the period has
     // one much larger transaction.
     const intensity = 0.2 + Math.sqrt(amount / max) * 0.72
-    if (isNu) return `rgba(130, 10, 209, ${intensity})`
+    if (isNu) return `rgba(var(--accent-rgb), ${intensity})`
     if (isIncome) {
       return dark
         ? `rgba(98, 220, 162, ${intensity})`
@@ -204,7 +204,7 @@ export default function ActivityIntensityStrip({
             w="10px"
             h="10px"
             borderRadius="3px"
-            bg={isNu ? `rgba(130, 10, 209, ${intensity})` : isIncome
+            bg={isNu ? `rgba(var(--accent-rgb), ${intensity})` : isIncome
               ? dark ? `rgba(98, 220, 162, ${intensity})` : `rgba(31, 138, 79, ${intensity})`
               : dark ? `rgba(255, 154, 144, ${intensity})` : `rgba(184, 69, 47, ${intensity})`}
           />

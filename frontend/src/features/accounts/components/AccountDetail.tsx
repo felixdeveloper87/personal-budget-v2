@@ -230,7 +230,7 @@ export default function AccountDetail({ account, hideBalances, onTransfer, onSet
         <Box mt={2} position="relative" minH="96px">
           {showRecentSpinner ? (
             <Flex minH="96px" align="center" justify="center">
-              <Spinner size="sm" color="var(--nu-brand, #820ad1)" />
+              <Spinner size="sm" color="var(--nu-brand)" />
             </Flex>
           ) : filtered.length === 0 ? (
             <Box mt={2} bg="var(--nu-surface)" borderRadius="16px" p={6} textAlign="center">
@@ -249,7 +249,7 @@ export default function AccountDetail({ account, hideBalances, onTransfer, onSet
           )}
           {tab === 'recent' && activityLoading && activity && (
             <Flex position="absolute" inset={0} align="center" justify="center" pointerEvents="none">
-              <Spinner size="sm" color="var(--nu-brand, #820ad1)" />
+              <Spinner size="sm" color="var(--nu-brand)" />
             </Flex>
           )}
         </Box>
@@ -263,11 +263,11 @@ export default function AccountDetail({ account, hideBalances, onTransfer, onSet
               size="sm"
               variant="ghost"
               borderRadius="full"
-              color="var(--nu-brand, #820ad1)"
-              bg="var(--nu-brand-tint, #f3e8fc)"
+              color="var(--nu-brand)"
+              bg="var(--nu-brand-tint)"
               isDisabled={activityPage === 0 || activityLoading}
               onClick={() => setActivityPage((page) => Math.max(0, page - 1))}
-              _hover={{ bg: '#ead6fa' }}
+              _hover={{ bg: 'var(--accent-border)' }}
             />
             <Text minW="64px" textAlign="center" fontSize="sm" fontWeight={600} color="var(--pb-ink-soft)">
               {t('accounts.activity.page', { page: activityPage + 1 })}
@@ -279,11 +279,11 @@ export default function AccountDetail({ account, hideBalances, onTransfer, onSet
               size="sm"
               variant="ghost"
               borderRadius="full"
-              color="var(--nu-brand, #820ad1)"
-              bg="var(--nu-brand-tint, #f3e8fc)"
+              color="var(--nu-brand)"
+              bg="var(--nu-brand-tint)"
               isDisabled={!activity?.hasMore || activityLoading}
               onClick={() => setActivityPage((page) => page + 1)}
-              _hover={{ bg: '#ead6fa' }}
+              _hover={{ bg: 'var(--accent-border)' }}
             />
           </HStack>
         )}

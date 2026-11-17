@@ -34,8 +34,8 @@ export default function ReportInsights({ insights }: { insights: string[] }) {
                 borderRadius="lg"
                 align="center"
                 justify="center"
-                bg="purple.50"
-                color="purple.500"
+                bg="brand.50"
+                color="brand.500"
               >
                 <Sparkle size={13} />
               </Flex>

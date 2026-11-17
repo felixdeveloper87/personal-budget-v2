@@ -18,8 +18,8 @@ import { ADMIN_NAV_ITEM, NAV_ITEMS, localizeNavigationItems, navItemIdFor } from
 /** Scrolled past the page's own (large) title: the bar shows a compact one. */
 const COMPACT_TITLE_AFTER = 64
 
-/** Bottom tab bar on phones: a lighter purple than the top app bar. */
-const MOBILE_NAV_BG = '#9b3de0'
+/** Bottom tab bar on phones: a lighter shade of the accent than the top app bar. */
+const MOBILE_NAV_BG = 'color-mix(in srgb, var(--accent) 82%, #ffffff)'
 
 /** Chrome bar height — shared so the sidebar's brand block lines up with the
  * header's bottom edge (their dividers sit on the same baseline). */

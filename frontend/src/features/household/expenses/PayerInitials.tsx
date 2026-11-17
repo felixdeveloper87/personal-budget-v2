@@ -15,7 +15,7 @@ export function PayerInitials({ name }: { name: string }) {
     <Flex
       as="span" role="img" aria-label={label} title={label}
       w="20px" h="20px" flexShrink={0} align="center" justify="center" borderRadius="full"
-      bg="#f3e8fc" color="#820ad1" fontSize="9px" fontWeight={800} letterSpacing="-.02em"
+      bg="var(--accent-tint)" color="var(--accent)" fontSize="9px" fontWeight={800} letterSpacing="-.02em"
     >
       {initials(name)}
     </Flex>

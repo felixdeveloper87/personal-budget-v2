@@ -58,7 +58,7 @@ export function HouseholdPayments({
             h="40px" px={4} borderRadius="full" flexShrink={0}
             bg="var(--nu-brand-tint)" color="var(--nu-brand)" fontSize="sm" fontWeight={600}
             aria-label={t('household.settlements.openAria')} onClick={onViewPayments}
-            _hover={{ bg: '#ead6fa' }}
+            _hover={{ bg: 'var(--accent-border)' }}
           >
             {t('household.settlements.viewAll')}
           </Button>

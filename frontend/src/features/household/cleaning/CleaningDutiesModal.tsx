@@ -7,7 +7,7 @@ import { PremiumModal } from '../../../components/ui'
 import NuModalHeader from '../../../components/ui/NuModalHeader'
 import type { DisplayedCleaningDuty } from './cleaningConfig'
 
-const BRAND = '#820ad1'
+const BRAND = 'var(--accent)'
 const ROW_HEIGHT = '56px'
 
 export function CleaningDutiesModal({

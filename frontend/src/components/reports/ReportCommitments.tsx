@@ -56,7 +56,7 @@ export default function ReportCommitments({ report }: { report: ReportResponse }
             label={t('reports.installments')}
             value={currency(report.installmentExpenseTotal)}
             caption={t('reports.expenseFromInstallments')}
-            accent="purple.600"
+            accent="brand.600"
           />
           <CommitmentTile
             label={t('reports.recurring')}

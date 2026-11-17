@@ -165,7 +165,7 @@ export default function CashPace({
               borderRadius="full"
               color="var(--pb-ink-faint)"
               _hover={{ color: 'var(--pb-ink)', bg: 'var(--pb-surface-2)' }}
-              _focusVisible={{ boxShadow: '0 0 0 3px var(--nu-brand-tint, #f3e8fc)' }}
+              _focusVisible={{ boxShadow: '0 0 0 3px var(--nu-brand-tint)' }}
             />
           )}
         </HStack>

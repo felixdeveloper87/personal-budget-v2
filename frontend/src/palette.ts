@@ -1,7 +1,8 @@
 /** Shared color source for Chakra, the app shell and --pb-* CSS tokens.
  * Single light theme in a Nubank-like voice: white surfaces, neutral greys and
- * one purple accent. Green/red stay reserved for money meaning (in/out, good/bad).
- * Token names are historical (`forest` is the purple accent, `coral` is red).
+ * one accent the user picks (see accent.ts), referenced through --accent-*
+ * variables. Green/red stay reserved for money meaning (in/out, good/bad).
+ * Token names are historical (`forest` is the accent, `coral` is red).
  */
 export const LIGHT_PALETTE = {
   paper: '#f4f4f7',
@@ -13,18 +14,18 @@ export const LIGHT_PALETTE = {
   ink: '#1f1f24',
   'ink-soft': '#5f5f6b',
   'ink-faint': '#6b6b76',
-  forest: '#820ad1',
-  'forest-2': '#820ad1',
-  line: '#820ad1',
+  forest: 'var(--accent)',
+  'forest-2': 'var(--accent)',
+  line: 'var(--accent)',
   'on-accent': '#ffffff',
-  'tint-green': 'rgba(130, 10, 209, 0.08)',
-  'tint-green-hover': 'rgba(130, 10, 209, 0.14)',
-  'sidebar-accent': '#820ad1',
-  'sidebar-active-bg': '#f3e8fc',
-  'sidebar-active-border': 'rgba(130, 10, 209, 0.22)',
+  'tint-green': 'rgba(var(--accent-rgb), 0.08)',
+  'tint-green-hover': 'rgba(var(--accent-rgb), 0.14)',
+  'sidebar-accent': 'var(--accent)',
+  'sidebar-active-bg': 'var(--accent-tint)',
+  'sidebar-active-border': 'rgba(var(--accent-rgb), 0.22)',
   header: '#ffffff',
   'header-ink': '#1f1f24',
-  hero: '#820ad1',
+  hero: 'var(--accent)',
   'hero-ink': '#ffffff',
   'hero-line': 'rgba(255, 255, 255, 0.20)',
   income: '#1e8a5a',
@@ -36,11 +37,11 @@ export const LIGHT_PALETTE = {
   gold: '#8a5a00',
   'gold-2': '#734b00',
   'tint-gold': 'rgba(138, 90, 0, 0.09)',
-  'summary-petrol': '#f3e8fc',
+  'summary-petrol': 'var(--accent-tint)',
   'summary-ink': '#1f1f24',
   'summary-ink-soft': '#55555f',
   'summary-ink-faint': '#6b6b76',
-  'summary-line': 'rgba(130, 10, 209, 0.18)',
+  'summary-line': 'rgba(var(--accent-rgb), 0.18)',
   'summary-panel': 'rgba(255, 255, 255, 0.6)',
   'summary-control': '#f5f5f8',
   'summary-income': '#177049',
@@ -52,7 +53,7 @@ export const LIGHT_PALETTE = {
   solid: '#ffffff',
   'panel-raised': '#f5f5f8',
   glass: '#f5f5f8',
-  hover: 'rgba(130, 10, 209, 0.05)',
+  hover: 'rgba(var(--accent-rgb), 0.05)',
   control: '#f5f5f8',
   'control-hover': '#ececf1',
   track: '#e4e4eb',
@@ -62,7 +63,7 @@ export const LIGHT_PALETTE = {
   'shadow-lift': '0 2px 5px rgba(31, 31, 36, 0.05), 0 14px 32px -12px rgba(31, 31, 36, 0.16)',
   'modal-shadow': '0 28px 80px -24px rgba(31, 31, 36, 0.28)',
   overlay: 'rgba(20, 20, 26, 0.40)',
-  focus: 'rgba(130, 10, 209, 0.35)',
+  focus: 'rgba(var(--accent-rgb), 0.35)',
 } as const
 
 export type Palette = { [Key in keyof typeof LIGHT_PALETTE]: string }
@@ -128,19 +129,6 @@ export const DARK_PALETTE: Palette = {
   overlay: 'rgba(6, 15, 18, 0.72)',
   focus: 'rgba(155, 196, 197, 0.58)',
 }
-
-export const BRAND_COLORS = {
-  50: '#f6effd',
-  100: '#ead9fb',
-  200: '#d4b0f6',
-  300: '#bb84f0',
-  400: '#a04de6',
-  500: '#820ad1',
-  600: '#7008b5',
-  700: '#5d0796',
-  800: '#4a0577',
-  900: '#36045a',
-} as const
 
 export function paletteCssVariables(palette: Palette) {
   return Object.fromEntries(

@@ -5,7 +5,7 @@ import type { ReactNode } from 'react'
 /** Concrete Nubank-style colours for places where CSS vars can't reach (recharts SVG attributes).
  * Mirrors the .nu-dashboard tokens in theme/pb-tokens.css. */
 const NU = {
-  brand: '#820ad1',
+  brand: 'var(--accent)',
   ink: '#1f1f24',
   inkFaint: '#8a8a95',
   page: '#ffffff',

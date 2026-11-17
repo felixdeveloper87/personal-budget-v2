@@ -6,9 +6,9 @@ import { SheetDragHandle } from './SheetGrabber'
 import { useI18n } from '../../i18n'
 
 const NU = {
-  brand: '#820ad1',
-  brandDeep: '#6e08b3',
-  brandSoft: '#f3e8fc',
+  brand: 'var(--accent)',
+  brandDeep: 'var(--accent-deep)',
+  brandSoft: 'var(--accent-tint)',
   ink: '#1f1f24',
   inkSoft: '#6b6b76',
   surface: '#f5f5f8',

@@ -881,7 +881,7 @@ export function AttachmentGalleryModal({
                     <Button
                       mt={3}
                       w={{ base: 'full', sm: 'auto' }}
-                      bg="#820ad1" color="white" borderRadius="full" _hover={{ bg: '#6e08b3' }} _active={{ bg: '#6e08b3' }}
+                      bg="var(--accent)" color="white" borderRadius="full" _hover={{ bg: 'var(--accent-deep)' }} _active={{ bg: 'var(--accent-deep)' }}
                       leftIcon={<Upload size={16} />}
                       isLoading={uploading}
                       onClick={() => void upload()}

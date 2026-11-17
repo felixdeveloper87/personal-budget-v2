@@ -70,7 +70,7 @@ export default function ReportMovementList({ report }: { report: ReportResponse 
                         {transaction.description?.trim() || categoryLabel(transaction.category)}
                       </Text>
                       {transaction.installment ? (
-                        <Badge colorScheme="purple" variant="subtle" fontSize="9px" borderRadius="md">
+                        <Badge colorScheme="brand" variant="subtle" fontSize="9px" borderRadius="md">
                           {t('reports.installment')}
                         </Badge>
                       ) : null}

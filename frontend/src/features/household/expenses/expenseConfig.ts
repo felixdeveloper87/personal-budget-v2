@@ -30,7 +30,7 @@ export const HOUSEHOLD_EXPENSE_PRESETS: ReadonlyArray<HouseholdExpensePreset> = 
     icon: Lightbulb,
     color: 'var(--pb-forest)',
     tint: 'var(--pb-tint-green)',
-    gradient: 'linear(to-br, #A04DE6, #820AD1)',
+    gradient: 'linear(to-br, var(--accent-400), var(--accent))',
   },
   {
     key: 'water',
@@ -38,7 +38,7 @@ export const HOUSEHOLD_EXPENSE_PRESETS: ReadonlyArray<HouseholdExpensePreset> = 
     icon: Drop,
     color: 'var(--pb-forest)',
     tint: 'var(--pb-tint-green)',
-    gradient: 'linear(to-br, #A04DE6, #820AD1)',
+    gradient: 'linear(to-br, var(--accent-400), var(--accent))',
   },
   {
     key: 'gas',
@@ -46,7 +46,7 @@ export const HOUSEHOLD_EXPENSE_PRESETS: ReadonlyArray<HouseholdExpensePreset> = 
     icon: Flame,
     color: 'var(--pb-forest)',
     tint: 'var(--pb-tint-green)',
-    gradient: 'linear(to-br, #A04DE6, #820AD1)',
+    gradient: 'linear(to-br, var(--accent-400), var(--accent))',
   },
   {
     key: 'internet',
@@ -54,7 +54,7 @@ export const HOUSEHOLD_EXPENSE_PRESETS: ReadonlyArray<HouseholdExpensePreset> = 
     icon: WifiHigh,
     color: 'var(--pb-forest)',
     tint: 'var(--pb-tint-green)',
-    gradient: 'linear(to-br, #A04DE6, #820AD1)',
+    gradient: 'linear(to-br, var(--accent-400), var(--accent))',
   },
   {
     key: 'cleaning',
@@ -62,7 +62,7 @@ export const HOUSEHOLD_EXPENSE_PRESETS: ReadonlyArray<HouseholdExpensePreset> = 
     icon: Broom,
     color: 'var(--pb-forest)',
     tint: 'var(--pb-tint-green)',
-    gradient: 'linear(to-br, #A04DE6, #820AD1)',
+    gradient: 'linear(to-br, var(--accent-400), var(--accent))',
   },
   {
     key: 'garden',
@@ -70,7 +70,7 @@ export const HOUSEHOLD_EXPENSE_PRESETS: ReadonlyArray<HouseholdExpensePreset> = 
     icon: Plant,
     color: 'var(--pb-forest)',
     tint: 'var(--pb-tint-green)',
-    gradient: 'linear(to-br, #A04DE6, #820AD1)',
+    gradient: 'linear(to-br, var(--accent-400), var(--accent))',
   },
   {
     key: 'kitchen',
@@ -78,7 +78,7 @@ export const HOUSEHOLD_EXPENSE_PRESETS: ReadonlyArray<HouseholdExpensePreset> = 
     icon: CookingPot,
     color: 'var(--pb-forest)',
     tint: 'var(--pb-tint-green)',
-    gradient: 'linear(to-br, #A04DE6, #820AD1)',
+    gradient: 'linear(to-br, var(--accent-400), var(--accent))',
   },
   {
     key: 'toilet',
@@ -86,7 +86,7 @@ export const HOUSEHOLD_EXPENSE_PRESETS: ReadonlyArray<HouseholdExpensePreset> = 
     icon: ToiletPaper,
     color: 'var(--pb-forest)',
     tint: 'var(--pb-tint-green)',
-    gradient: 'linear(to-br, #A04DE6, #820AD1)',
+    gradient: 'linear(to-br, var(--accent-400), var(--accent))',
   },
 ]
 

@@ -25,7 +25,7 @@ export default function TransactionModalHeader({
 
   return (
     <Box
-      bg="#820ad1"
+      bg="var(--accent)"
       px={{ base: 3.5, sm: 6 }}
       pt={{
         base: useMobileSafeArea

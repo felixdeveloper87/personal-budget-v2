@@ -5,7 +5,7 @@ import { Pencil, ReceiptText, Upload } from '../../../components/ui/icons'
 import { getHouseholdCategoryConfig } from './expenseConfig'
 import { PayerInitials } from './PayerInitials'
 
-const BRAND = '#820ad1'
+const BRAND = 'var(--accent)'
 
 /**
  * One expense in two lines:
@@ -54,7 +54,7 @@ export function ExpenseCard({
                 icon={<Icon as={attachmentCount > 0 ? ReceiptText : Upload} boxSize={4} weight={attachmentCount > 0 ? 'fill' : 'bold'} />}
                 size="xs" w="28px" minW="28px" h="28px" borderRadius="full" variant="ghost"
                 color={attachmentCount > 0 ? BRAND : 'var(--pb-ink-faint)'}
-                _hover={{ bg: '#f3e8fc', color: BRAND }}
+                _hover={{ bg: 'var(--accent-tint)', color: BRAND }}
                 onClick={() => onOpenAttachments(expense.id)}
               />
             )}
@@ -64,7 +64,7 @@ export function ExpenseCard({
                 icon={<Icon as={Pencil} boxSize={4} />}
                 size="xs" w="28px" minW="28px" h="28px" borderRadius="full" variant="ghost"
                 color="var(--pb-ink-faint)"
-                _hover={{ bg: '#f3e8fc', color: BRAND }}
+                _hover={{ bg: 'var(--accent-tint)', color: BRAND }}
                 onClick={() => onEditExpense(expense)}
               />
             )}

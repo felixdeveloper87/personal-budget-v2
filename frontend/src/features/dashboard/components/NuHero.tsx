@@ -61,9 +61,9 @@ export function NuHeroGlow() {
     <Box
       aria-hidden="true" position="absolute" inset={0} zIndex={-1} pointerEvents="none"
       bg={[
-        'radial-gradient(60% 70% at 18% 62%, rgba(214, 160, 255, 0.28) 0%, rgba(214, 160, 255, 0) 70%)',
+        'radial-gradient(60% 70% at 18% 62%, color-mix(in srgb, var(--accent-200) 28%, transparent) 0%, transparent 70%)',
         'radial-gradient(50% 60% at 100% 0%, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0) 70%)',
-        'linear-gradient(135deg, #8a12dc 0%, #820ad1 45%, #6c05b5 100%)',
+        'linear-gradient(135deg, var(--accent-bright) 0%, var(--accent) 45%, var(--accent-deep) 100%)',
       ].join(', ')}
     />
   )

@@ -209,7 +209,7 @@ export default function TransactionList({
                           <span>
                             <Icon
                               as={FiCreditCard}
-                              color={tx.isFutureInstallment ? "gray.400" : "purple.500"}
+                              color={tx.isFutureInstallment ? "gray.400" : "brand.500"}
                               fontSize={{ base: "xs", md: "sm" }}
                             />
                           </span>

@@ -27,7 +27,7 @@ import {
 import { PremiumModal } from '../../components/ui'
 import NuModalHeader from '../../components/ui/NuModalHeader'
 
-const BRAND = '#820ad1'
+const BRAND = 'var(--accent)'
 
 type NotificationAction = 'expenses' | 'payments' | 'cleaning' | null
 
@@ -145,7 +145,7 @@ export function HouseholdNotificationsCard({
           </Button>
           <Button
             size="sm"
-            bg="#820ad1" color="white" borderRadius="full" _hover={{ bg: '#6e08b3' }} _active={{ bg: '#6e08b3' }}
+            bg="var(--accent)" color="white" borderRadius="full" _hover={{ bg: 'var(--accent-deep)' }} _active={{ bg: 'var(--accent-deep)' }}
             flex={{ base: 1, sm: 'initial' }}
             rightIcon={<ChevronRight size={15} />}
             onClick={onOpenAll}
@@ -207,7 +207,7 @@ export function HouseholdNotificationsModal({
               leftIcon={<CheckCircle2 size={15} />}
               isLoading={isMarkingRead}
               onClick={onMarkAllRead}
-              _hover={{ bg: '#f3e8fc' }}
+              _hover={{ bg: 'var(--accent-tint)' }}
             >
               {t('household.notifications.markAllRead')}
             </Button>
@@ -217,7 +217,7 @@ export function HouseholdNotificationsModal({
           <NotificationList notifications={notifications} {...navigation} />
         ) : (
           <VStack spacing={3} px={6} py={12} textAlign="center">
-            <Flex w="56px" h="56px" align="center" justify="center" borderRadius="full" bg="#f3e8fc" color={BRAND}>
+            <Flex w="56px" h="56px" align="center" justify="center" borderRadius="full" bg="var(--accent-tint)" color={BRAND}>
               <Icon as={CheckCircle2} boxSize={6} weight="duotone" />
             </Flex>
             <Text fontSize="lg" fontWeight={800} letterSpacing="-.02em" color="var(--pb-ink)">
@@ -308,7 +308,7 @@ function NotificationRow({
       align="center"
       px={{ base: 4, md: 6 }}
       py={compact ? 2.5 : 3}
-      bg={notification.readAt == null ? 'rgba(130, 10, 209, 0.04)' : 'transparent'}
+      bg={notification.readAt == null ? 'rgba(var(--accent-rgb), 0.04)' : 'transparent'}
     >
       <Flex
         w={8}
@@ -317,7 +317,7 @@ function NotificationRow({
         align="center"
         justify="center"
         borderRadius="full"
-        bg="#f3e8fc"
+        bg="var(--accent-tint)"
         color={BRAND}
       >
         <NotificationIcon size={16} weight="duotone" aria-hidden="true" />
@@ -358,7 +358,7 @@ function NotificationRow({
           fontWeight={700}
           rightIcon={<ChevronRight size={13} />}
           onClick={onOpen}
-          _hover={{ bg: '#f3e8fc' }}
+          _hover={{ bg: 'var(--accent-tint)' }}
         >
           {t(`household.notifications.action.${action}`)}
         </Button>

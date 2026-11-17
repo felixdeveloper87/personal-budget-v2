@@ -183,15 +183,15 @@ export default function MobileNav({ currentPage, onPageChange, items }: MobileNa
                     py={3}
                     borderRadius="2xl"
                     border="2px solid"
-                    borderColor={active ? '#820ad1' : 'var(--pb-hair)'}
+                    borderColor={active ? 'var(--accent)' : 'var(--pb-hair)'}
                     bg={active ? 'var(--pb-surface-2)' : 'var(--pb-control, var(--pb-surface))'}
                     color="var(--pb-ink)"
                     transition={reducedMotion ? 'none' : 'transform 140ms ease, border-color 0.3s ease, box-shadow 0.3s ease'}
-                    _hover={{ borderColor: '#820ad1' }}
+                    _hover={{ borderColor: 'var(--accent)' }}
                     _active={{ transform: reducedMotion ? 'none' : 'scale(0.97)' }}
-                    _focusVisible={{ outline: 'none', boxShadow: '0 0 0 3px #820ad120', borderColor: '#820ad1' }}
+                    _focusVisible={{ outline: 'none', boxShadow: '0 0 0 3px rgba(var(--accent-rgb), 0.13)', borderColor: 'var(--accent)' }}
                   >
-                    <Flex w={8} h={8} align="center" justify="center" borderRadius="xl" bg="var(--pb-surface-2)" color="#820ad1">
+                    <Flex w={8} h={8} align="center" justify="center" borderRadius="xl" bg="var(--pb-surface-2)" color="var(--accent)">
                       <Icon as={item.icon} boxSize={4} weight={active ? 'fill' : 'regular'} />
                     </Flex>
                     <Text mt={2} fontSize="sm" fontWeight={600} lineHeight="shorter" noOfLines={1}>

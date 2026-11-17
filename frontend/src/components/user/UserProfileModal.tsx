@@ -26,7 +26,7 @@ const PLAN_META: Record<UserPlan, { colorScheme: string }> = {
   PREMIUM: { colorScheme: 'yellow' },
 }
 
-const NU_PURPLE = '#820ad1'
+const NU_PURPLE = 'var(--accent)'
 
 export default function UserProfileModal({ isOpen, onClose, user }: UserProfileModalProps) {
   const { t } = useI18n()
@@ -79,7 +79,7 @@ export default function UserProfileModal({ isOpen, onClose, user }: UserProfileM
           <Card>
             <HStack spacing={4} align="center">
               <Box position="relative" p="3px" borderRadius="full" bg={NU_PURPLE} flexShrink={0}>
-                <Avatar size="lg" name={displayName} bg="#f3e8fc" color={NU_PURPLE} fontWeight={700} />
+                <Avatar size="lg" name={displayName} bg="var(--accent-tint)" color={NU_PURPLE} fontWeight={700} />
               </Box>
               <VStack spacing={1} align="start" flex={1} minW={0}>
                 <HStack spacing={2} flexWrap="wrap">

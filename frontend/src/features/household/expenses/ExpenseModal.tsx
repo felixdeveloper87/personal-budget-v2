@@ -139,8 +139,8 @@ export function ExpenseModal({ isOpen, onClose, household, expense, onChanged }:
         bg="var(--pb-forest)" color="white"
         leftIcon={expense ? <Check size={18} weight="bold" /> : <Plus size={18} weight="bold" />}
         isDisabled={!canSubmit} isLoading={saving} loadingText={t('household.common.saving')}
-        fontSize="sm" fontWeight={800} _hover={{ bg: '#6E08B3' }}
-        _disabled={{ bg: '#C9A6E8', color: 'white', opacity: 1, cursor: 'not-allowed' }}
+        fontSize="sm" fontWeight={800} _hover={{ bg: 'var(--accent-deep)' }}
+        _disabled={{ bg: 'color-mix(in srgb, var(--accent) 40%, #ffffff)', color: 'white', opacity: 1, cursor: 'not-allowed' }}
       >
         {expense ? t('household.expenseModal.saveChanges') : t('household.expenseModal.addToHousehold')}
       </Button>
@@ -169,13 +169,13 @@ export function ExpenseModal({ isOpen, onClose, household, expense, onChanged }:
         <VStack align="stretch" spacing={3}>
           <FieldCard icon={Calculator} label={t('household.expenseModal.totalAmount')}
             right={
-              <HStack spacing={1} justify="flex-end" whiteSpace="nowrap" px={2} py={1} borderRadius="10px" bg="#f3e8fc">
-                <Text color="#820ad1" fontSize="lg" fontWeight={800}>{mark}</Text>
+              <HStack spacing={1} justify="flex-end" whiteSpace="nowrap" px={2} py={1} borderRadius="10px" bg="var(--accent-tint)">
+                <Text color="var(--accent)" fontSize="lg" fontWeight={800}>{mark}</Text>
                 <Input variant="unstyled" inputMode="decimal" value={amount}
                   onChange={(event) => setAmount(event.target.value.replace(/[^0-9.,]/g, ''))}
                   placeholder="0.00" aria-label={t('household.expenseModal.totalAmount')}
                   w={{ base: '68px', sm: '80px' }} minW={{ base: '68px', sm: '80px' }} flex="none" p={0}
-                  color="#820ad1" fontSize="22px" fontWeight={800} lineHeight="1.1" textAlign="left"
+                  color="var(--accent)" fontSize="22px" fontWeight={800} lineHeight="1.1" textAlign="left"
                   sx={{ fontVariantNumeric: 'tabular-nums', _placeholder: { color: colors.text.secondary, opacity: 0.8 } }} />
               </HStack>
             }>
@@ -190,7 +190,7 @@ export function ExpenseModal({ isOpen, onClose, household, expense, onChanged }:
             right={
               <Input type="date" value={expenseDate} onChange={(event) => setExpenseDate(event.target.value)} size="sm"
                 w="auto" bg={colors.bgSecondary} border="none" borderRadius="lg" color={colors.text.primary} fontSize="sm" fontWeight={600}
-                _focusVisible={{ boxShadow: '0 0 0 2px rgba(130,10,209,.2)' }} />
+                _focusVisible={{ boxShadow: '0 0 0 2px rgba(var(--accent-rgb), .2)' }} />
             } />
 
           <FieldCard icon={Tag} label={t('household.expenseModal.aboutTitle')}>
@@ -203,7 +203,7 @@ export function ExpenseModal({ isOpen, onClose, household, expense, onChanged }:
                   <Button key={item} type="button" variant="ghost" h={{ base: 10, sm: 11 }} px={3} minW={0}
                     gridColumn={spanLast ? 'span 2' : undefined} justifyContent="flex-start" borderRadius="xl"
                     leftIcon={<CategoryIcon size={16} weight="duotone" aria-hidden="true" />} iconSpacing={2}
-                    border="1px solid" borderColor={selected ? '#820ad1' : colors.border}
+                    border="1px solid" borderColor={selected ? 'var(--accent)' : colors.border}
                     bg={selected ? colors.bgSecondary : 'transparent'}
                     color={selected ? colors.text.primary : colors.text.secondary}
                     fontSize="xs" fontWeight={selected ? 600 : 500} aria-pressed={selected}
@@ -245,13 +245,13 @@ export function ExpenseModal({ isOpen, onClose, household, expense, onChanged }:
                   return (
                     <Flex as="label" key={member.id} minH={{ base: 10, sm: 11 }} px={3} align="center" gap={2}
                       gridColumn={spanLast ? 'span 2' : undefined}
-                      border="1px solid" borderColor={selected ? '#820ad1' : colors.border} borderRadius="xl"
+                      border="1px solid" borderColor={selected ? 'var(--accent)' : colors.border} borderRadius="xl"
                       bg={selected ? colors.bgSecondary : 'transparent'} cursor={isPayer ? 'default' : 'pointer'}>
                       <Text flex={1} minW={0} fontSize="xs" fontWeight={selected ? 600 : 500}
                         color={selected ? colors.text.primary : colors.text.secondary} noOfLines={1}>
                         {isPayer ? `${t('household.common.you')} \u00B7 ${t('household.expenseModal.paid')}` : member.name}
                       </Text>
-                      <Checkbox isChecked={selected} isDisabled={isPayer} colorScheme="purple" onChange={(event) => {
+                      <Checkbox isChecked={selected} isDisabled={isPayer} colorScheme="brand" onChange={(event) => {
                         setParticipantIds((current) => {
                           const next = new Set(current)
                           if (event.target.checked) next.add(member.id)
@@ -268,7 +268,7 @@ export function ExpenseModal({ isOpen, onClose, household, expense, onChanged }:
             {participantsAreValid && amountIsValid && (
               <Text fontSize="xs" color={colors.text.secondary}>
                 {t('household.expenseModal.approximatelyPerPerson')}{' '}
-                <Text as="span" fontSize="sm" fontWeight={800} color="#820ad1">{formatCurrency(preview)}</Text>
+                <Text as="span" fontSize="sm" fontWeight={800} color="var(--accent)">{formatCurrency(preview)}</Text>
               </Text>
             )}
           </FieldCard>
@@ -286,7 +286,7 @@ function ExpenseSheetHeader({ householdName, editing, saving, onClose }: { house
   return (
     <Box position="relative" overflow="hidden" bg="var(--pb-tint-green)" borderBottom="1px solid var(--pb-hair)" px={5} pt={2.5} pb={5}>
       <Box aria-hidden="true" position="absolute" inset="0 0 0 auto" w="190px"
-        bgImage="linear-gradient(90deg, #F3E8FC 0%, rgba(243,232,252,.76) 48%, rgba(243,232,252,.18) 100%), url('/household-landscape.svg?v=20261004-lilac')"
+        bgImage="linear-gradient(90deg, var(--accent-tint) 0%, rgba(var(--accent-tint-rgb), .76) 48%, rgba(var(--accent-tint-rgb), .18) 100%), url('/household-landscape.svg?v=20261004-lilac')"
         bgSize="cover" bgPosition="center" pointerEvents="none" />
       <Box w="36px" h="5px" mx="auto" mb={4.5} borderRadius="full" bg="var(--pb-hair-2)" />
       <Flex position="relative" align="center" gap={3}>
@@ -311,11 +311,11 @@ function FieldCard({ icon, label, right, children }: { icon: ElementType; label:
   const colors = useThemeColors()
   return (
     <Box borderRadius="2xl" bg={colors.inputBg} border="2px solid" borderColor={colors.border}
-      _focusWithin={{ borderColor: '#820ad1', boxShadow: '0 0 0 3px #820ad120' }} transition="border-color 0.3s ease, box-shadow 0.3s ease">
+      _focusWithin={{ borderColor: 'var(--accent)', boxShadow: '0 0 0 3px rgba(var(--accent-rgb), 0.13)' }} transition="border-color 0.3s ease, box-shadow 0.3s ease">
       <VStack align="stretch" spacing={3} px={{ base: 3, sm: 4 }} py={{ base: 3, sm: 4 }}>
         <HStack justify="space-between" spacing={3} align="center">
           <HStack spacing={2.5} flexShrink={0}>
-            <Box role="presentation" w={{ base: 8, sm: 10 }} h={{ base: 8, sm: 10 }} borderRadius="xl" bg={colors.bgSecondary} color="#820ad1"
+            <Box role="presentation" w={{ base: 8, sm: 10 }} h={{ base: 8, sm: 10 }} borderRadius="xl" bg={colors.bgSecondary} color="var(--accent)"
               display="flex" alignItems="center" justifyContent="center" flexShrink={0} aria-hidden>
               <Icon as={icon} boxSize={{ base: 4, sm: 5 }} sx={{ '& svg': { display: 'block' } }} />
             </Box>

@@ -53,14 +53,14 @@ export default function IncomeQuickAdd({
               justifyContent="flex-start"
               borderRadius="16px"
               border="1px solid"
-              borderColor={selected ? '#820ad1' : 'var(--pb-hair)'}
-              bg={selected ? '#f3e8fc' : 'var(--pb-surface)'}
-              color={selected ? '#820ad1' : 'var(--pb-ink)'}
+              borderColor={selected ? 'var(--accent)' : 'var(--pb-hair)'}
+              bg={selected ? 'var(--accent-tint)' : 'var(--pb-surface)'}
+              color={selected ? 'var(--accent)' : 'var(--pb-ink)'}
               onClick={() => {
                 setCustomSource(false)
                 onSelect(source.name)
               }}
-              _hover={{ borderColor: '#820ad1', bg: selected ? '#f3e8fc' : '#f8f1fe' }}
+              _hover={{ borderColor: 'var(--accent)', bg: selected ? 'var(--accent-tint)' : 'var(--accent-soft)' }}
               aria-label={`Use ${source.name} as income source`}
             >
               <HStack spacing={2.5} minW={0}>
@@ -80,14 +80,14 @@ export default function IncomeQuickAdd({
           justifyContent="flex-start"
           borderRadius="16px"
           border="1px solid"
-          borderColor={customSource ? '#820ad1' : 'var(--pb-hair)'}
-          bg={customSource ? '#f3e8fc' : 'var(--pb-surface)'}
-          color={customSource ? '#820ad1' : 'var(--pb-ink)'}
+          borderColor={customSource ? 'var(--accent)' : 'var(--pb-hair)'}
+          bg={customSource ? 'var(--accent-tint)' : 'var(--pb-surface)'}
+          color={customSource ? 'var(--accent)' : 'var(--pb-ink)'}
           onClick={() => {
             setCustomSource(true)
             onSelectOther()
           }}
-          _hover={{ borderColor: '#820ad1', bg: customSource ? '#f3e8fc' : '#f8f1fe' }}
+          _hover={{ borderColor: 'var(--accent)', bg: customSource ? 'var(--accent-tint)' : 'var(--accent-soft)' }}
         >
           <HStack spacing={2.5} minW={0}>
             <Box
@@ -97,8 +97,8 @@ export default function IncomeQuickAdd({
               placeItems="center"
               flexShrink={0}
               borderRadius="12px"
-              bg={customSource ? '#820ad1' : '#f3e8fc'}
-              color={customSource ? 'white' : '#820ad1'}
+              bg={customSource ? 'var(--accent)' : 'var(--accent-tint)'}
+              color={customSource ? 'white' : 'var(--accent)'}
             >
               <MoreHorizontal aria-hidden="true" size={23} strokeWidth={2.5} />
             </Box>

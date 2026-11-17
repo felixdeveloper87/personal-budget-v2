@@ -68,8 +68,8 @@ export function NuListRow({ leading, title, caption, amount, amountColor, amount
       opacity={muted ? 0.62 : 1}
       transition="background-color .15s ease, opacity .15s ease"
       _last={{ borderBottom: 0 }}
-      _hover={{ bg: 'rgba(130,10,209,.025)', opacity: 1 }}
-      _focusVisible={{ outline: 'none', boxShadow: 'inset 3px 0 0 var(--nu-brand, #820ad1)' }}
+      _hover={{ bg: 'rgba(var(--accent-rgb), .025)', opacity: 1 }}
+      _focusVisible={{ outline: 'none', boxShadow: 'inset 3px 0 0 var(--nu-brand)' }}
     >
       <Box flexShrink={0}>{leading}</Box>
 
@@ -86,7 +86,7 @@ export function NuListRow({ leading, title, caption, amount, amountColor, amount
         {amountCaption && <Text mt="2px" fontSize="10px" color="var(--pb-ink-faint)">{amountCaption}</Text>}
       </Box>
 
-      <Icon as={ChevronRight} boxSize="16px" color="var(--nu-brand, #820ad1)" flexShrink={0} />
+      <Icon as={ChevronRight} boxSize="16px" color="var(--nu-brand)" flexShrink={0} />
     </Flex>
   )
 }

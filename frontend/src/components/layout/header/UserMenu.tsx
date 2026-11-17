@@ -95,7 +95,7 @@ export default function UserMenu({
       borderRadius="10px"
       transition="background 0.2s ease"
       _hover={{ bg: onBrand ? ON_BRAND.controlBg : ed.controlHoverBg }}
-      _focusVisible={{ outline: 'none', boxShadow: onBrand ? ON_BRAND.focus : `0 0 0 3px ${jade}38` }}
+      _focusVisible={{ outline: 'none', boxShadow: onBrand ? ON_BRAND.focus : '0 0 0 3px rgba(var(--accent-rgb), 0.22)' }}
     >
       <HStack spacing={1.5} minW={0}>
         <Text
@@ -137,7 +137,7 @@ export default function UserMenu({
         }}
         _focusVisible={{
           outline: 'none',
-          boxShadow: onBrand ? ON_BRAND.focus : `0 0 0 3px ${jade}38`,
+          boxShadow: onBrand ? ON_BRAND.focus : '0 0 0 3px rgba(var(--accent-rgb), 0.22)',
         }}
       >
         <HStack spacing={1.5}>
@@ -264,7 +264,7 @@ export default function UserMenu({
   )
 }
 
-const NU_PURPLE = '#820ad1'
+const NU_PURPLE = 'var(--accent)'
 
 interface NuMenuRowProps {
   icon: typeof User

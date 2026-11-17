@@ -183,8 +183,8 @@ export function HouseLineArt() {
         {/* soft glow behind the main house */}
         <defs>
           <radialGradient id="hhGlow" cx="62%" cy="58%" r="45%">
-            <stop offset="0" stopColor="#d9a8ff" stopOpacity="0.22" />
-            <stop offset="1" stopColor="#d9a8ff" stopOpacity="0" />
+            <stop offset="0" stopColor="var(--accent-200)" stopOpacity="0.22" />
+            <stop offset="1" stopColor="var(--accent-200)" stopOpacity="0" />
           </radialGradient>
         </defs>
         <rect width="600" height="260" fill="url(#hhGlow)" stroke="none" />

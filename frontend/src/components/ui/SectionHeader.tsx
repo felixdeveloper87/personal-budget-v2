@@ -53,10 +53,10 @@ const ACCENT_TOKENS: Record<SectionHeaderAccent, AccentTokens> = {
     fgDark: 'red.300',
   },
   violet: {
-    bgLight: 'purple.50',
+    bgLight: 'brand.50',
     bgDark: 'rgba(139,92,246,0.12)',
-    fgLight: 'purple.600',
-    fgDark: 'purple.300',
+    fgLight: 'brand.600',
+    fgDark: 'brand.300',
   },
   pink: {
     bgLight: 'pink.50',

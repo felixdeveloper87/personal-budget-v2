@@ -90,7 +90,7 @@ export default function MerchantLogo({ name, category, domain, size = 36, border
       flexShrink={0}
       overflow="hidden"
       borderRadius={borderRadius}
-      bg={showLogo ? '#ffffff' : rent ? '#f3e8fc' : fallback?.background ?? 'var(--pb-surface-2)'}
+      bg={showLogo ? '#ffffff' : rent ? 'var(--accent-tint)' : fallback?.background ?? 'var(--pb-surface-2)'}
       border="1px solid var(--pb-hair)"
       boxShadow="0 1px 2px rgba(0,0,0,0.08)"
       userSelect="none"
@@ -106,7 +106,7 @@ export default function MerchantLogo({ name, category, domain, size = 36, border
           onError={() => { failedLogoUrls.add(logoUrl); setFailed(true) }}
         />
       ) : rent ? (
-        <RentHome size={Math.round(size * 0.56)} weight="bold" color="#820ad1" />
+        <RentHome size={Math.round(size * 0.56)} weight="bold" color="var(--accent)" />
       ) : fallback && FallbackIcon ? (
         <FallbackIcon size={Math.round(size * 0.62)} strokeWidth={2.3} color={fallback.color} />
       ) : (

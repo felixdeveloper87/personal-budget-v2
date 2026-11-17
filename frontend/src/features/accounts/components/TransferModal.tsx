@@ -139,11 +139,11 @@ export default function TransferModal({
             {t('accounts.transfer.cancel')}
           </Button>
           <Button
-            bg="var(--nu-brand, #820ad1)"
+            bg="var(--nu-brand)"
             color="white"
             borderRadius="full"
             px={5}
-            _hover={{ bg: '#6f00b8' }}
+            _hover={{ bg: 'var(--accent-deep)' }}
             leftIcon={<Icon as={Repeat} boxSize={4} />}
             onClick={submit}
             isLoading={saving}
@@ -180,8 +180,8 @@ export default function TransferModal({
                   align="center"
                   justify="center"
                   borderRadius="full"
-                  bg="var(--nu-brand-tint, #f3e8fc)"
-                  color="var(--nu-brand, #820ad1)"
+                  bg="var(--nu-brand-tint)"
+                  color="var(--nu-brand)"
                 >
                   <Icon as={ArrowRight} boxSize={4} />
                 </Flex>

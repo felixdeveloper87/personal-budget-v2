@@ -27,6 +27,7 @@ import { useThemeColorDimming } from './hooks/useThemeColorDimming'
 import type { AppPage, PageChangeOptions } from './components/layout/header/navigation.config'
 import { PAGE_PATHS, cardPath, pageFromPath } from './routes'
 import { queryClient } from './queries/queryClient'
+import { DEFAULT_ACCENT, readStoredAccent, setDocumentAccent } from './accent'
 
 function authTabFromSearch(search: string): 'signIn' | 'signUp' | null {
   const value = new URLSearchParams(search).get('auth')
@@ -72,6 +73,12 @@ function AppContent() {
   useEffect(() => {
     if (user) setShowAuth(false)
   }, [user])
+
+  // The saved accent dresses the signed-in app; signed out it is always the brand purple.
+  useEffect(() => {
+    if (loading) return
+    setDocumentAccent(user ? readStoredAccent() : DEFAULT_ACCENT)
+  }, [user, loading])
 
   const openAuth = (tab: 'signIn' | 'signUp') => {
     setAuthTab(tab)

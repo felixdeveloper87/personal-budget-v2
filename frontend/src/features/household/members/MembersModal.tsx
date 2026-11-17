@@ -9,9 +9,9 @@ import NuModalHeader from '../../../components/ui/NuModalHeader'
 import { MOBILE_MEDIA, SHEET_SX, sheetContainerProps } from '../../../components/ui/modalLayout'
 import SheetGrabber from '../../../components/ui/SheetGrabber'
 
-const BRAND = '#820ad1'
-const BRAND_HOVER = '#6e08b3'
-const BRAND_TINT = '#f3e8fc'
+const BRAND = 'var(--accent)'
+const BRAND_HOVER = 'var(--accent-deep)'
+const BRAND_TINT = 'var(--accent-tint)'
 
 // The default sheet is a fixed 80dvh; this one hugs its content instead.
 const FIT_SHEET_SX = {

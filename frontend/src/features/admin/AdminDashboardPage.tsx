@@ -334,7 +334,7 @@ function UserTable({
                     ) : (
                       <Badge colorScheme="green">{t('admin.status.approved')}</Badge>
                     )}
-                    {row.admin && <Badge colorScheme="purple">{t('admin.status.admin')}</Badge>}
+                    {row.admin && <Badge colorScheme="brand">{t('admin.status.admin')}</Badge>}
                   </HStack>
                 </Td>
                 <Td>
@@ -417,7 +417,7 @@ function UserTable({
               ) : (
                 <Badge colorScheme="green">{t('admin.status.approved')}</Badge>
               )}
-              {row.admin && <Badge colorScheme="purple">{t('admin.status.admin')}</Badge>}
+              {row.admin && <Badge colorScheme="brand">{t('admin.status.admin')}</Badge>}
             </HStack>
             <Stack mt={3} spacing={2}>
               <Select

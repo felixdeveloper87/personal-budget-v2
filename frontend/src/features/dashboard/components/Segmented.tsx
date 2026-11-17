@@ -94,8 +94,8 @@ export default function Segmented<T extends string>({
               ml="6px"
               px="5px"
               borderRadius="999px"
-              bg={summary ? '#ffffff' : 'var(--nu-brand, #820ad1)'}
-              color={summary ? 'var(--nu-brand, #820ad1)' : '#ffffff'}
+              bg={summary ? '#ffffff' : 'var(--nu-brand)'}
+              color={summary ? 'var(--nu-brand)' : '#ffffff'}
               fontSize="10.5px"
               fontWeight={800}
               letterSpacing={0}

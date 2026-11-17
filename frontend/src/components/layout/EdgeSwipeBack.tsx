@@ -113,8 +113,8 @@ export default function EdgeSwipeBack() {
         display="flex"
         alignItems="center"
         justifyContent="center"
-        bg={ready ? '#820ad1' : 'white'}
-        color={ready ? 'white' : '#820ad1'}
+        bg={ready ? 'var(--accent)' : 'white'}
+        color={ready ? 'white' : 'var(--accent)'}
         boxShadow="0 6px 18px -6px rgba(31, 10, 50, 0.45)"
         transition="background 0.15s ease, color 0.15s ease"
       >

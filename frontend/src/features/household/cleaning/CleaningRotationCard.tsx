@@ -94,7 +94,7 @@ export function CleaningRotationCard({
               h="40px" px={4} borderRadius="full"
               bg="var(--nu-brand-tint)" color="var(--nu-brand)" fontSize="sm" fontWeight={600}
               aria-label={t('household.cleaning.openDutiesAria')} onClick={dutiesModal.onOpen}
-              _hover={{ bg: '#ead6fa' }}
+              _hover={{ bg: 'var(--accent-border)' }}
             >
               {t('household.cleaning.openDuties')}
             </Button>

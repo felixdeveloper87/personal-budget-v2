@@ -14,19 +14,19 @@ const MODES = [
     value: 'single' as const,
     titleKey: 'form.oneOff',
     captionKey: 'form.regularExpense',
-    accent: '#820ad1',
+    accent: 'var(--accent)',
   },
   {
     value: 'fixed' as const,
     titleKey: 'form.fixedMonthly',
     captionKey: 'form.fixedExpenseCaption',
-    accent: '#820ad1',
+    accent: 'var(--accent)',
   },
   {
     value: 'installment' as const,
     titleKey: 'dashboard.installments',
     captionKey: 'form.installmentsCaption',
-    accent: '#820ad1',
+    accent: 'var(--accent)',
   },
 ]
 
@@ -106,7 +106,7 @@ export default function ExpenseModeSelector({
                     bg={selected ? mode.accent : 'transparent'}
                     border="1px solid"
                     borderColor={selected ? mode.accent : colors.border}
-                    boxShadow={selected ? `0 0 0 3px ${mode.accent}20` : 'none'}
+                    boxShadow={selected ? '0 0 0 3px rgba(var(--accent-rgb), 0.13)' : 'none'}
                     flexShrink={0}
                   />
                 </HStack>

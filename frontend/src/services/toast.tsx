@@ -59,16 +59,16 @@ const SNACKBAR = {
   border: 'rgba(255, 255, 255, 0.08)',
   titleColor: '#ffffff',
   descriptionColor: 'rgba(255, 255, 255, 0.72)',
-  action: '#d6b4f7',
-  actionHover: 'rgba(214, 180, 247, 0.14)',
+  action: 'var(--accent-200)',
+  actionHover: 'color-mix(in srgb, var(--accent-200) 14%, transparent)',
   close: 'rgba(255, 255, 255, 0.6)',
 } as const
 
 const STATUS_BADGE: Record<ToastStatus, { icon: PhosphorIcon | null; bg: string; fg: string }> = {
-  success: { icon: CheckIcon, bg: '#820ad1', fg: '#ffffff' },
+  success: { icon: CheckIcon, bg: 'var(--accent)', fg: '#ffffff' },
   error: { icon: XIcon, bg: '#e5484d', fg: '#ffffff' },
   warning: { icon: ExclamationMarkIcon, bg: '#f5b83d', fg: '#1f1f24' },
-  info: { icon: InfoIcon, bg: '#820ad1', fg: '#ffffff' },
+  info: { icon: InfoIcon, bg: 'var(--accent)', fg: '#ffffff' },
   loading: { icon: null, bg: 'rgba(255, 255, 255, 0.12)', fg: '#ffffff' },
 }
 

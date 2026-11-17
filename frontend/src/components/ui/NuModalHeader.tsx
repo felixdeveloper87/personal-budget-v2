@@ -11,7 +11,7 @@ interface NuModalHeaderProps {
 export default function NuModalHeader({ title, caption, onClose }: NuModalHeaderProps) {
   return (
     <Box
-      bg="#820ad1"
+      bg="var(--accent)"
       px={{ base: 3.5, sm: 6 }}
       pt={{ base: 'max(0.85rem, calc(env(safe-area-inset-top, 0px) + 0.55rem))', sm: 5 }}
       pb={{ base: 3, sm: 4 }}

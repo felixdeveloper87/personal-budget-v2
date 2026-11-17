@@ -8,7 +8,7 @@ import NuModalHeader from '../../../components/ui/NuModalHeader'
 import { PayerInitials } from '../expenses/PayerInitials'
 import { SettlementIcon, settlementStatusColors, settlementVoided } from './HouseholdPayments'
 
-const BRAND = '#820ad1'
+const BRAND = 'var(--accent)'
 
 export function PaymentsOverviewModal({
   isOpen,
@@ -59,7 +59,7 @@ export function PaymentsOverviewModal({
         sx={{ WebkitOverflowScrolling: 'touch' }}>
         {household.settlements.length === 0 ? (
           <VStack py={12} px={6} spacing={3} textAlign="center">
-            <Flex w="56px" h="56px" align="center" justify="center" borderRadius="full" bg="#f3e8fc" color={BRAND}>
+            <Flex w="56px" h="56px" align="center" justify="center" borderRadius="full" bg="var(--accent-tint)" color={BRAND}>
               <Icon as={Mail} boxSize={6} weight="duotone" />
             </Flex>
             <Text fontSize="lg" fontWeight={800} letterSpacing="-.02em" color="var(--pb-ink)">
@@ -134,7 +134,7 @@ function SettlementRow({ settlement, onOpenAttachments }: {
                 icon={<Icon as={attachmentCount > 0 ? ReceiptText : Upload} boxSize={4} weight={attachmentCount > 0 ? 'fill' : 'bold'} />}
                 size="xs" w="28px" minW="28px" h="28px" borderRadius="full" variant="ghost"
                 color={attachmentCount > 0 ? BRAND : 'var(--pb-ink-faint)'}
-                _hover={{ bg: '#f3e8fc', color: BRAND }}
+                _hover={{ bg: 'var(--accent-tint)', color: BRAND }}
                 onClick={() => onOpenAttachments(settlement.id)}
               />
             )}

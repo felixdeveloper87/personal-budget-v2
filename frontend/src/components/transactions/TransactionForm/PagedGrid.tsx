@@ -14,13 +14,13 @@ export function tileStyle(selected: boolean): BoxProps {
     textAlign: 'left',
     borderRadius: '15px',
     border: '1px solid',
-    borderColor: selected ? '#820ad1' : 'var(--pb-hair)',
-    bg: selected ? '#f3e8fc' : 'var(--pb-surface)',
-    color: selected ? '#820ad1' : 'var(--pb-ink)',
+    borderColor: selected ? 'var(--accent)' : 'var(--pb-hair)',
+    bg: selected ? 'var(--accent-tint)' : 'var(--pb-surface)',
+    color: selected ? 'var(--accent)' : 'var(--pb-ink)',
     cursor: 'pointer',
     transition: 'border-color 0.18s ease, background 0.18s ease',
-    _hover: { borderColor: '#820ad1', bg: selected ? '#f3e8fc' : '#f8f1fe' },
-    _focusVisible: { outline: '2px solid #820ad1', outlineOffset: '2px' },
+    _hover: { borderColor: 'var(--accent)', bg: selected ? 'var(--accent-tint)' : 'var(--accent-soft)' },
+    _focusVisible: { outline: '2px solid var(--accent)', outlineOffset: '2px' },
   }
 }
 
@@ -111,7 +111,7 @@ export default function PagedGrid<T>({ items, getKey, renderItem, initialIndex =
               h="6px"
               w={index === page ? '18px' : '6px'}
               borderRadius="full"
-              bg={index === page ? '#820ad1' : 'var(--pb-hair-2, #d4d4dd)'}
+              bg={index === page ? 'var(--accent)' : 'var(--pb-hair-2, #d4d4dd)'}
               transition="width 0.2s ease, background 0.2s ease"
             />
           ))}

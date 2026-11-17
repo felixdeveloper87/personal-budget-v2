@@ -62,8 +62,8 @@ const LANGUAGES: ReadonlyArray<{ locale: AppLocale; label: string; Flag: () => J
 
 const MENU = {
   ink: '#1f1f24',
-  brand: '#820ad1',
-  brandSoft: '#f3e8fc',
+  brand: 'var(--accent)',
+  brandSoft: 'var(--accent-tint)',
   hover: '#f5f5f8',
 } as const
 

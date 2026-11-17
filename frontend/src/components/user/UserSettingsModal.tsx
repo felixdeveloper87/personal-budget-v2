@@ -35,15 +35,19 @@ import { ToastService } from '../../services/toast'
 import {
   AlertTriangle,
   Bell,
+  Check,
   Home,
   Download,
   Globe,
+  Palette,
   Settings,
   Shield,
   Trash2,
   Upload,
 } from '../ui/icons'
 import { useThemeColors } from '../../hooks/useThemeColors'
+import { useAccent } from '../../hooks/useAccent'
+import { ACCENTS, ACCENT_IDS } from '../../accent'
 import { useI18n } from '../../i18n'
 import { usePushNotifications } from '../../hooks/usePushNotifications'
 import { SHEET_SX, sheetContainerProps } from '../ui/modalLayout'
@@ -78,6 +82,7 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
   }[push.state ?? 'off']
   const pushToggleable = push.state === 'on' || push.state === 'off'
   const colors = useThemeColors()
+  const { accent, setAccent } = useAccent()
   const [dateFormat, setDateFormat] = useState('DD/MM/YYYY')
   const [emailReports, setEmailReports] = useState(true)
   const [monthlySummary, setMonthlySummary] = useState(true)
@@ -138,9 +143,9 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
     })
   }
 
-  const SectionTitle = ({ icon, label }: { icon: typeof Settings; label: string }) => (
+  const SectionTitle = ({ icon, label }: { icon: typeof Settings | typeof Palette; label: string }) => (
     <HStack spacing={2.5} mb={2.5}>
-      <Box role="presentation" w={{ base: 8, sm: 10 }} h={{ base: 8, sm: 10 }} borderRadius="xl" bg={colors.bgSecondary} color="#820ad1"
+      <Box role="presentation" w={{ base: 8, sm: 10 }} h={{ base: 8, sm: 10 }} borderRadius="xl" bg={colors.bgSecondary} color="var(--accent)"
         display="flex" alignItems="center" justifyContent="center" flexShrink={0} aria-hidden>
         <Icon as={icon} boxSize={{ base: 4, sm: 5 }} sx={{ '& svg': { display: 'block' } }} />
       </Box>
@@ -263,6 +268,59 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
             </VStack>
           </Box>
 
+          {/* Appearance */}
+          <Box>
+            <SectionTitle icon={Palette} label={t('settings.appearance')} />
+            <VStack
+              spacing={0}
+              align="stretch"
+              bg={colors.inputBg}
+              border="2px solid"
+              borderColor={borderColor}
+              borderRadius="2xl"
+              overflow="hidden"
+            >
+              <SettingRow
+                label={t('settings.accent')}
+                description={t('settings.accentDescription')}
+                noBorder
+              >
+                <HStack spacing={2.5} role="radiogroup" aria-label={t('settings.accent')}>
+                  {ACCENT_IDS.map((id) => {
+                    const selected = accent === id
+                    const ring = `0 0 0 2px ${colors.inputBg}, 0 0 0 4px ${ACCENTS[id].main}`
+                    return (
+                      <Box
+                        key={id}
+                        as="button"
+                        type="button"
+                        role="radio"
+                        aria-checked={selected}
+                        aria-label={t(`settings.accent.${id}`)}
+                        title={t(`settings.accent.${id}`)}
+                        onClick={() => setAccent(id)}
+                        w="32px"
+                        h="32px"
+                        borderRadius="full"
+                        bg={ACCENTS[id].main}
+                        color="white"
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="center"
+                        boxShadow={selected ? ring : 'none'}
+                        transition="box-shadow 0.15s ease, transform 0.15s ease"
+                        _hover={{ transform: 'scale(1.06)' }}
+                        _focusVisible={{ outline: 'none', boxShadow: ring }}
+                      >
+                        {selected && <Icon as={Check} boxSize={4} aria-hidden />}
+                      </Box>
+                    )
+                  })}
+                </HStack>
+              </SettingRow>
+            </VStack>
+          </Box>
+
           {/* Household: everything the shared-home core sends, for people who only use that part */}
           <Box>
             <SectionTitle icon={Home} label={t('settings.household')} />
@@ -340,7 +398,7 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
                     isChecked={push.state === 'on'}
                     isDisabled={!pushToggleable || push.busy}
                     onChange={(e) => void push.setEnabled(e.target.checked)}
-                    colorScheme="purple"
+                    colorScheme="brand"
                     size="md"
                   />
                 </HStack>
@@ -371,7 +429,7 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
                   isChecked={push.preferences?.billsDue ?? true}
                   isDisabled={!push.preferences}
                   onChange={(e) => void push.setPreference('billsDue', e.target.checked)}
-                  colorScheme="purple"
+                  colorScheme="brand"
                   size="md"
                 />
               </SettingRow>
@@ -382,7 +440,7 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
                 <Switch
                   isChecked={emailReports}
                   onChange={(e) => { setEmailReports(e.target.checked); showComingSoon() }}
-                  colorScheme="purple"
+                  colorScheme="brand"
                   size="md"
                 />
               </SettingRow>
@@ -393,7 +451,7 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
                 <Switch
                   isChecked={monthlySummary}
                   onChange={(e) => { setMonthlySummary(e.target.checked); showComingSoon() }}
-                  colorScheme="purple"
+                  colorScheme="brand"
                   size="md"
                 />
               </SettingRow>
@@ -405,7 +463,7 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
                 <Switch
                   isChecked={budgetAlerts}
                   onChange={(e) => { setBudgetAlerts(e.target.checked); showComingSoon() }}
-                  colorScheme="purple"
+                  colorScheme="brand"
                   size="md"
                 />
               </SettingRow>

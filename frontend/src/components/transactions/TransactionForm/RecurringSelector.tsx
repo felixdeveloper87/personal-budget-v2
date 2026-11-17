@@ -78,10 +78,10 @@ export default function RecurringSelector({
   const isIncome = type === 'INCOME'
   const accentBorder = isIncome ? 'green.400' : 'red.400'
   const focusWithinShadow =
-    type === 'INCOME' ? '0 0 0 3px #820ad120' : '0 0 0 3px #820ad120'
+    type === 'INCOME' ? '0 0 0 3px rgba(var(--accent-rgb), 0.13)' : '0 0 0 3px rgba(var(--accent-rgb), 0.13)'
   const focusRing = isIncome
-    ? '0 0 0 2px rgba(130, 10, 209, 0.2)'
-    : '0 0 0 2px rgba(130, 10, 209, 0.2)'
+    ? '0 0 0 2px rgba(var(--accent-rgb), 0.2)'
+    : '0 0 0 2px rgba(var(--accent-rgb), 0.2)'
 
   const fieldShell = {
     h: { base: 9, sm: 10 },

@@ -217,7 +217,7 @@ export function CleaningRotationModal({
               isChecked={active}
               onChange={(event) => setActive(event.target.checked)}
               size="lg"
-              sx={{ '& .chakra-switch__track[data-checked]': { bg: '#820ad1' } }}
+              sx={{ '& .chakra-switch__track[data-checked]': { bg: 'var(--accent)' } }}
               flexShrink={0}
             />
           </Flex>

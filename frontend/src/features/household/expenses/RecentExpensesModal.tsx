@@ -60,7 +60,7 @@ export function RecentExpensesModal({
         sx={{ WebkitOverflowScrolling: 'touch' }}>
         {household.expenses.length === 0 ? (
           <VStack py={12} px={6} spacing={3} textAlign="center">
-            <Flex w="56px" h="56px" align="center" justify="center" borderRadius="full" bg="#f3e8fc" color="#820ad1">
+            <Flex w="56px" h="56px" align="center" justify="center" borderRadius="full" bg="var(--accent-tint)" color="var(--accent)">
               <Icon as={ReceiptText} boxSize={6} weight="duotone" />
             </Flex>
             <Text fontSize="lg" fontWeight={800} letterSpacing="-.02em" color="var(--pb-ink)">
@@ -70,10 +70,10 @@ export function RecentExpensesModal({
               {t('household.expenses.emptyDescription')}
             </Text>
             <Button
-              h="44px" px={5} borderRadius="full" bg="#820ad1" color="white"
+              h="44px" px={5} borderRadius="full" bg="var(--accent)" color="white"
               leftIcon={<Icon as={Plus} boxSize={4} />}
               onClick={onAddExpense}
-              _hover={{ bg: '#6d08b0' }}
+              _hover={{ bg: 'var(--accent-deep)' }}
             >
               {t('household.expenses.addFirst')}
             </Button>

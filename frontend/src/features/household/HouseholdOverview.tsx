@@ -32,7 +32,7 @@ export function HouseholdOverview({
             h="40px" px={4} borderRadius="full" flexShrink={0}
             bg="var(--nu-brand-tint)" color="var(--nu-brand)" fontSize="sm" fontWeight={600}
             aria-label={t('household.activity.viewAllAria')} onClick={onViewExpenses}
-            _hover={{ bg: '#ead6fa' }}
+            _hover={{ bg: 'var(--accent-border)' }}
           >
             {t('household.activity.viewAll')}
           </Button>

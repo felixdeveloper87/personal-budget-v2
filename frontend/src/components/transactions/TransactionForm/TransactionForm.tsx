@@ -597,7 +597,7 @@ export default function TransactionForm({
               bg={colors.inputBg}
               overflow="hidden"
               transition="border-color 0.18s ease, box-shadow 0.18s ease"
-              boxShadow={installmentDetailsOpen ? '0 0 0 3px #820ad120' : 'none'}
+              boxShadow={installmentDetailsOpen ? '0 0 0 3px rgba(var(--accent-rgb), 0.13)' : 'none'}
             >
               <HStack
                 as="button"
@@ -611,7 +611,7 @@ export default function TransactionForm({
                 onClick={() => setInstallmentDetailsOpen((open) => !open)}
                 aria-expanded={installmentDetailsOpen}
                 _hover={{ bg: colors.bgSecondary }}
-                _focusVisible={{ boxShadow: 'inset 0 0 0 2px rgba(130, 10, 209, 0.35)' }}
+                _focusVisible={{ boxShadow: 'inset 0 0 0 2px rgba(var(--accent-rgb), 0.35)' }}
               >
                 <Box
                   w={9}
@@ -685,7 +685,7 @@ export default function TransactionForm({
               fontWeight={700}
               color="white"
               borderRadius="full"
-              bg="#820ad1"
+              bg="var(--accent)"
               leftIcon={type === 'INCOME' ? <Plus size={18} /> : <Minus size={18} />}
               onClick={handleReviewRequest}
               isLoading={loading}
@@ -701,8 +701,8 @@ export default function TransactionForm({
                     ? t('form.addingIncome')
                     : t('form.addingExpense')
               }
-              _hover={{ bg: '#6e08b3' }}
-              _active={{ bg: '#6e08b3' }}
+              _hover={{ bg: 'var(--accent-deep)' }}
+              _active={{ bg: 'var(--accent-deep)' }}
               transition="background 0.15s ease"
             >
               {type === 'INCOME' && incomeMode === 'fixed'
@@ -907,8 +907,8 @@ export default function TransactionForm({
               flex={1}
               color="white"
               borderRadius="full"
-              bg="#820ad1"
-              _hover={{ bg: '#6e08b3' }}
+              bg="var(--accent)"
+              _hover={{ bg: 'var(--accent-deep)' }}
               onClick={handleConfirmSave}
               isLoading={loading}
               loadingText={t('form.saving')}

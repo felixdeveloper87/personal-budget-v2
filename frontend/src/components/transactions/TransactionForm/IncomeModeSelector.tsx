@@ -14,13 +14,13 @@ const MODES = [
     value: 'single' as const,
     titleKey: 'form.oneOff',
     captionKey: 'form.incomeOneOffCaption',
-    accent: '#820ad1',
+    accent: 'var(--accent)',
   },
   {
     value: 'fixed' as const,
     titleKey: 'form.fixedIncome',
     captionKey: 'form.fixedIncomeCaption',
-    accent: '#820ad1',
+    accent: 'var(--accent)',
   },
 ]
 
@@ -96,7 +96,7 @@ export default function IncomeModeSelector({ value, onChange }: IncomeModeSelect
                     bg={selected ? mode.accent : 'transparent'}
                     border="1px solid"
                     borderColor={selected ? mode.accent : colors.border}
-                    boxShadow={selected ? `0 0 0 3px ${mode.accent}20` : 'none'}
+                    boxShadow={selected ? '0 0 0 3px rgba(var(--accent-rgb), 0.13)' : 'none'}
                     flexShrink={0}
                   />
                 </HStack>

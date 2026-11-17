@@ -79,7 +79,7 @@ export default function AllTransactionsSection({
             <Button
               size="sm"
               variant="link"
-              color="var(--nu-brand, #820ad1)"
+              color="var(--nu-brand)"
               onClick={() => groupedListRef.current?.goToCurrentMonth()}
               fontSize="xs"
               fontWeight="700"
@@ -115,9 +115,9 @@ export default function AllTransactionsSection({
               size="sm"
               variant="ghost"
               borderRadius="full"
-              color="var(--nu-brand, #820ad1)"
-              bg="var(--nu-brand-tint, #f3e8fc)"
-              _hover={{ bg: '#ead6fa' }}
+              color="var(--nu-brand)"
+              bg="var(--nu-brand-tint)"
+              _hover={{ bg: 'var(--accent-border)' }}
               isLoading={loadingMore}
               onClick={onLoadMore}
             >

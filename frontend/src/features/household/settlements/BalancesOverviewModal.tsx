@@ -9,7 +9,7 @@ import { PremiumModal } from '../../../components/ui'
 import NuModalHeader from '../../../components/ui/NuModalHeader'
 import { today } from '../householdDates'
 
-const BRAND = '#820ad1'
+const BRAND = 'var(--accent)'
 const HOLD_DURATION_MS = 3_000
 const SUCCESS_FEEDBACK_MS = 900
 
@@ -62,7 +62,7 @@ export function BalancesOverviewModal({
         sx={{ WebkitOverflowScrolling: 'touch' }}>
         {!hasOpenBalances ? (
           <VStack py={12} px={6} spacing={3}>
-            <Flex w="56px" h="56px" align="center" justify="center" borderRadius="full" bg="#f3e8fc" color={BRAND}>
+            <Flex w="56px" h="56px" align="center" justify="center" borderRadius="full" bg="var(--accent-tint)" color={BRAND}>
               <Icon as={Check} boxSize={6} weight="bold" />
             </Flex>
             <Text fontSize="lg" fontWeight={800} letterSpacing="-.02em" color="var(--pb-ink)" textAlign="center">
@@ -88,7 +88,7 @@ export function BalancesOverviewModal({
                   key={`${debt.fromMemberId}-${debt.toMemberId}`}
                   px={{ base: 4, md: 6 }}
                   py={3.5}
-                  bg={youPay || youReceive ? 'rgba(130, 10, 209, 0.04)' : undefined}
+                  bg={youPay || youReceive ? 'rgba(var(--accent-rgb), 0.04)' : undefined}
                 >
                   <Flex align="center" gap={3}>
                     <Box minW={0} flex={1}>
@@ -299,7 +299,7 @@ function HoldToPayButton({
           WebkitTouchCallout: 'none',
         }}
         _hover={{
-          bg: phase === 'success' ? 'var(--pb-income)' : '#6d08b0',
+          bg: phase === 'success' ? 'var(--pb-income)' : 'var(--accent-deep)',
           transform: phase === 'idle' ? 'translateY(-1px)' : 'none',
         }}
         _disabled={{ opacity: 1, cursor: 'default' }}

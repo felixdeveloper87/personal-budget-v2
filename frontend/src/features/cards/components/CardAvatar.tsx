@@ -16,8 +16,8 @@ export default function CardAvatar({ card, size = 44 }: { card: PaymentMethod; s
       align="center"
       justify="center"
       borderRadius="12px"
-      bg="var(--nu-brand-tint, #f3e8fc)"
-      color="var(--nu-brand, #820ad1)"
+      bg="var(--nu-brand-tint)"
+      color="var(--nu-brand)"
     >
       <Icon as={CreditCard} boxSize={`${Math.round(size * 0.45)}px`} />
     </Flex>

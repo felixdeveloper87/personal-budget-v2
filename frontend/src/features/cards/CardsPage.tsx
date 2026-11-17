@@ -184,13 +184,13 @@ export default function CardsPage() {
           ) : listFailed ? (
             <Flex direction="column" align="center" py={16} px={6} textAlign="center">
               <Text fontSize="md" fontWeight={600} color="var(--pb-ink)">{t('cards.toast.loadFailed')}</Text>
-              <Button mt={4} onClick={retry} borderRadius="full" bg="var(--nu-brand, #820ad1)" color="white" _hover={{ bg: '#6f00b8' }}>{t('cards.action.retry')}</Button>
+              <Button mt={4} onClick={retry} borderRadius="full" bg="var(--nu-brand)" color="white" _hover={{ bg: 'var(--accent-deep)' }}>{t('cards.action.retry')}</Button>
             </Flex>
           ) : detailOpen ? (
             !selectedCard ? (
               <Flex direction="column" align="center" py={16}>
                 <Text fontSize="lg" fontWeight={600} color="var(--pb-ink)">{t('cards.page.notFound')}</Text>
-                <Button mt={4} onClick={() => navigateToList(true)} borderRadius="full" bg="var(--nu-brand, #820ad1)" color="white" _hover={{ bg: '#6f00b8' }}>{t('cards.action.back')}</Button>
+                <Button mt={4} onClick={() => navigateToList(true)} borderRadius="full" bg="var(--nu-brand)" color="white" _hover={{ bg: 'var(--accent-deep)' }}>{t('cards.action.back')}</Button>
               </Flex>
             ) : statementsQuery.isPending ? (
               <ListSkeleton withSummary />
@@ -219,9 +219,9 @@ export default function CardsPage() {
                   h="40px"
                   px={4}
                   borderRadius="full"
-                  bg="var(--nu-brand, #820ad1)"
+                  bg="var(--nu-brand)"
                   color="white"
-                  _hover={{ bg: '#6f00b8', transform: 'translateY(-1px)' }}
+                  _hover={{ bg: 'var(--accent-deep)', transform: 'translateY(-1px)' }}
                 >
                   {t('cards.action.add')}
                 </Button>
@@ -298,7 +298,7 @@ function EmptyState({ onAdd }: { onAdd: () => void }) {
       <Flex w="44px" h="44px" align="center" justify="center" borderRadius="full" bg="var(--nu-brand-tint)" color="var(--nu-brand)" mb={3}><Icon as={CreditCard} boxSize="22px" /></Flex>
       <Text fontSize="md" fontWeight={650} color="var(--pb-ink)">{t('cards.empty.title')}</Text>
       <Text fontSize="sm" color="var(--pb-ink-soft)" mt={1} maxW="340px">{t('cards.empty.noCards')}</Text>
-      <Button mt={5} onClick={onAdd} leftIcon={<Icon as={Plus} boxSize={4} />} borderRadius="full" bg="var(--nu-brand, #820ad1)" color="white" _hover={{ bg: '#6f00b8' }}>{t('cards.action.add')}</Button>
+      <Button mt={5} onClick={onAdd} leftIcon={<Icon as={Plus} boxSize={4} />} borderRadius="full" bg="var(--nu-brand)" color="white" _hover={{ bg: 'var(--accent-deep)' }}>{t('cards.action.add')}</Button>
     </Flex>
   )
 }

@@ -150,11 +150,11 @@ export default function CardFormModal({ isOpen, onClose, card, onSaved, onDelete
             {t('cards.form.cancel')}
           </Button>
           <Button
-            bg="var(--nu-brand, #820ad1)"
+            bg="var(--nu-brand)"
             color="white"
             borderRadius="full"
             px={5}
-            _hover={{ bg: '#6f00b8' }}
+            _hover={{ bg: 'var(--accent-deep)' }}
             leftIcon={<Icon as={isEditing ? Check : Plus} boxSize={4} />}
             onClick={save}
             isLoading={saving}
@@ -252,7 +252,7 @@ export default function CardFormModal({ isOpen, onClose, card, onSaved, onDelete
             <Switch
               isChecked={state.active}
               onChange={(e) => patch({ active: e.target.checked })}
-              colorScheme="purple"
+              colorScheme="brand"
             />
           </FormControl>
 

@@ -17,7 +17,7 @@ interface CardData {
 const TONES: Record<Tone, { ink: string; bg: string }> = {
   good: { ink: 'var(--pb-income)', bg: 'var(--pb-tint-income)' },
   bad: { ink: 'var(--pb-coral)', bg: 'var(--pb-tint-coral)' },
-  neutral: { ink: 'var(--nu-brand, #820ad1)', bg: 'var(--nu-brand-tint, #f3e8fc)' },
+  neutral: { ink: 'var(--nu-brand)', bg: 'var(--nu-brand-tint)' },
 }
 
 /** Up to three Nubank-style cards; the caller hides the section when empty. */

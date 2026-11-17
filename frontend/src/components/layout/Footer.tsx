@@ -35,11 +35,11 @@ export default function Footer() {
               h="40px"
               minW="40px"
               borderRadius="full"
-              bg="#f3e8fc"
-              color="#820ad1"
+              bg="var(--accent-tint)"
+              color="var(--accent)"
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-              _hover={{ bg: '#ead6fa' }}
-              _active={{ bg: '#e2c6f8' }}
+              _hover={{ bg: 'var(--accent-border)' }}
+              _active={{ bg: 'color-mix(in srgb, var(--accent) 22%, #ffffff)' }}
             />
           </Tooltip>
         </Flex>
@@ -53,7 +53,7 @@ export default function Footer() {
           lineHeight={1.2}
         >
           {t('footer.statement')}{' '}
-          <Text as="span" color="#820ad1">{t('footer.statementAccent')}</Text>
+          <Text as="span" color="var(--accent)">{t('footer.statementAccent')}</Text>
         </Text>
 
         <Flex

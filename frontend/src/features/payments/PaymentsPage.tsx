@@ -399,11 +399,11 @@ function StatementPaymentRow({ payment, onOpen }: { payment: TxnVM; onOpen: () =
       borderRadius="14px"
       bg="var(--pb-surface-2)"
       transition="background .15s ease"
-      _hover={{ bg: 'var(--nu-brand-tint, #f3e8fc)' }}
-      _focusVisible={{ boxShadow: '0 0 0 2px var(--nu-brand, #820ad1)', outline: 'none' }}
+      _hover={{ bg: 'var(--nu-brand-tint)' }}
+      _focusVisible={{ boxShadow: '0 0 0 2px var(--nu-brand)', outline: 'none' }}
     >
       <Flex align="center" gap={3} minW={0}>
-        <Flex w="40px" h="40px" flexShrink={0} align="center" justify="center" borderRadius="full" bg="var(--nu-brand-tint, #f3e8fc)" color="var(--nu-brand, #820ad1)">
+        <Flex w="40px" h="40px" flexShrink={0} align="center" justify="center" borderRadius="full" bg="var(--nu-brand-tint)" color="var(--nu-brand)">
           <CreditCard size={18} strokeWidth={2.2} aria-hidden="true" />
         </Flex>
         <Box minW={0}>

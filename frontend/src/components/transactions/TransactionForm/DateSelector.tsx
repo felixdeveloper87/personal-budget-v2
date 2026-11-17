@@ -74,7 +74,7 @@ export default function DateSelector({
           _hover={{ borderColor: colors.accent }}
           _focusWithin={{
             borderColor: colors.accent,
-            boxShadow: `0 0 0 3px ${colors.accent}20`
+            boxShadow: '0 0 0 3px rgba(var(--accent-rgb), 0.13)'
           }}
           transition="border-color 0.3s ease, box-shadow 0.3s ease"
         >
@@ -200,7 +200,7 @@ export default function DateSelector({
                       opacity={date === option.value ? 1 : 0.78}
                       _hover={{ bg: colors.bgSecondary, opacity: 1, textDecoration: 'underline' }}
                       _active={{ bg: colors.bgSecondary }}
-                      _focusVisible={{ boxShadow: `0 0 0 2px ${colors.accent}20` }}
+                      _focusVisible={{ boxShadow: '0 0 0 2px rgba(var(--accent-rgb), 0.13)' }}
                     >
                       {option.label}
                     </Button>

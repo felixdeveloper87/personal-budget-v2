@@ -318,7 +318,7 @@ function buildStatements(plans: InstallmentPlan[], fallbackPlanLabel: string): S
 
 const STATUS_STYLE: Record<StatementStatus, { bg: string; color: string }> = {
   closed: { bg: 'var(--nu-positive-tint)', color: 'var(--nu-positive)' },
-  open: { bg: 'var(--nu-brand-tint, #f3e8fc)', color: 'var(--nu-brand)' },
+  open: { bg: 'var(--nu-brand-tint)', color: 'var(--nu-brand)' },
   upcoming: { bg: 'var(--nu-surface)', color: 'var(--pb-ink-soft)' },
 }
 

@@ -127,7 +127,7 @@ export function HouseholdOnboarding({
     <HouseholdStateFrame
       hero={(
         <Box mt={{ base: 4, md: 5 }} maxW="620px">
-          <Text fontSize="sm" fontWeight={600} color="#e2c2fb">{t('household.create.eyebrow')}</Text>
+          <Text fontSize="sm" fontWeight={600} color="var(--accent-100)">{t('household.create.eyebrow')}</Text>
           <Text mt={1} fontSize={{ base: '2xl', md: '3xl' }} fontWeight={700} letterSpacing="-0.02em" lineHeight={1.1} color="white">
             {t('household.create.title')}
           </Text>

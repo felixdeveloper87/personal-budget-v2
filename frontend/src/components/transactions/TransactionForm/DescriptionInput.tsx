@@ -23,7 +23,7 @@ export default function DescriptionInput({
   const colors = useThemeColors()
   const accentBorder = type === 'INCOME' ? 'green.400' : 'red.400'
   const focusWithinShadow =
-    type === 'INCOME' ? '0 0 0 3px #820ad120' : '0 0 0 3px #820ad120'
+    type === 'INCOME' ? '0 0 0 3px rgba(var(--accent-rgb), 0.13)' : '0 0 0 3px rgba(var(--accent-rgb), 0.13)'
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onChange(e.target.value)

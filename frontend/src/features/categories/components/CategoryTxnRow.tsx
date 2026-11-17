@@ -36,7 +36,7 @@ export default function CategoryTxnRow({ appearance = 'default', txn, icon, side
           w="7px"
           h="7px"
           borderRadius="full"
-          bg="var(--nu-brand, #820ad1)"
+          bg="var(--nu-brand)"
           opacity={0.45}
         />
       )}
@@ -48,8 +48,8 @@ export default function CategoryTxnRow({ appearance = 'default', txn, icon, side
           align="center"
           justify="center"
           borderRadius="full"
-          color="var(--nu-brand, #820ad1)"
-          bg="var(--nu-brand-tint, #f3e8fc)"
+          color="var(--nu-brand)"
+          bg="var(--nu-brand-tint)"
         >
           <Icon as={icon} boxSize="18px" weight="bold" />
         </Flex>

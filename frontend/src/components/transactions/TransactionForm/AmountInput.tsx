@@ -64,8 +64,8 @@ export default function AmountInput({
   const currencyMark = formatCurrency(0).replace(/[\d\s.,]/g, '') || '\u00A3'
   const focusRing =
     type === 'INCOME'
-      ? '0 0 0 2px rgba(130, 10, 209, 0.2)'
-      : '0 0 0 2px rgba(130, 10, 209, 0.2)'
+      ? '0 0 0 2px rgba(var(--accent-rgb), 0.2)'
+      : '0 0 0 2px rgba(var(--accent-rgb), 0.2)'
 
   return (
     <>
@@ -81,8 +81,8 @@ export default function AmountInput({
               borderColor: type === 'INCOME' ? 'green.400' : 'red.400',
               boxShadow:
                 type === 'INCOME'
-                  ? '0 0 0 3px #820ad120'
-                  : '0 0 0 3px #820ad120',
+                  ? '0 0 0 3px rgba(var(--accent-rgb), 0.13)'
+                  : '0 0 0 3px rgba(var(--accent-rgb), 0.13)',
             }}
             transition="border-color 0.3s ease, box-shadow 0.3s ease"
           >

@@ -147,7 +147,7 @@ export default function TransactionLedgerRow({
             {transaction.description || categoryLabel(transaction.category) || t('transactions.transaction')}
           </Text>
           {transaction.isInstallment && (
-            <Badge colorScheme="purple" variant="subtle" fontSize="9px" borderRadius="md">
+            <Badge colorScheme="brand" variant="subtle" fontSize="9px" borderRadius="md">
               {transaction.installmentNumber
                 ? t('transactions.installmentNumber', { number: transaction.installmentNumber })
                 : t('transactions.installment')}

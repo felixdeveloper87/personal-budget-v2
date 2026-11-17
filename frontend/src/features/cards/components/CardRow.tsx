@@ -30,8 +30,8 @@ export default function CardRow({ card, currentTotal, hideValues, onSelect }: Ca
       transition="background-color .15s ease"
       opacity={card.active ? 1 : 0.7}
       _last={{ borderBottom: 0 }}
-      _hover={{ bg: 'rgba(130,10,209,.025)' }}
-      _focusVisible={{ outline: 'none', boxShadow: 'inset 3px 0 0 var(--nu-brand, #820ad1)' }}
+      _hover={{ bg: 'rgba(var(--accent-rgb), .025)' }}
+      _focusVisible={{ outline: 'none', boxShadow: 'inset 3px 0 0 var(--nu-brand)' }}
     >
       <CardAvatar card={card} size={42} />
 
@@ -52,7 +52,7 @@ export default function CardRow({ card, currentTotal, hideValues, onSelect }: Ca
         <Text mt="2px" fontSize="10px" color="var(--pb-ink-faint)">{t('cards.currentStatement')}</Text>
       </Box>
 
-      <Icon as={ChevronRight} boxSize="16px" color="var(--nu-brand, #820ad1)" flexShrink={0} />
+      <Icon as={ChevronRight} boxSize="16px" color="var(--nu-brand)" flexShrink={0} />
     </Flex>
   )
 }
