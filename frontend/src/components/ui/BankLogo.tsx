@@ -6,6 +6,9 @@ interface BankMeta {
   bg: string
   text: string
   domain: string
+  /** Background behind the fetched logo when it differs from `bg`, e.g. a
+   * transparent logo drawn in the brand colour itself. */
+  logoBg?: string
 }
 
 const BANK_REGISTRY = [
@@ -15,7 +18,7 @@ const BANK_REGISTRY = [
   { keys: ['hsbc'],             meta: { abbr: 'HSBC', bg: '#DB0011', text: '#fff', domain: 'hsbc.co.uk' } },
   { keys: ['lloyds'],           meta: { abbr: 'LB',   bg: '#006A4D', text: '#fff', domain: 'lloydsbank.com' } },
   { keys: ['metro'],            meta: { abbr: 'MB',   bg: '#CA0028', text: '#fff', domain: 'metrobankonline.co.uk' } },
-  { keys: ['barclays'],         meta: { abbr: 'BC',   bg: '#00AEEF', text: '#fff', domain: 'barclays.co.uk' } },
+  { keys: ['barclays'],         meta: { abbr: 'BC',   bg: '#00AEEF', text: '#fff', domain: 'barclays.co.uk', logoBg: '#ffffff' } },
   { keys: ['santander'],        meta: { abbr: 'SAN',  bg: '#EC0000', text: '#fff', domain: 'santander.co.uk' } },
   { keys: ['halifax'],          meta: { abbr: 'HX',   bg: '#004A8F', text: '#fff', domain: 'halifax.co.uk' } },
   { keys: ['tsb'],              meta: { abbr: 'TSB',  bg: '#1D65A6', text: '#fff', domain: 'tsb.co.uk' } },
@@ -73,19 +76,20 @@ export default function BankLogo({ issuer, size = 32, borderRadius = '10px' }: B
   const meta = getBankMeta(issuer)
   if (!meta) return null
 
-  const { abbr, bg, text, domain } = meta
+  const { abbr, bg, text, domain, logoBg } = meta
   const abbSize = abbr.length >= 4 ? '7px' : abbr.length === 3 ? '8.5px' : '10px'
 
-  // Google's favicon cache — free, no API key, always 200 (returns generic icon if unknown).
+  // Google's favicon cache — free, no API key; 404 for unknown domains.
   // sz=128 is the largest size Google serves reliably.
   const logoUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`
+  const showLogo = !imgFailed && !failedLogoUrls.has(logoUrl)
 
   return (
     <Box
       w={`${size}px`}
       h={`${size}px`}
       borderRadius={borderRadius}
-      bg={bg}
+      bg={showLogo && logoBg ? logoBg : bg}
       display="flex"
       alignItems="center"
       justifyContent="center"
@@ -93,7 +97,7 @@ export default function BankLogo({ issuer, size = 32, borderRadius = '10px' }: B
       overflow="hidden"
       userSelect="none"
     >
-      {!imgFailed && !failedLogoUrls.has(logoUrl) ? (
+      {showLogo ? (
         <img
           src={logoUrl}
           alt={issuer ?? ''}
