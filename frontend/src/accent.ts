@@ -133,31 +133,6 @@ export function accentCssVariables(id: AccentId): Record<string, string> {
   return vars
 }
 
-/** Writes every accent's `--accent-*` variables into a plain <style> tag:
- * the default on :root, the others under html[data-accent].
- *
- * They must NOT go through Chakra's global styles: Chakra treats a custom
- * property value with commas as `token, fallback` and keeps only one piece,
- * so `--accent-rgb: 130, 10, 209` would come out as `--accent-rgb: 10` and
- * every `rgba(var(--accent-rgb), a)` would turn transparent. */
-export function installAccentStylesheet() {
-  const id = 'pb-accent-vars'
-  if (document.getElementById(id)) return
-  const block = (selector: string, accent: AccentId) =>
-    `${selector}{${Object.entries(accentCssVariables(accent))
-      .map(([name, value]) => `${name}:${value};`)
-      .join('')}}`
-  const style = document.createElement('style')
-  style.id = id
-  style.textContent = [
-    block(':root', DEFAULT_ACCENT),
-    ...ACCENT_IDS.filter((accent) => accent !== DEFAULT_ACCENT).map((accent) =>
-      block(`html[data-accent="${accent}"]`, accent),
-    ),
-  ].join('\n')
-  document.head.appendChild(style)
-}
-
 /** Chakra's `brand` colour tokens, pointing at the live accent scale. */
 export const BRAND_COLOR_TOKENS = Object.fromEntries(
   Object.keys(ACCENTS.purple.scale).map((step) => [step, `var(--accent-${step})`]),

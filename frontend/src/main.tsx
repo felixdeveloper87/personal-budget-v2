@@ -19,9 +19,9 @@ import { SearchProvider } from './contexts/SearchContext'
 import { AppToastContainer } from './services/toast'
 import { I18nProvider } from './i18n'
 import { reloadWhenNewVersionTakesOver } from './utils/pwa'
-import { installAccentStylesheet } from './accent'
+import { installThemeVariables } from './themeVariables'
 
-installAccentStylesheet()
+installThemeVariables()
 
 if (!window.location.pathname.startsWith('/reports/print')) {
   reloadWhenNewVersionTakesOver()

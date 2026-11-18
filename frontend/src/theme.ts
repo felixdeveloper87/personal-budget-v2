@@ -1,9 +1,10 @@
 import { extendTheme, ThemeConfig } from '@chakra-ui/react'
-import { DARK_PALETTE, LIGHT_PALETTE, paletteCssVariables } from './palette'
+import { DARK_PALETTE, LIGHT_PALETTE } from './palette'
 import { BRAND_COLOR_TOKENS } from './accent'
 
-// The --accent-* variables themselves are written by installAccentStylesheet()
-// (accent.ts), outside Chakra, which would mangle their comma-separated values.
+// The global --accent-*, --pb-* and --nu-brand* variables are written by
+// installThemeVariables() (themeVariables.ts), outside Chakra, which would
+// mangle values with commas.
 
 // 🎨 Gradientes centralizados
 const GRADIENTS = {
@@ -38,12 +39,6 @@ const theme = extendTheme({
   },
   styles: {
     global: {
-      ':root': {
-        ...paletteCssVariables(LIGHT_PALETTE),
-        '--nu-brand': 'var(--accent)',
-        '--nu-brand-deep': 'var(--accent-deep)',
-        '--nu-brand-tint': 'var(--accent-tint)',
-      },
       '::selection': {
         bg: 'var(--pb-sidebar-active-bg)',
         color: 'var(--pb-ink)',
