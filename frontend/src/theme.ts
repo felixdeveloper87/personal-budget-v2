@@ -1,15 +1,9 @@
 import { extendTheme, ThemeConfig } from '@chakra-ui/react'
 import { DARK_PALETTE, LIGHT_PALETTE, paletteCssVariables } from './palette'
-import { ACCENT_IDS, BRAND_COLOR_TOKENS, DEFAULT_ACCENT, accentCssVariables } from './accent'
+import { BRAND_COLOR_TOKENS } from './accent'
 
-/** Default accent on :root, each other accent under html[data-accent]. Variables
- * that reference --accent live on the same element, so they follow the switch. */
-const ACCENT_STYLES = Object.fromEntries(
-  ACCENT_IDS.filter((id) => id !== DEFAULT_ACCENT).map((id) => [
-    `html[data-accent="${id}"]`,
-    accentCssVariables(id),
-  ]),
-)
+// The --accent-* variables themselves are written by installAccentStylesheet()
+// (accent.ts), outside Chakra, which would mangle their comma-separated values.
 
 // 🎨 Gradientes centralizados
 const GRADIENTS = {
@@ -45,13 +39,11 @@ const theme = extendTheme({
   styles: {
     global: {
       ':root': {
-        ...accentCssVariables(DEFAULT_ACCENT),
         ...paletteCssVariables(LIGHT_PALETTE),
         '--nu-brand': 'var(--accent)',
         '--nu-brand-deep': 'var(--accent-deep)',
         '--nu-brand-tint': 'var(--accent-tint)',
       },
-      ...ACCENT_STYLES,
       '::selection': {
         bg: 'var(--pb-sidebar-active-bg)',
         color: 'var(--pb-ink)',
