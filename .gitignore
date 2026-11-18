@@ -231,6 +231,7 @@ data/
 
 # Docker
 .dockerignore
+!/frontend/.dockerignore
 
 # Application specific
 application-local.properties

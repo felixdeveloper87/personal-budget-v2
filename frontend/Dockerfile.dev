@@ -7,8 +7,9 @@ WORKDIR /app
 # Copiar arquivos de dependências
 COPY package*.json ./
 
-# Instalar dependências
-RUN npm install
+# Registrar quais dependências estão no volume inicial da imagem.
+RUN npm ci --no-audit --no-fund \
+    && sha256sum package.json package-lock.json > node_modules/.docker-dev-deps.sha256
 
 # Copiar código fonte
 COPY . .
@@ -16,5 +17,10 @@ COPY . .
 # Expor porta do Vite
 EXPOSE 5173
 
-# Comando para iniciar o servidor de desenvolvimento
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
+# O Compose pode reutilizar node_modules mesmo depois de reconstruir a imagem.
+CMD ["sh", "-ec", "\
+  if ! sha256sum -c node_modules/.docker-dev-deps.sha256 >/dev/null 2>&1; then \
+    npm ci --prefer-offline --no-audit --no-fund; \
+    sha256sum package.json package-lock.json > node_modules/.docker-dev-deps.sha256; \
+  fi; \
+  exec npm run dev -- --host 0.0.0.0"]
