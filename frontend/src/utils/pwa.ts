@@ -81,3 +81,23 @@ export function reloadWhenNewVersionTakesOver(): void {
       .catch(() => undefined)
   })
 }
+
+/**
+ * Dev only: drop any service worker a production build left on this origin
+ * (prod and dev share localhost:3000) together with its caches, so the dev
+ * server is never shadowed by a stale precached app shell.
+ */
+export async function removeServiceWorkersInDev(): Promise<void> {
+  if (!('serviceWorker' in navigator)) return
+  try {
+    const registrations = await navigator.serviceWorker.getRegistrations()
+    if (!registrations.length) return
+    await Promise.all(registrations.map((registration) => registration.unregister()))
+    if ('caches' in window) {
+      const keys = await caches.keys()
+      await Promise.all(keys.map((key) => caches.delete(key)))
+    }
+  } catch {
+    // Nothing to clean up, or storage is unavailable.
+  }
+}

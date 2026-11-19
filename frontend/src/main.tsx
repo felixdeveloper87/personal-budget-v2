@@ -18,12 +18,14 @@ import { AuthProvider } from './contexts/AuthContext'
 import { SearchProvider } from './contexts/SearchContext'
 import { AppToastContainer } from './services/toast'
 import { I18nProvider } from './i18n'
-import { reloadWhenNewVersionTakesOver } from './utils/pwa'
+import { reloadWhenNewVersionTakesOver, removeServiceWorkersInDev } from './utils/pwa'
 import { installThemeVariables } from './themeVariables'
 
 installThemeVariables()
 
-if (!window.location.pathname.startsWith('/reports/print')) {
+if (import.meta.env.DEV) {
+  void removeServiceWorkersInDev()
+} else if (!window.location.pathname.startsWith('/reports/print')) {
   reloadWhenNewVersionTakesOver()
 }
 
