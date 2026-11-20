@@ -129,7 +129,7 @@
   height: calc((100dvh - var(--lp-nav-total) - var(--lp-hero-top) - var(--lp-hero-pad)) * .85);
   align-self: center;
   overflow: hidden;
-  border-radius: 18px clamp(45px, 6vw, 94px) 18px 18px;
+  border-radius: 44px;
   background: #cfb7d6;
 }
 .lp-balance-card {
@@ -574,7 +574,7 @@
   .lp-hero-actions { gap: 5px 15px; margin-top: 16px; }
   .lp .lp-button { min-height: 44px; padding: 9px 16px; font-size: .825rem; gap: 8px; }
   .lp-text-link { font-size: .78rem; gap: 5px; }
-  .lp-cover { height: auto; align-self: stretch; max-height: none; aspect-ratio: auto; border-radius: 14px 45px 14px 14px; }
+  .lp-cover { height: auto; align-self: stretch; max-height: none; aspect-ratio: auto; border-radius: 16px; }
   .lp-balance-card { width: 165px; padding: 4px 12px 9px; border-radius: 10px; }
   .lp-balance-card > strong { font-size: 1.4rem; }
   .lp-balance-card small { margin-top: 4px; font-size: .57rem; }
