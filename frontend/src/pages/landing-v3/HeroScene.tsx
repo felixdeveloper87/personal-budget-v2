@@ -1,186 +1,146 @@
-import { useEffect, useRef, type CSSProperties, type ReactNode } from 'react'
-import { ArrowDownLeft } from 'lucide-react'
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
+import { Bus, ShoppingBasket, UtensilsCrossed, type LucideIcon } from 'lucide-react'
 import { useI18n } from '../../i18n'
 import { DEMO_MONTHS } from './landingV3.config'
 
 /*
- * Hero 3D scene — a ledger on a lilac desk, stacks of coins and a glass lens
- * that magnifies the cash-flow line. Pure CSS 3D (preserve-3d) driven by one
- * requestAnimationFrame loop that only writes CSS variables, so React never
- * re-renders while it animates. The whole scene is decorative (aria-hidden).
+ * Hero scene — an "exploded view" of the product: three glass panels (cash
+ * flow, budgets, budget ring) float at different depths in one CSS 3D stage.
+ * A cursor reads along the cash-flow curve, and every few seconds a new
+ * transaction lands on top and visibly moves its budget bar and the ring.
  *
- * World units are px inside a 640×640 stage that is scaled to fit the cover.
+ * One requestAnimationFrame loop writes CSS variables and the cursor's
+ * position directly, so React only re-renders when a transaction lands.
+ * The whole scene is decorative (aria-hidden).
+ *
+ * World units are px inside a STAGE_W × STAGE_H stage scaled to fit the cover.
  */
-const WORLD = 640
-const PAPER = { x: 58, y: 118, w: 480, h: 300 }
-const CHART = { left: 34, right: 446, top: 44, bottom: 262 }
-const LENS_R = 98
-const MAG = 1.42
-const COIN_T = 9
-const COIN_LAYERS = 5
+const STAGE_W = 600
+const STAGE_H = 540
+const PLOT = { w: 352, h: 148, max: 2400 }
 
 const latest = DEMO_MONTHS[DEMO_MONTHS.length - 1]
 const series = [...latest.balances, latest.income - latest.expenses]
 const POINTS = series.map((value, i) => ({
-  x: CHART.left + (i / (series.length - 1)) * (CHART.right - CHART.left),
-  y: CHART.bottom - (value / 2400) * (CHART.bottom - CHART.top),
+  x: (i / (series.length - 1)) * PLOT.w,
+  y: PLOT.h - 6 - (value / PLOT.max) * (PLOT.h - 18),
 }))
-const LINE = POINTS.map((p, i) => `${i ? 'L' : 'M'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ')
-const GRID_ROWS = Array.from({ length: 7 }, (_, i) => CHART.top + i * ((CHART.bottom - CHART.top) / 6))
-const GRID_COLS = Array.from({ length: 9 }, (_, i) => CHART.left + i * ((CHART.right - CHART.left) / 8))
 
-const STACKS = [
-  { x: 486, y: 452, count: 9, size: 94 },
-  { x: 384, y: 524, count: 6, size: 88 },
-  { x: 276, y: 572, count: 2, size: 76 },
+/** Catmull-Rom through every point, as cubic Béziers: a smooth curve that still hits each value. */
+const LINE = POINTS.reduce((d, p, i) => {
+  if (i === 0) return `M${p.x},${p.y.toFixed(1)}`
+  const p0 = POINTS[i - 2] ?? POINTS[i - 1]
+  const p1 = POINTS[i - 1]
+  const p3 = POINTS[i + 1] ?? p
+  const c1 = { x: p1.x + (p.x - p0.x) / 6, y: p1.y + (p.y - p0.y) / 6 }
+  const c2 = { x: p.x - (p3.x - p1.x) / 6, y: p.y - (p3.y - p1.y) / 6 }
+  return `${d} C${c1.x.toFixed(1)},${c1.y.toFixed(1)} ${c2.x.toFixed(1)},${c2.y.toFixed(1)} ${p.x},${p.y.toFixed(1)}`
+}, '')
+const AREA = `${LINE} L${PLOT.w},${PLOT.h} L0,${PLOT.h} Z`
+
+interface Budget { category: string, icon: LucideIcon, spent: number, limit: number, tone: string }
+const BUDGETS: Budget[] = [
+  { category: 'Groceries', icon: ShoppingBasket, spent: 286, limit: 400, tone: '#712ab2' },
+  { category: 'Transport', icon: Bus, spent: 92, limit: 150, tone: '#c0712b' },
+  { category: 'Dining out', icon: UtensilsCrossed, spent: 118, limit: 200, tone: '#3d8a5c' },
 ]
-// Rest position for the lens when nothing drives it: over the latest rise.
-const LENS_REST = { x: PAPER.x + POINTS[9].x, y: PAPER.y + POINTS[9].y + 12 }
-
-// Geometry shared with LandingV3.css, plus the resting pose (used as-is when
-// motion is reduced or before the first frame).
-const sceneGeometry = {
-  '--world': `${WORLD}px`,
-  '--paper-x': `${PAPER.x}px`, '--paper-y': `${PAPER.y}px`,
-  '--paper-w': `${PAPER.w}px`, '--paper-h': `${PAPER.h}px`,
-  '--lens-r': `${LENS_R}px`, '--mag': MAG,
-  '--coin-t': `${COIN_T}px`, '--coin-step': `${COIN_T / COIN_LAYERS}px`,
-  '--rx': '50deg', '--rz': '-27deg', '--lift': '0px',
-  '--lx': `${LENS_REST.x}px`, '--ly': `${LENS_REST.y}px`, '--lz': '84px', '--ls': 1,
-  '--px': 0, '--py': 0,
-} as CSSProperties
+// Transactions that land one by one; each adds to its budget row.
+const ARRIVALS = [
+  { budget: 0, amount: 24.6 },
+  { budget: 1, amount: 12.4 },
+  { budget: 2, amount: 18.9 },
+]
+const TOTAL_LIMIT = BUDGETS.reduce((sum, b) => sum + b.limit, 0)
+const RING_R = 44
 
 const clamp = (value: number, min = 0, max = 1) => Math.min(max, Math.max(min, value))
 const lerp = (from: number, to: number, t: number) => from + (to - from) * t
 const easeOutCubic = (t: number) => 1 - (1 - t) ** 3
-const easeOutBack = (t: number) => 1 + 2.2 * (t - 1) ** 3 + 1.2 * (t - 1) ** 2
 
-/** Point on the chart polyline at progress s (0..1), in paper coordinates. */
-function pointOnLine(s: number) {
-  const scaled = clamp(s) * (POINTS.length - 1)
-  const i = Math.min(POINTS.length - 2, Math.floor(scaled))
-  const f = scaled - i
-  return { x: lerp(POINTS[i].x, POINTS[i + 1].x, f), y: lerp(POINTS[i].y, POINTS[i + 1].y, f) }
+/** Running balance under the cursor, interpolated between the daily points. */
+function valueAt(x: number) {
+  const scaled = clamp(x / PLOT.w) * (series.length - 1)
+  const i = Math.min(series.length - 2, Math.floor(scaled))
+  return lerp(series[i], series[i + 1], scaled - i)
 }
 
-function Ledger() {
-  return (
-    <svg className="lp-ledger-sheet" viewBox={`0 0 ${PAPER.w} ${PAPER.h}`}>
-      <g className="lp-ledger-grid">
-        {GRID_ROWS.map(y => <line key={`r${y}`} x1={14} x2={PAPER.w - 14} y1={y} y2={y} />)}
-        {GRID_COLS.map(x => <line key={`c${x}`} x1={x} x2={x} y1={20} y2={PAPER.h - 18} />)}
-      </g>
-      <path className="lp-ledger-line" d={LINE} pathLength={1} />
-      {POINTS.map((p, i) => i % 2 === 1 || i === POINTS.length - 1
-        ? <circle key={i} className={i === POINTS.length - 1 ? 'lp-ledger-dot is-last' : 'lp-ledger-dot'}
-            cx={p.x} cy={p.y} r={i === POINTS.length - 1 ? 5.2 : 3.6} style={{ '--d': i } as CSSProperties} />
-        : null)}
-    </svg>
-  )
-}
-
-function CoinStack({ x, y, count, size, order }: (typeof STACKS)[number] & { order: number }) {
-  return (
-    <div className="lp-stack" style={{
-      '--size': `${size}px`, '--x': `${x - size / 2}px`, '--y': `${y - size / 2}px`, '--h': count,
-    } as CSSProperties}>
-      <div className="lp-stack-shadow" />
-      {Array.from({ length: count }, (_, i) => (
-        <div className="lp-coin" key={i} style={{ '--i': i, '--delay': `${0.55 + order * 0.16 + i * 0.075}s` } as CSSProperties}>
-          {Array.from({ length: COIN_LAYERS }, (_, l) => (
-            <i key={l} style={{ '--l': l } as CSSProperties} />
-          ))}
-          <b />
-        </div>
-      ))}
-    </div>
-  )
-}
-
-function Lens() {
-  return (
-    <>
-      <div className="lp-lens-shadow">
-        <i className="lp-lens-shadow-ring" />
-        <i className="lp-lens-shadow-handle" />
-      </div>
-      <div className="lp-lens">
-        <div className="lp-lens-view">
-          <div className="lp-lens-content"><Ledger /></div>
-        </div>
-        <div className="lp-lens-handle"><i /><b /></div>
-        <i className="lp-lens-rim" style={{ '--z': 0 } as CSSProperties} />
-        <i className="lp-lens-rim" style={{ '--z': 1 } as CSSProperties} />
-        <i className="lp-lens-rim" style={{ '--z': 2 } as CSSProperties} />
-        <i className="lp-lens-glass" />
-      </div>
-    </>
-  )
-}
+const layer = (z: number, float: number) => ({ '--z': `${z}px`, '--float': `${float}s` } as CSSProperties)
 
 export default function HeroScene({ children }: { children?: ReactNode }) {
-  const { t, formatCurrency } = useI18n()
+  const { t, formatCurrency, formatDate, categoryLabel } = useI18n()
   const coverRef = useRef<HTMLDivElement>(null)
+  const lineRef = useRef<SVGPathElement>(null)
+  const cursorRef = useRef<HTMLDivElement>(null)
+  const tipRef = useRef<HTMLSpanElement>(null)
+  // How many ARRIVALS have landed; wraps to 0 to start the month again.
+  const [landed, setLanded] = useState(0)
+
+  const spent = BUDGETS.map((b, i) => b.spent + ARRIVALS
+    .slice(0, landed).filter(a => a.budget === i).reduce((sum, a) => sum + a.amount, 0))
+  const totalSpent = spent.reduce((sum, value) => sum + value, 0)
+  const ringShare = totalSpent / TOTAL_LIMIT
+  const arrival = landed > 0 ? ARRIVALS[landed - 1] : null
+  const period = formatDate(latest.start, { month: 'short', year: 'numeric' })
+
+  useEffect(() => {
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)')
+    if (reduced.matches) return
+    let timer = 0
+    const next = () => {
+      setLanded(n => (n + 1) % (ARRIVALS.length + 1))
+      timer = window.setTimeout(next, 3400)
+    }
+    timer = window.setTimeout(next, 2600)
+    return () => window.clearTimeout(timer)
+  }, [])
 
   useEffect(() => {
     const cover = coverRef.current
-    if (!cover) return
+    const line = lineRef.current
+    if (!cover || !line) return
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)')
     const set = (name: string, value: string) => cover.style.setProperty(name, value)
 
     const fit = () => {
       const { width, height } = cover.getBoundingClientRect()
-      set('--fit', (Math.max(width, height * 1.08) / (WORLD * 1.02)).toFixed(4))
+      set('--fit', (Math.min(width / STAGE_W, height / STAGE_H) * 0.94).toFixed(4))
     }
     const resize = new ResizeObserver(fit)
     resize.observe(cover)
     fit()
 
-    const pointer = { x: 0.5, y: 0.5, active: false, last: -Infinity }
-    const state = { lx: LENS_REST.x, ly: LENS_REST.y, px: 0, py: 0 }
+    const length = line.getTotalLength()
+    const pointer = { x: 0.5, y: 0.5, active: false }
+    const state = { px: 0, py: 0 }
     const start = performance.now()
+    let tip = ''
     let frame = 0
     let visible = true
 
     const render = (now: number, still: boolean) => {
       const time = still ? 99 : (now - start) / 1000
-      const intro = easeOutCubic(clamp((time - 0.05) / 1.7))
-      const lensIn = easeOutBack(clamp((time - 0.45) / 1.25))
+      const intro = easeOutCubic(clamp((time - 0.15) / 1.6))
       const rect = cover.getBoundingClientRect()
       const scroll = clamp(-rect.top / Math.max(rect.height, 1))
-      const idle = still || !pointer.active || now - pointer.last > 2600
 
-      let tx = LENS_REST.x
-      let ty = LENS_REST.y
-      if (!still && idle && time > 1.6) {
-        // Glide back and forth along the cash-flow line, like reading it.
-        // Phase π/6 starts the glide where the lens already rests (s = .75).
-        const s = (Math.sin((time - 1.6) * 0.26 + Math.PI / 6) + 1) / 2
-        const p = pointOnLine(0.12 + s * 0.84)
-        tx = PAPER.x + p.x
-        ty = PAPER.y + p.y + 14
-      } else if (!idle) {
-        tx = PAPER.x + CHART.left + pointer.x * (CHART.right - CHART.left)
-        ty = PAPER.y + CHART.top + pointer.y * (CHART.bottom - CHART.top)
-      }
-      const follow = still ? 1 : idle ? 0.03 : 0.085
-      state.lx += (tx - state.lx) * follow
-      state.ly += (ty - state.ly) * follow
+      const aimX = still ? 0 : pointer.active ? pointer.x * 2 - 1 : Math.sin(time * 0.3) * 0.45
+      const aimY = still ? 0 : pointer.active ? pointer.y * 2 - 1 : Math.cos(time * 0.23) * 0.35
+      state.px += (aimX - state.px) * (still ? 1 : 0.06)
+      state.py += (aimY - state.py) * (still ? 1 : 0.06)
 
-      const aimX = still ? 0 : idle ? Math.sin(time * 0.37) * 0.35 : pointer.x * 2 - 1
-      const aimY = still ? 0 : idle ? Math.cos(time * 0.29) * 0.25 : pointer.y * 2 - 1
-      state.px += (aimX - state.px) * (still ? 1 : 0.05)
-      state.py += (aimY - state.py) * (still ? 1 : 0.05)
-
-      set('--rx', `${(lerp(14, 50, intro) - state.py * 4.5 + scroll * 14).toFixed(3)}deg`)
-      set('--rz', `${(lerp(-6, -27, intro) + state.px * 5).toFixed(3)}deg`)
-      set('--lift', `${(lerp(-60, 0, intro)).toFixed(2)}px`)
-      set('--lx', `${state.lx.toFixed(2)}px`)
-      set('--ly', `${state.ly.toFixed(2)}px`)
-      set('--lz', `${(lerp(340, 84, lensIn) + Math.sin(time * 1.2) * 6 + scroll * 120).toFixed(2)}px`)
-      set('--ls', lerp(0.55, 1, clamp(lensIn * 1.4)).toFixed(3))
+      set('--rx', `${(lerp(0, 13, intro) - state.py * 5).toFixed(3)}deg`)
+      set('--ry', `${(lerp(0, -19, intro) + state.px * 9).toFixed(3)}deg`)
+      set('--explode', (intro + scroll * 0.7).toFixed(3))
       set('--px', state.px.toFixed(3))
       set('--py', state.py.toFixed(3))
+
+      // The cursor reads the curve back and forth, resting at month end when motion is reduced.
+      const read = still ? 1 : 0.5 - 0.5 * Math.cos(Math.max(0, time - 1.4) * 0.42)
+      const point = line.getPointAtLength(read * length)
+      cursorRef.current?.style.setProperty('--cx', `${point.x.toFixed(1)}px`)
+      cursorRef.current?.style.setProperty('--cy', `${point.y.toFixed(1)}px`)
+      const label = formatCurrency(Math.round(valueAt(point.x)), { maximumFractionDigits: 0 })
+      if (label !== tip && tipRef.current) tipRef.current.textContent = tip = label
     }
 
     const tick = (now: number) => {
@@ -202,11 +162,10 @@ export default function HeroScene({ children }: { children?: ReactNode }) {
 
     const move = (event: PointerEvent) => {
       if (event.pointerType === 'touch') return
-      const rect = cover.getBoundingClientRect()
-      pointer.x = clamp((event.clientX - rect.left) / rect.width)
-      pointer.y = clamp((event.clientY - rect.top) / rect.height)
+      const bounds = cover.getBoundingClientRect()
+      pointer.x = clamp((event.clientX - bounds.left) / bounds.width)
+      pointer.y = clamp((event.clientY - bounds.top) / bounds.height)
       pointer.active = true
-      pointer.last = performance.now()
     }
     const leave = () => { pointer.active = false }
     cover.addEventListener('pointermove', move)
@@ -222,21 +181,87 @@ export default function HeroScene({ children }: { children?: ReactNode }) {
       cover.removeEventListener('pointerleave', leave)
       reduced.removeEventListener('change', kick)
     }
-  }, [])
+  }, [formatCurrency])
+
+  const ArrivalIcon = arrival ? BUDGETS[arrival.budget].icon : null
 
   return (
-    <div className="lp-cover lp-scene" ref={coverRef} style={sceneGeometry}>
-      <div className="lp-scene-fit" aria-hidden="true">
-        <div className="lp-scene-table">
-          <div className="lp-ledger"><Ledger /></div>
-          {STACKS.map((stack, order) => <CoinStack key={order} order={order} {...stack} />)}
-          <Lens />
+    <div className="lp-cover lp-scene" ref={coverRef}>
+      <div className="lp-scene-fit" aria-hidden="true" style={{ '--stage-w': `${STAGE_W}px`, '--stage-h': `${STAGE_H}px` } as CSSProperties}>
+        <div className="lp-scene-stage">
+          <div className="lp-scene-floor" />
+
+          <div className="lp-panel lp-panel-flow" style={layer(-70, 7.4)}>
+            <div className="lp-panel-head">
+              <span><i style={{ background: '#712ab2' }} />{t('landing.snapshot.cashFlow')}</span>
+              <small>{period}</small>
+            </div>
+            <div className="lp-flow-total">
+              <strong>{formatCurrency(latest.income - latest.expenses)}</strong>
+              <small>{t('landing.snapshot.monthBalance')}</small>
+            </div>
+            <div className="lp-flow-plot">
+              <svg width={PLOT.w} height={PLOT.h} viewBox={`0 0 ${PLOT.w} ${PLOT.h}`}>
+                <defs>
+                  <linearGradient id="lp-flow-fill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#8a46cf" stopOpacity=".26" />
+                    <stop offset="100%" stopColor="#8a46cf" stopOpacity="0" />
+                  </linearGradient>
+                </defs>
+                {[.25, .5, .75].map(f => <line key={f} className="lp-flow-grid" x1={0} x2={PLOT.w} y1={PLOT.h * f} y2={PLOT.h * f} />)}
+                <path className="lp-flow-area" d={AREA} fill="url(#lp-flow-fill)" />
+                <path className="lp-flow-line" d={LINE} pathLength={1} />
+                {/* Unscaled copy for getPointAtLength (pathLength would skew the measurement). */}
+                <path ref={lineRef} d={LINE} fill="none" stroke="none" />
+              </svg>
+              <div className="lp-flow-cursor" ref={cursorRef}>
+                <b />
+                <i />
+                <span ref={tipRef} />
+              </div>
+            </div>
+          </div>
+
+          <div className="lp-panel lp-panel-budgets" style={layer(30, 8.6)}>
+            <div className="lp-panel-head">
+              <span><i style={{ background: '#c0712b' }} />{t('landing.scene.budgets')}</span>
+              <small>{period}</small>
+            </div>
+            {BUDGETS.map(({ category, icon: Icon, limit, tone }, i) => (
+              <div className={arrival?.budget === i ? 'lp-budget is-hit' : 'lp-budget'} key={category}
+                style={{ '--tone': tone, '--share': clamp(spent[i] / limit) } as CSSProperties}>
+                <span className="lp-budget-icon"><Icon size={14} strokeWidth={2.2} /></span>
+                <div>
+                  <p>
+                    <span>{categoryLabel(category)}</span>
+                    <small><b>{formatCurrency(spent[i], { maximumFractionDigits: 0 })}</b> / {formatCurrency(limit, { maximumFractionDigits: 0 })}</small>
+                  </p>
+                  <span className="lp-budget-bar"><i /></span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="lp-panel lp-panel-ring" style={layer(110, 6.8)}>
+            <div className="lp-ring-dial">
+              <svg viewBox="0 0 112 112" width={112} height={112}>
+                <circle className="lp-ring-track" cx={56} cy={56} r={RING_R} />
+                <circle className="lp-ring-fill" cx={56} cy={56} r={RING_R} pathLength={100}
+                  style={{ '--share': clamp(ringShare) } as CSSProperties} />
+              </svg>
+              <strong>{Math.round(ringShare * 100)}%</strong>
+            </div>
+            <small>{t('landing.scene.ofBudget')}</small>
+          </div>
+
+          {arrival && ArrivalIcon && (
+            <div className="lp-arrival" key={landed} style={{ ...layer(170, 5.2), '--tone': BUDGETS[arrival.budget].tone } as CSSProperties}>
+              <span><ArrivalIcon size={15} strokeWidth={2.2} /></span>
+              <p>{categoryLabel(BUDGETS[arrival.budget].category)}<small>{t('landing.scene.justNow')}</small></p>
+              <strong>−{formatCurrency(arrival.amount)}</strong>
+            </div>
+          )}
         </div>
-      </div>
-      <div className="lp-scene-light" aria-hidden="true" />
-      <div className="lp-scene-chip" aria-hidden="true">
-        <span><ArrowDownLeft size={15} /></span>
-        <div><small>{t('landing.snapshot.income')}</small><strong>{formatCurrency(latest.income)}</strong></div>
       </div>
       {children}
     </div>
