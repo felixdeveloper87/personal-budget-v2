@@ -151,7 +151,6 @@ function Hero({ onRequestAccess }: Pick<LandingV3Props, 'onRequestAccess'>) {
     <header className="lp-hero">
       <div className="lp-shell lp-hero-inner">
         <div className="lp-hero-copy">
-          <p className="lp-kicker"><span />{t('landing.hero.eyebrow')}</p>
           <h1 lang="en"><strong>
             <span><Words text={lead} /></span>{' '}
             <em><Words text={t('landing.manifesto.emphasis')} offset={lead.split(' ').length} /></em>
